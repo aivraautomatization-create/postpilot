@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+/* Restrict Tailwind v4 content scanning to project source dirs only.
+   Without a git repo, the scanner has no boundary and hangs on parent node_modules. */
+@source "../app";
+@source "../components";
