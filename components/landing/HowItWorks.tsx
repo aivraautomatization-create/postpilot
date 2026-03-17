@@ -20,10 +20,10 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <div id="features" className="py-24 sm:py-32 relative z-10 bg-black/50 backdrop-blur-sm">
+    <div id="features" className="py-24 sm:py-32 relative z-10">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl lg:text-center">
-          <h2 className="text-base font-medium leading-7 text-emerald-400">Innovative & Excellent</h2>
+          <h2 className="text-base font-medium leading-7 text-white">Innovative & Excellent</h2>
           <p className="mt-2 text-3xl font-light tracking-tight text-white sm:text-4xl">
             Everything you need for massive ROI
           </p>
@@ -34,14 +34,15 @@ export default function HowItWorks() {
         <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
           <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
             {steps.map((step) => (
-              <div key={step.name} className="flex flex-col">
-                <dt className="flex items-center gap-x-3 text-base font-medium leading-7 text-white">
-                  <div className="h-10 w-10 flex items-center justify-center rounded-lg bg-emerald-400/10">
-                    <step.icon className="h-6 w-6 text-emerald-400" aria-hidden="true" />
+              <div key={step.name} className="flex flex-col bg-white/[0.02] border border-white/[0.08] backdrop-blur-xl p-8 rounded-3xl hover:border-white/30 transition-colors duration-500 transition-all duration-300 hover:shadow-glass-card group relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-sky-300/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <dt className="flex items-center gap-x-3 text-lg font-medium leading-7 text-white relative z-10">
+                  <div className="h-12 w-12 flex items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.08] group-hover:bg-gradient-to-br group-hover:from-blue-50/20 group-hover:to-sky-300/20 transition-all duration-300">
+                    <step.icon className="h-6 w-6 text-white group-hover:scale-110 transition-transform duration-300" aria-hidden="true" />
                   </div>
                   {step.name}
                 </dt>
-                <dd className="mt-4 flex flex-auto flex-col text-base leading-7 text-white/60">
+                <dd className="mt-6 flex flex-auto flex-col text-base leading-7 text-white/60 relative z-10">
                   <p className="flex-auto">{step.description}</p>
                 </dd>
               </div>

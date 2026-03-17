@@ -92,6 +92,6 @@ export async function GET() {
     });
   } catch (error: any) {
     console.error('Analytics error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Failed to fetch analytics. Please try again." }, { status: 500 });
   }
 }

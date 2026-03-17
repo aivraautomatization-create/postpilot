@@ -1,17 +1,32 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { GoogleGenAI, ThinkingLevel } from "@google/genai";
-import { Loader2, Sparkles, TrendingUp, Clock, Target, Lightbulb, Video } from "lucide-react";
+import { Loader2, Sparkles, TrendingUp, Clock, Target, Lightbulb, Video, CheckCircle2, FileText, Link as LinkIcon } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { getSupabase } from "@/lib/supabase";
 
 export default function StrategyPage() {
   const [insights, setInsights] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+  const [analytics, setAnalytics] = useState<any>(null);
 
   useEffect(() => {
     generateStrategy();
+    // Fetch analytics for real stats
+    async function fetchAnalytics() {
+      try {
+        const response = await fetch('/api/analytics');
+        if (response.ok) {
+          const data = await response.json();
+          setAnalytics(data);
+        }
+      } catch {
+        // Non-blocking
+      }
+    }
+    fetchAnalytics();
   }, []);
 
   const generateStrategy = async () => {
@@ -19,49 +34,54 @@ export default function StrategyPage() {
     setError(null);
     
     try {
-      const profileStr = localStorage.getItem('companyProfile');
-      const profile = profileStr ? JSON.parse(profileStr) : null;
-      
-      if (!profile) {
+      // Fetch profile from Supabase (not localStorage)
+      const supabase = getSupabase();
+      let profile = null;
+      if (supabase) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data } = await (supabase as any)
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+          profile = data;
+        }
+      }
+
+      if (!profile || !profile.company_name) {
         setError("Please complete your company profile in settings to get personalized strategy insights.");
         setIsLoading(false);
         return;
       }
 
-      const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY });
-      
-      const prompt = `Analyze the following company profile and generate a highly specific, actionable viral social media strategy.
-      
-      Company Name: ${profile.companyName}
-      Niche/Industry: ${profile.niche}
-      Offerings: ${profile.offerings}
-      Target Audience: ${profile.targetAudience}
-      Brand Voice: ${profile.toneOfVoice}
-      
-      Provide insights in the following format using markdown:
-      
-      ## 🎯 Top Performing Content Topics
-      [List 3-4 highly specific content angles that are currently trending in this niche]
-      
-      ## ⏰ Optimal Posting Schedule
-      [Provide specific days and times based on when this target audience is most active online]
-      
-      ## 🎬 Viral Video Techniques
-      [List 3 specific editing styles, hooks, or formats (e.g., POV, educational, behind-the-scenes) that work best for this audience]
-      
-      ## 📈 Growth Hacks
-      [Provide 2 unconventional or highly effective strategies to maximize reach and engagement for this specific business]`;
-
-      const response = await ai.models.generateContent({
-        model: "gemini-3.1-pro-preview",
-        contents: prompt,
-        config: {
-          thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH },
-          systemInstruction: "You are an elite social media strategist and algorithm expert. Provide highly actionable, data-driven, and specific advice tailored to the exact niche and audience provided. Do not give generic advice."
-        }
+      const response = await fetch('/api/generate/strategy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profile })
       });
       
-      setInsights(response.text || "Failed to generate insights.");
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to generate strategy.");
+      }
+
+      const strategyText = data.content || "Failed to generate insights.";
+      setInsights(strategyText);
+
+      // Save strategy to Supabase for use in content creation
+      if (strategyText && strategyText !== "Failed to generate insights." && supabase) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await (supabase as any)
+            .from('profiles')
+            .update({ latest_strategy: strategyText })
+            .eq('id', user.id);
+          setSaved(true);
+          setTimeout(() => setSaved(false), 3000);
+        }
+      }
     } catch (err: any) {
       console.error(err);
       setError(err.message || "An error occurred while generating strategy.");
@@ -85,6 +105,12 @@ export default function StrategyPage() {
           {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
           Refresh Insights
         </button>
+        {saved && (
+          <div className="flex items-center gap-2 text-white/60 text-sm">
+            <CheckCircle2 className="w-4 h-4" />
+            Strategy saved — will be applied to content creation
+          </div>
+        )}
       </div>
 
       {error && (
@@ -94,16 +120,19 @@ export default function StrategyPage() {
       )}
 
       {isLoading && !insights ? (
-        <div className="bg-[#111] border border-white/10 rounded-2xl p-12 flex flex-col items-center justify-center min-h-[400px]">
-          <Loader2 className="w-8 h-8 text-emerald-400 animate-spin mb-4" />
+        <div className="bg-white/[0.02] border border-white/[0.08] backdrop-blur-xl rounded-2xl p-12 flex flex-col items-center justify-center min-h-[400px]">
+          <div className="relative mb-6">
+            <div className="absolute inset-0 bg-white text-black backdrop-blur-md blur-xl opacity-50 mix-blend-screen" />
+            <Loader2 className="w-10 h-10 text-white animate-spin relative z-10" />
+          </div>
           <h3 className="text-xl font-medium text-white mb-2">Analyzing Algorithm Trends...</h3>
           <p className="text-white/50 text-center max-w-md">
             Our AI is analyzing current social media algorithms to build a custom viral strategy for your specific niche.
           </p>
         </div>
       ) : insights ? (
-        <div className="bg-[#111] border border-white/10 rounded-2xl p-8">
-          <div className="prose prose-invert prose-emerald max-w-none prose-headings:font-light prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-p:text-white/70 prose-li:text-white/70">
+        <div className="bg-white/[0.02] border border-white/[0.08] backdrop-blur-xl rounded-2xl p-8">
+          <div className="prose prose-invert max-w-none prose-headings:font-light prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-p:text-white/70 prose-li:text-white/70">
             <ReactMarkdown>{insights}</ReactMarkdown>
           </div>
         </div>
@@ -111,34 +140,37 @@ export default function StrategyPage() {
       
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-        <div className="bg-[#111] border border-white/10 rounded-xl p-6">
+        <div className="bg-white/[0.02] border border-white/[0.08] backdrop-blur-xl rounded-2xl p-6 hover:border-white/30 transition-colors duration-500 transition-all duration-300">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-emerald-400/10 rounded-lg">
-              <TrendingUp className="w-5 h-5 text-emerald-400" />
+            <div className="p-2.5 bg-gradient-to-br from-blue-50/10 to-sky-300/10 border border-white/[0.06] rounded-xl text-white">
+              <FileText className="w-5 h-5 flex-shrink-0" />
             </div>
-            <h3 className="font-medium text-white">Algorithm Status</h3>
+            <h3 className="font-medium text-white">Posts This Month</h3>
           </div>
-          <p className="text-sm text-white/60">Short-form video is currently prioritized across all major platforms. High retention rate is the #1 ranking factor.</p>
+          <p className="text-2xl font-light text-white mb-1">{analytics?.stats?.postsThisMonth ?? '—'}</p>
+          <p className="text-sm text-white/40">total published this month</p>
         </div>
-        
-        <div className="bg-[#111] border border-white/10 rounded-xl p-6">
+
+        <div className="bg-white/[0.02] border border-white/[0.08] backdrop-blur-xl rounded-2xl p-6 hover:border-white/30 transition-colors duration-500 transition-all duration-300">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-blue-400/10 rounded-lg">
-              <Video className="w-5 h-5 text-blue-400" />
+            <div className="p-2.5 bg-gradient-to-br from-blue-400/20 to-indigo-500/20 border border-white/[0.06] rounded-xl text-blue-300">
+              <Target className="w-5 h-5 flex-shrink-0" />
             </div>
-            <h3 className="font-medium text-white">Content Format</h3>
+            <h3 className="font-medium text-white">Success Rate</h3>
           </div>
-          <p className="text-sm text-white/60">9:16 vertical video under 60 seconds is outperforming static images by 300% in organic reach.</p>
+          <p className="text-2xl font-light text-white mb-1">{analytics?.stats?.successRate ?? '—'}%</p>
+          <p className="text-sm text-white/40">publish success rate</p>
         </div>
-        
-        <div className="bg-[#111] border border-white/10 rounded-xl p-6">
+
+        <div className="bg-white/[0.02] border border-white/[0.08] backdrop-blur-xl rounded-2xl p-6 hover:border-white/30 transition-colors duration-500 transition-all duration-300">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-purple-400/10 rounded-lg">
-              <Lightbulb className="w-5 h-5 text-purple-400" />
+            <div className="p-2.5 bg-gradient-to-br from-rose-400/20 to-purple-500/20 border border-white/[0.06] rounded-xl text-rose-300">
+              <LinkIcon className="w-5 h-5 flex-shrink-0" />
             </div>
-            <h3 className="font-medium text-white">Hook Strategy</h3>
+            <h3 className="font-medium text-white">Active Platforms</h3>
           </div>
-          <p className="text-sm text-white/60">The first 3 seconds determine 80% of your video&apos;s success. Use visual movement and text hooks immediately.</p>
+          <p className="text-2xl font-light text-white mb-1">{analytics?.stats?.activePlatforms ?? '—'}</p>
+          <p className="text-sm text-white/40">connected accounts</p>
         </div>
       </div>
     </div>

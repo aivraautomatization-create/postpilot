@@ -3,7 +3,7 @@ import { Command } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="bg-black/80 backdrop-blur-md border-t border-white/10 relative z-10">
+    <footer className="bg-white/[0.02] backdrop-blur-xl border-t border-white/[0.06] relative z-10">
       <div className="mx-auto max-w-7xl px-6 py-12 md:flex md:items-center md:justify-between lg:px-8">
         <div className="flex justify-center space-x-6 md:order-2">
           <Link href="#" className="text-white/40 hover:text-white/80">
@@ -20,7 +20,7 @@ export default function Footer() {
           </Link>
         </div>
         <div className="mt-8 md:order-1 md:mt-0 flex items-center gap-2">
-          <Command className="w-5 h-5 text-emerald-400" />
+          <Command className="w-5 h-5 text-white" />
           <p className="text-center text-xs leading-5 text-white/40">
             &copy; 2026 Postpilot, Inc. All rights reserved.
           </p>

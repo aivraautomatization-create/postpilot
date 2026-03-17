@@ -2,20 +2,28 @@ import { GoogleGenAI } from "@google/genai";
 import { NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabase-server";
 import { isSubscriptionActive } from "@/lib/plan-limits";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { searchTrends } from "@/lib/perplexity";
+import { reviewContent } from "@/lib/claude";
+import { getGeminiKey } from "@/lib/env";
+import { generateSchema } from "@/lib/validations";
 
 export async function POST(req: Request) {
   try {
-    const { topic, platform, profile } = await req.json();
+    const { topic, platform, profile, strategy } = await req.json();
 
-    if (!topic || !platform) {
-      return NextResponse.json({ error: "Topic and platform are required" }, { status: 400 });
+    const parsed = generateSchema.safeParse({ topic, platform, profile, strategy });
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid input. Topic and platform are required.' }, { status: 400 });
     }
 
     // Check auth and subscription
     const supabase = await getSupabaseServer();
+    let userId: string | null = null;
     if (supabase) {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        userId = user.id;
         const { getSupabaseAdmin } = await import("@/lib/supabase");
         const admin = getSupabaseAdmin();
         if (admin) {
@@ -35,28 +43,65 @@ export async function POST(req: Request) {
       }
     }
 
-    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    if (!apiKey) {
+    // Rate limiting
+    if (userId) {
+      const { allowed, retryAfter } = checkRateLimit(`generate:${userId}`, 20, 60000);
+      if (!allowed) {
+        return NextResponse.json({
+          error: `Rate limit exceeded. Try again in ${retryAfter} seconds.`,
+          code: "RATE_LIMITED"
+        }, { status: 429 });
+      }
+    }
+
+    let apiKey: string;
+    try {
+      apiKey = getGeminiKey();
+    } catch {
       return NextResponse.json({ error: "Gemini API key not configured" }, { status: 500 });
     }
 
+    // Step 1: Perplexity trend research (optional, non-blocking)
+    let trendData: string | null = null;
+    if (profile?.niche) {
+      trendData = await searchTrends(profile.niche, platform);
+    }
+
+    // Step 2: Gemini content generation (enriched with trend data)
     const ai = new GoogleGenAI({ apiKey });
 
-    const systemInstruction = `You are an expert social media manager and copywriter.
-Your task is to write a highly engaging, viral-optimized post for ${platform}.
-The user's brand profile is:
-- Company Name: ${profile?.company_name || 'A growing business'}
-- Niche/Industry: ${profile?.niche || 'General'}
-- Offerings: ${profile?.offerings || 'Products and services'}
-- Target Audience: ${profile?.target_audience || 'General public'}
-- Tone of Voice: ${profile?.tone_of_voice || 'Professional yet approachable'}
+    const systemInstruction = `
+    POSTPILOT CORE ARTIFICIAL INTELLIGENCE (MEMORY BRAIN):
+    - You are NOT an AI assistant; you are the digital brain of an elite viral growth agency.
+    - Your memory is populated with the psychological triggers of billions of viral social media impressions.
+    - ELIMINATE THE "AI LOOK": No lists of emojis, no "Discover the secret of...", no "In a world where...", no "Elevate your business".
+    - HUMAN WRITING STYLE: Use intentional fragments. Use punchy one-sentence paragraphs. Use rhythm. If it sounds like ChatGPT wrote it, REWRITE IT.
 
-Guidelines for ${platform}:
-${platform === 'Twitter' ? '- Write a compelling thread (3-5 tweets). Use numbers, hooks, and spacing. Separate tweets with "---".' : ''}
-${platform === 'LinkedIn' ? '- Write a professional but story-driven post. Use a strong hook, short paragraphs, and a clear call to action.' : ''}
-${platform === 'TikTok' ? '- Write a short, punchy video script. Include visual cues in brackets [like this] and spoken text. Keep it under 60 seconds.' : ''}
+    MISSION: Break the algorithm and command obsession.
 
-Do not include any introductory or concluding remarks, just output the requested content.`
+    CORE DIRECTIVES:
+    1. PSYCHOLOGICAL HOOKS: Start with a statement so polarizing, curiosity-inducing, or high-value that scrolling becomes impossible.
+    2. RHYTHMIC FLOW: Vary sentence length. One short. One medium. One short. This creates a "beat" that keeps readers moving.
+    3. NO FLUFF: Every word must earn its place. If it's a filler word, kill it.
+
+    BRAND CONTEXT:
+    - Company: ${profile?.company_name || 'A growing business'}
+    - Niche: ${profile?.niche || 'General'}
+    - Offerings: ${profile?.offerings || 'Products and services'}
+    - Audience: ${profile?.target_audience || 'General public'}
+    - Tone: ${profile?.tone_of_voice || 'Professional yet approachable'} (Keep it human, not robotic).
+
+    PLATFORM ARCHITECTURE FOR ${platform}:
+    ${platform === 'Twitter' ? '- THREAD MASTERPLAY: Hook (curiosity/data) -> The "Why it matters" -> The "How-to" steps -> The "Big Reveal" -> CTA. Use separator "---".' : ''}
+    ${platform === 'LinkedIn' ? '- AUTHORITY REVERSE-ENGINEERING: Start with a failure or a contrarian observation. Break it down. End with a high-level strategic takeaway.' : ''}
+    ${platform === 'TikTok' ? '- RETENTION OPTIMIZED SCRIPT: 0-1s: Visual/Text Hook. 1-10s: The Problem/Drama. 10-50s: The Payoff. 50-60s: Low-friction CTA. Include [VISUAL CUES] and {SFX}.' : ''}
+
+    ${strategy ? `ALGORITHM MEMORY OVERLAY:\n${strategy}\nDeeply weave these strategic identifiers into the content.` : ''}
+
+    ${trendData ? `REAL-TIME TREND DATA (from live research — USE THIS to make the content timely and relevant):\n${trendData}` : ''}
+
+    FINAL RULE: If the user reads this and thinks "An AI wrote this," you have failed. Write like a human master of the craft.
+    `.trim();
 
     const response = await ai.models.generateContent({
       model: "gemini-3.1-pro-preview",
@@ -67,7 +112,32 @@ Do not include any introductory or concluding remarks, just output the requested
       }
     });
 
-    return NextResponse.json({ content: response.text });
+    const generatedContent = response.text || "";
+
+    // Step 3: Claude content review (optional, non-blocking)
+    let enhanced: string | undefined;
+    let engagementScore: number | undefined;
+    let suggestions: string[] | undefined;
+
+    const review = await reviewContent(
+      generatedContent,
+      platform,
+      profile?.niche || 'General'
+    );
+
+    if (review) {
+      enhanced = review.improvedContent;
+      engagementScore = review.engagementScore;
+      suggestions = review.suggestions;
+    }
+
+    return NextResponse.json({
+      content: generatedContent,
+      enhanced,
+      engagementScore,
+      suggestions,
+      trends: trendData || undefined,
+    });
   } catch (error) {
     console.error("Error generating content:", error);
     return NextResponse.json({ error: "Failed to generate content" }, { status: 500 });

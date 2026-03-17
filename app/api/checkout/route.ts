@@ -1,28 +1,24 @@
 import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
 import { getSupabaseAdmin } from '@/lib/supabase';
 import { getSupabaseServer } from '@/lib/supabase-server';
-
-let stripeClient: Stripe | null = null;
-
-function getStripe(): Stripe {
-  if (!stripeClient) {
-    let key = process.env.STRIPE_SECRET_KEY;
-    if (!key) {
-      throw new Error('STRIPE_SECRET_KEY environment variable is required');
-    }
-    key = key.replace(/^.*(sk_live_|sk_test_)/i, '$1').trim();
-    stripeClient = new Stripe(key, { apiVersion: '2026-02-25.clover' });
-  }
-  return stripeClient;
-}
+import { getStripe } from '@/lib/stripe';
+import { checkoutSchema } from '@/lib/validations';
 
 export async function POST(req: Request) {
   try {
     const { tierId } = await req.json();
+
+    const parsed = checkoutSchema.safeParse({ tierId });
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid plan selected.' }, { status: 400 });
+    }
     const stripe = getStripe();
     const supabase = await getSupabaseServer();
     const supabaseAdmin = getSupabaseAdmin();
+
+    if (!stripe) {
+      return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 });
+    }
 
     if (!supabase || !supabaseAdmin) {
       return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
@@ -48,12 +44,17 @@ export async function POST(req: Request) {
 
     const userProfile = profile as any;
 
-    // Mapping tier IDs to the user's actual Stripe Product IDs
+    // Mapping tier IDs to Stripe Product IDs from environment variables
     const products: Record<string, string> = {
-      'tier-entry': 'prod_U6EnvTN871rLJr',
-      'tier-pro': 'prod_U6EorgeBGdq0Qf',
-      'tier-business': 'prod_U6EqD3vE5B7mkd',
+      'tier-entry': process.env.STRIPE_PRODUCT_ENTRY || '',
+      'tier-pro': process.env.STRIPE_PRODUCT_PRO || '',
+      'tier-business': process.env.STRIPE_PRODUCT_BUSINESS || '',
     };
+
+    if (!products['tier-entry'] || !products['tier-pro'] || !products['tier-business']) {
+      console.error('Missing Stripe product IDs in environment variables');
+      return NextResponse.json({ error: 'Payment configuration incomplete' }, { status: 500 });
+    }
 
     const prices: Record<string, number> = {
       'tier-entry': 6900,     // $69.00
@@ -71,7 +72,7 @@ export async function POST(req: Request) {
       // Create a new customer
       const customer = await stripe.customers.create({
         email: user.email,
-        name: userProfile.full_name || user.user_metadata?.full_name || user.email,
+        name: user.user_metadata?.full_name || user.email,
         metadata: {
           supabase_user_id: user.id,
         },
@@ -85,8 +86,8 @@ export async function POST(req: Request) {
         .eq('id', user.id);
     }
 
-    // Determine if we should offer a trial
-    const shouldOfferTrial = !userProfile.trial_claimed;
+    // Free trial is only available for the Pro tier
+    const shouldOfferTrial = tierId === 'tier-pro' && !userProfile.trial_claimed;
 
     // Create a Checkout Session for a subscription
     const session = await stripe.checkout.sessions.create({
@@ -122,17 +123,9 @@ export async function POST(req: Request) {
       cancel_url: `${origin}/#pricing`,
     });
 
-    // Mark trial as claimed immediately to prevent trial abuse via abandoned checkouts
-    if (shouldOfferTrial) {
-      await (supabaseAdmin as any)
-        .from('profiles')
-        .update({ trial_claimed: true })
-        .eq('id', user.id);
-    }
-
     return NextResponse.json({ url: session.url });
   } catch (error: any) {
     console.error('Stripe Checkout error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Failed to create checkout session. Please try again." }, { status: 500 });
   }
 }

@@ -1,39 +1,78 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { TwitterApi } from 'twitter-api-v2';
 import axios from 'axios';
-import { isSubscriptionActive, getUsageLimit } from '@/lib/plan-limits';
-
-function getSupabaseAdmin() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) return null;
-  return createClient(url, key);
-}
+import { refreshAccessToken } from '@/lib/token-refresh';
+import { isSubscriptionActive, getUsageLimit, PLAN_LIMITS } from '@/lib/plan-limits';
+import { getSupabaseServer } from '@/lib/supabase-server';
+import { getSupabaseAdmin } from '@/lib/supabase';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { sanitizeErrorForClient } from '@/lib/error-messages';
+import { publishSchema } from '@/lib/validations';
 
 function getCurrentPeriod(): string {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 }
 
-async function downloadImage(url: string): Promise<Buffer> {
+async function downloadImage(url: string): Promise<{ buffer: Buffer; mimeType: string }> {
   const response = await axios.get(url, { responseType: 'arraybuffer' });
-  return Buffer.from(response.data);
+  const mimeType = response.headers['content-type'] || 'image/png';
+  return { buffer: Buffer.from(response.data), mimeType };
+}
+async function downloadVideo(url: string): Promise<{ buffer: Buffer; mimeType: string }> {
+  const response = await axios.get(url, { responseType: 'arraybuffer' });
+  const mimeType = response.headers['content-type'] || 'video/mp4';
+  return { buffer: Buffer.from(response.data), mimeType };
+}
+
+function createMultipartBody(videoBuffer: Buffer, mimeType: string, metadata: any): Buffer {
+  const boundary = 'foo_bar_baz';
+  const delimiter = `\r\n--${boundary}\r\n`;
+  const closeDelimiter = `\r\n--${boundary}--`;
+
+  const body = Buffer.concat([
+    Buffer.from(delimiter),
+    Buffer.from('Content-Type: application/json; charset=UTF-8\r\n\r\n'),
+    Buffer.from(JSON.stringify(metadata)),
+    Buffer.from(delimiter),
+    Buffer.from(`Content-Type: ${mimeType}\r\n\r\n`),
+    videoBuffer,
+    Buffer.from(closeDelimiter),
+  ]);
+
+  return body;
 }
 
 export async function POST(req: Request) {
   try {
-    const { userId, content, imageUrl, videoUrl, platforms, scheduledDate } = await req.json();
+    const { content, imageUrl, videoUrl, platforms, scheduledDate } = await req.json();
 
-    if (!platforms || platforms.length === 0) {
-      return NextResponse.json({ error: 'No platforms selected' }, { status: 400 });
+    const parsed = publishSchema.safeParse({ content, imageUrl, videoUrl, platforms, scheduledDate });
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid input. Content and at least one platform are required.' }, { status: 400 });
     }
 
-    if (!userId) {
-      return NextResponse.json({ error: 'User ID is required' }, { status: 401 });
+    // Authenticate via server-side session — never trust client-provided userId
+    const supabaseAuth = await getSupabaseServer();
+    if (!supabaseAuth) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+    const userId = user.id;
+
+    // Rate limit: 10 per minute per user
+    const { allowed, retryAfter } = checkRateLimit(`publish:${userId}`, 10, 60000);
+    if (!allowed) {
+      return NextResponse.json({
+        error: `Rate limit exceeded. Try again in ${retryAfter} seconds.`,
+        code: "RATE_LIMITED"
+      }, { status: 429 });
     }
 
-    const supabase = getSupabaseAdmin();
+    const supabase = getSupabaseAdmin() as any;
     if (!supabase) {
       return NextResponse.json({ error: 'Database configuration missing' }, { status: 500 });
     }
@@ -61,19 +100,33 @@ export async function POST(req: Request) {
     const period = getCurrentPeriod();
     const { data: usage } = await supabase
       .from('usage')
-      .select('posts_count')
+      .select('posts_count, videos_count')
       .eq('user_id', userId)
       .eq('period', period)
       .single();
 
-    const currentUsage = usage?.posts_count || 0;
-    const limit = getUsageLimit(profile.subscription_tier);
+    const currentUsagePosts = usage?.posts_count || 0;
+    const currentUsageVideos = usage?.videos_count || 0;
+    
+    // Fallback to entry limits if tier not found
+    const tierLimits = PLAN_LIMITS[profile.subscription_tier] || PLAN_LIMITS['tier-entry'];
+    const postsLimit = tierLimits.posts;
+    const videosLimit = tierLimits.videos;
 
-    if (currentUsage >= limit) {
-      return NextResponse.json({
-        error: `Monthly post limit reached (${currentUsage}/${limit}). Upgrade your plan for more posts.`,
-        code: 'USAGE_LIMIT_REACHED'
-      }, { status: 403 });
+    if (videoUrl) {
+      if (currentUsageVideos >= videosLimit) {
+        return NextResponse.json({
+          error: `Monthly video limit reached (${currentUsageVideos}/${videosLimit}). Upgrade your plan for more Reels/TikToks.`,
+          code: 'USAGE_LIMIT_REACHED'
+        }, { status: 403 });
+      }
+    } else {
+      if (currentUsagePosts >= postsLimit) {
+        return NextResponse.json({
+          error: `Monthly post limit reached (${currentUsagePosts}/${postsLimit}). Upgrade your plan for more posts.`,
+          code: 'USAGE_LIMIT_REACHED'
+        }, { status: 403 });
+      }
     }
 
     // Handle scheduled posts
@@ -143,218 +196,151 @@ export async function POST(req: Request) {
       }
 
       try {
-        if (platform === 'twitter') {
-          const client = new TwitterApi(account.access_token);
+        let currentAccessToken = account.access_token;
+        let currentRefreshToken = account.refresh_token;
 
-          if (imageUrl) {
-            // Upload image then tweet with media
-            try {
-              const imageBuffer = await downloadImage(imageUrl);
-              const mediaId = await client.v1.uploadMedia(imageBuffer, { mimeType: 'image/png' });
+        const performPost = async (token: string) => {
+          if (platform === 'twitter') {
+            const client = new TwitterApi(token);
+            if (imageUrl) {
+              const { buffer: imageBuffer, mimeType: imgMime } = await downloadImage(imageUrl);
+              const mediaId = await client.v1.uploadMedia(imageBuffer, { mimeType: imgMime });
               await client.v2.tweet({ text: content.substring(0, 280), media: { media_ids: [mediaId] } });
-            } catch {
-              // Fallback to text-only if image upload fails
+            } else {
               await client.v2.tweet(content.substring(0, 280));
             }
-          } else {
-            await client.v2.tweet(content.substring(0, 280));
-          }
-
-          results.push({
-            platform,
-            status: 'success',
-            message: 'Successfully posted to X (Twitter)',
-            timestamp: new Date().toISOString(),
-          });
-        } else if (platform === 'facebook' || platform === 'instagram') {
-          const pageId = account.provider_account_id;
-
-          if (imageUrl) {
-            await axios.post(`https://graph.facebook.com/v18.0/${pageId}/photos`, {
-              url: imageUrl,
-              caption: content,
-              access_token: account.access_token,
-            });
-          } else {
-            await axios.post(`https://graph.facebook.com/v18.0/${pageId}/feed`, {
-              message: content,
-              access_token: account.access_token,
-            });
-          }
-
-          results.push({
-            platform,
-            status: 'success',
-            message: `Successfully posted to ${platform}`,
-            timestamp: new Date().toISOString(),
-          });
-        } else if (platform === 'linkedin') {
-          // LinkedIn API v2 — UGC Post
-          const personUrn = account.provider_account_id;
-
-          if (imageUrl) {
-            // Step 1: Register image upload
-            const registerResponse = await axios.post(
-              'https://api.linkedin.com/v2/assets?action=registerUpload',
-              {
+          } else if (platform === 'facebook') {
+            const pageId = account.provider_account_id;
+            if (imageUrl) {
+              await axios.post(`https://graph.facebook.com/v21.0/${pageId}/photos`, {
+                url: imageUrl,
+                caption: content,
+                access_token: token,
+              });
+            } else {
+              await axios.post(`https://graph.facebook.com/v21.0/${pageId}/feed`, {
+                message: content,
+                access_token: token,
+              });
+            }
+          } else if (platform === 'instagram') {
+            const igUserId = account.provider_account_id;
+            if (imageUrl) {
+              const containerResponse = await axios.post(`https://graph.facebook.com/v21.0/${igUserId}/media`, {
+                image_url: imageUrl,
+                caption: content,
+                access_token: token,
+              });
+              await axios.post(`https://graph.facebook.com/v21.0/${igUserId}/media_publish`, {
+                creation_id: containerResponse.data.id,
+                access_token: token,
+              });
+            } else {
+              throw new Error('Instagram requires an image to publish a post.');
+            }
+          } else if (platform === 'linkedin') {
+            const personUrn = account.provider_account_id;
+            if (imageUrl) {
+              const regResp = await axios.post('https://api.linkedin.com/v2/assets?action=registerUpload', {
                 registerUploadRequest: {
                   recipes: ['urn:li:digitalmediaRecipe:feedshare-image'],
                   owner: `urn:li:person:${personUrn}`,
-                  serviceRelationships: [
-                    { relationshipType: 'OWNER', identifier: 'urn:li:userGeneratedContent' },
-                  ],
-                },
-              },
-              { headers: { Authorization: `Bearer ${account.access_token}`, 'Content-Type': 'application/json' } }
-            );
-
-            const uploadUrl =
-              registerResponse.data.value.uploadMechanism[
-                'com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest'
-              ].uploadUrl;
-            const asset = registerResponse.data.value.asset;
-
-            // Step 2: Upload the image binary
-            const imageBuffer = await downloadImage(imageUrl);
-            await axios.put(uploadUrl, imageBuffer, {
-              headers: { Authorization: `Bearer ${account.access_token}`, 'Content-Type': 'image/png' },
-            });
-
-            // Step 3: Create post with image
-            await axios.post(
-              'https://api.linkedin.com/v2/ugcPosts',
-              {
+                  serviceRelationships: [{ relationshipType: 'OWNER', identifier: 'urn:li:userGeneratedContent' }],
+                }
+              }, { headers: { Authorization: `Bearer ${token}` } });
+              const { buffer: imageBuffer, mimeType: imgMime } = await downloadImage(imageUrl);
+              await axios.put(regResp.data.value.uploadMechanism['com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest'].uploadUrl, imageBuffer, {
+                headers: { Authorization: `Bearer ${token}`, 'Content-Type': imgMime }
+              });
+              await axios.post('https://api.linkedin.com/v2/ugcPosts', {
                 author: `urn:li:person:${personUrn}`,
                 lifecycleState: 'PUBLISHED',
                 specificContent: {
                   'com.linkedin.ugc.ShareContent': {
                     shareCommentary: { text: content },
                     shareMediaCategory: 'IMAGE',
-                    media: [
-                      {
-                        status: 'READY',
-                        media: asset,
-                      },
-                    ],
-                  },
+                    media: [{ status: 'READY', media: regResp.data.value.asset }],
+                  }
                 },
-                visibility: { 'com.linkedin.ugc.MemberNetworkVisibility': 'PUBLIC' },
-              },
-              { headers: { Authorization: `Bearer ${account.access_token}`, 'Content-Type': 'application/json' } }
-            );
-          } else {
-            // Text-only LinkedIn post
-            await axios.post(
-              'https://api.linkedin.com/v2/ugcPosts',
-              {
+                visibility: { 'com.linkedin.ugc.MemberNetworkVisibility': 'PUBLIC' }
+              }, { headers: { Authorization: `Bearer ${token}` } });
+            } else {
+              await axios.post('https://api.linkedin.com/v2/ugcPosts', {
                 author: `urn:li:person:${personUrn}`,
                 lifecycleState: 'PUBLISHED',
                 specificContent: {
-                  'com.linkedin.ugc.ShareContent': {
-                    shareCommentary: { text: content },
-                    shareMediaCategory: 'NONE',
-                  },
+                  'com.linkedin.ugc.ShareContent': { shareCommentary: { text: content }, shareMediaCategory: 'NONE' }
                 },
-                visibility: { 'com.linkedin.ugc.MemberNetworkVisibility': 'PUBLIC' },
-              },
-              { headers: { Authorization: `Bearer ${account.access_token}`, 'Content-Type': 'application/json' } }
-            );
-          }
-
-          results.push({
-            platform,
-            status: 'success',
-            message: 'Successfully posted to LinkedIn',
-            timestamp: new Date().toISOString(),
-          });
-        } else if (platform === 'tiktok') {
-          // TikTok Content Posting API
-          if (!videoUrl && !imageUrl) {
-            results.push({
-              platform,
-              status: 'error',
-              message: 'TikTok requires an image or video to publish',
-              timestamp: new Date().toISOString(),
-            });
-            continue;
-          }
-
-          if (imageUrl) {
-            // TikTok Photo Mode
-            const initResponse = await axios.post(
-              'https://open.tiktokapis.com/v2/post/publish/content/init/',
-              {
-                post_info: {
-                  title: content.substring(0, 150),
-                  privacy_level: 'SELF_ONLY', // Users can change this on TikTok
-                },
-                source_info: {
-                  source: 'PULL_FROM_URL',
-                  photo_cover_index: 0,
-                  photo_images: [imageUrl],
-                },
+                visibility: { 'com.linkedin.ugc.MemberNetworkVisibility': 'PUBLIC' }
+              }, { headers: { Authorization: `Bearer ${token}` } });
+            }
+          } else if (platform === 'tiktok') {
+            if (!videoUrl && !imageUrl) throw new Error('TikTok requires an image or video to publish');
+            if (imageUrl) {
+              await axios.post('https://open.tiktokapis.com/v2/post/publish/content/init/', {
+                post_info: { title: content.substring(0, 150), privacy_level: 'SELF_ONLY' },
+                source_info: { source: 'PULL_FROM_URL', photo_cover_index: 0, photo_images: [imageUrl] },
                 post_mode: 'DIRECT_POST',
                 media_type: 'PHOTO',
-              },
-              {
-                headers: {
-                  Authorization: `Bearer ${account.access_token}`,
-                  'Content-Type': 'application/json',
-                },
-              }
-            );
-
-            if (initResponse.data.error?.code !== 'ok' && initResponse.data.error?.code) {
-              throw new Error(initResponse.data.error.message || 'TikTok publish failed');
+              }, { headers: { Authorization: `Bearer ${token}` } });
+            } else if (videoUrl) {
+              await axios.post('https://open.tiktokapis.com/v2/post/publish/video/init/', {
+                post_info: { title: content.substring(0, 150), privacy_level: 'SELF_ONLY' },
+                source_info: { source: 'PULL_FROM_URL', video_url: videoUrl },
+              }, { headers: { Authorization: `Bearer ${token}` } });
             }
-          } else if (videoUrl) {
-            // TikTok Video Mode — pull from URL
-            const initResponse = await axios.post(
-              'https://open.tiktokapis.com/v2/post/publish/video/init/',
-              {
-                post_info: {
-                  title: content.substring(0, 150),
-                  privacy_level: 'SELF_ONLY',
-                },
-                source_info: {
-                  source: 'PULL_FROM_URL',
-                  video_url: videoUrl,
-                },
-              },
-              {
-                headers: {
-                  Authorization: `Bearer ${account.access_token}`,
-                  'Content-Type': 'application/json',
-                },
-              }
+          } else if (platform === 'youtube') {
+            if (!videoUrl) throw new Error('YouTube requires a video to publish');
+            const { buffer: videoBuffer, mimeType: vidMime } = await downloadVideo(videoUrl);
+            await axios.post('https://www.googleapis.com/upload/youtube/v3/videos?uploadType=multipart&part=snippet,status',
+              createMultipartBody(videoBuffer, vidMime, {
+                snippet: { title: content.substring(0, 100) || 'New Video', description: content, categoryId: '22' },
+                status: { privacyStatus: 'public', selfDeclaredMadeForKids: false },
+              }), { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/related; boundary=foo_bar_baz' } }
             );
-
-            if (initResponse.data.error?.code !== 'ok' && initResponse.data.error?.code) {
-              throw new Error(initResponse.data.error.message || 'TikTok video publish failed');
-            }
+          } else {
+            throw new Error(`Platform ${platform} not supported`);
           }
+        };
 
-          results.push({
-            platform,
-            status: 'success',
-            message: 'Successfully posted to TikTok',
-            timestamp: new Date().toISOString(),
-          });
-        } else {
-          // Unknown platform
-          results.push({
-            platform,
-            status: 'error',
-            message: `Publishing to ${platform} is not yet supported`,
-            timestamp: new Date().toISOString(),
-          });
+        try {
+          await performPost(currentAccessToken);
+        } catch (postError: any) {
+          const isUnauthorized = postError.response?.status === 401 || postError.code === 401 || postError.message?.includes('401');
+          
+          if (isUnauthorized && currentRefreshToken) {
+            const refreshed = await refreshAccessToken(platform, currentRefreshToken);
+            if (refreshed) {
+              currentAccessToken = refreshed.accessToken;
+              currentRefreshToken = refreshed.refreshToken;
+              
+              await supabase.from('social_accounts').update({
+                access_token: currentAccessToken,
+                refresh_token: currentRefreshToken,
+                updated_at: new Date().toISOString()
+              }).eq('id', account.id);
+              
+              await performPost(currentAccessToken);
+            } else {
+              throw postError;
+            }
+          } else {
+            throw postError;
+          }
         }
+
+        results.push({
+          platform,
+          status: 'success',
+          message: `Successfully posted to ${platform}`,
+          timestamp: new Date().toISOString(),
+        });
       } catch (err: any) {
         console.error(`Error posting to ${platform}:`, err.response?.data || err.message);
         results.push({
           platform,
           status: 'error',
-          message: `Failed to post to ${platform}: ${err.message}`,
+          message: err.message || `Failed to post to ${platform}. Please try again.`,
           timestamp: new Date().toISOString(),
         });
       }
@@ -414,6 +400,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true, results });
   } catch (error: any) {
     console.error('Publish error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: sanitizeErrorForClient(error) }, { status: 500 });
   }
 }

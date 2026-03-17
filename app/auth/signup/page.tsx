@@ -23,6 +23,9 @@ export default function SignupPage() {
     setLoading(true);
     setError(null);
 
+    const searchParams = new URLSearchParams(window.location.search);
+    const plan = searchParams.get('plan');
+
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -46,7 +49,8 @@ export default function SignupPage() {
 
       if (data.session) {
         // Auto-confirmed — go straight to dashboard
-        router.push('/dashboard');
+        const redirectPath = plan ? `/dashboard?initiate_checkout=${plan}` : '/dashboard';
+        router.push(redirectPath);
       } else if (data.user) {
         // Email confirmation required — show success message
         setError(null);
@@ -61,8 +65,8 @@ export default function SignupPage() {
 
   return showConfirmation ? (
     <div className="bg-[#111] border border-white/10 rounded-2xl p-8 shadow-2xl text-center">
-      <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-        <Mail className="w-8 h-8 text-emerald-400" />
+      <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
+        <Mail className="w-8 h-8 text-white" />
       </div>
       <h2 className="text-xl font-semibold text-white mb-2">Check your email</h2>
       <p className="text-white/60 text-sm mb-6">
@@ -75,12 +79,6 @@ export default function SignupPage() {
   ) : (
     <div className="bg-[#111] border border-white/10 rounded-2xl p-8 shadow-2xl">
       <h2 className="text-xl font-semibold text-white mb-6">Create your account</h2>
-
-      <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
-        <p className="text-sm text-emerald-400">
-          Your 7-day free trial will start immediately after signup. No credit card required today.
-        </p>
-      </div>
 
       <form onSubmit={handleSignup} className="space-y-4">
         <div>

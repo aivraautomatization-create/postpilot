@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { CheckCircle2, Link as LinkIcon, AlertCircle, Loader2, Linkedin, Twitter, Instagram, Facebook } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { CheckCircle2, Link as LinkIcon, AlertCircle, Loader2, Linkedin, Twitter, Instagram, Facebook, Clock, Shield, ExternalLink, X, Youtube } from "lucide-react";
 import { getSupabase } from "@/lib/supabase";
 
 const TikTokIcon = ({ className }: { className?: string }) => (
@@ -10,56 +10,128 @@ const TikTokIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+type ConnectedAccount = {
+  provider: string;
+  provider_account_name: string | null;
+};
+
 export default function AccountsPage() {
   const [connecting, setConnecting] = useState<string | null>(null);
-  const [connectedAccounts, setConnectedAccounts] = useState<string[]>([]);
+  const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccount[]>([]);
+  const [configuredProviders, setConfiguredProviders] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [loadingProviders, setLoadingProviders] = useState(true);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const platforms = [
-    { id: 'linkedin', name: 'LinkedIn', icon: Linkedin, color: 'bg-[#0A66C2]', hover: 'hover:bg-[#004182]' },
-    { id: 'twitter', name: 'X (Twitter)', icon: Twitter, color: 'bg-black', hover: 'hover:bg-gray-900', border: 'border border-white/20' },
-    { id: 'instagram', name: 'Instagram', icon: Instagram, color: 'bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888]', hover: 'opacity-90' },
-    { id: 'facebook', name: 'Facebook Page', icon: Facebook, color: 'bg-[#1877F2]', hover: 'hover:bg-[#0C5ECA]' },
-    { id: 'tiktok', name: 'TikTok', icon: TikTokIcon, color: 'bg-black', hover: 'hover:bg-gray-900', border: 'border border-white/20' },
+    {
+      id: 'twitter',
+      name: 'X (Twitter)',
+      icon: Twitter,
+      color: 'bg-black',
+      hover: 'hover:bg-gray-900',
+      border: 'border border-white/20',
+      description: 'Post tweets and threads automatically',
+      connectHint: 'A window will open — log in to X and click "Authorize app"',
+    },
+    {
+      id: 'linkedin',
+      name: 'LinkedIn',
+      icon: Linkedin,
+      color: 'bg-[#0A66C2]',
+      hover: 'hover:bg-[#004182]',
+      description: 'Share professional updates and articles',
+      connectHint: 'A window will open — log in to LinkedIn and click "Allow"',
+    },
+    {
+      id: 'instagram',
+      name: 'Instagram',
+      icon: Instagram,
+      color: 'bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888]',
+      hover: 'opacity-90',
+      description: 'Publish photos and reels to your page',
+      connectHint: 'A window will open — log in to Facebook and grant page access',
+    },
+    {
+      id: 'facebook',
+      name: 'Facebook Page',
+      icon: Facebook,
+      color: 'bg-[#1877F2]',
+      hover: 'hover:bg-[#0C5ECA]',
+      description: 'Publish to your Facebook Page feed',
+      connectHint: 'A window will open — log in to Facebook and grant page access',
+    },
+    {
+      id: 'tiktok',
+      name: 'TikTok',
+      icon: TikTokIcon,
+      color: 'bg-black',
+      hover: 'hover:bg-gray-900',
+      border: 'border border-white/20',
+      description: 'Upload videos and photo posts',
+      connectHint: 'A window will open — log in to TikTok and click "Authorize"',
+    },
+    {
+      id: 'google',
+      name: 'YouTube',
+      icon: Youtube,
+      color: 'bg-[#FF0000]',
+      hover: 'hover:bg-[#CC0000]',
+      description: 'Upload videos and Shorts to your channel',
+      connectHint: 'A window will open — log in to Google and click "Allow"',
+    },
   ];
 
+  // Cleanup popup polling on unmount
   useEffect(() => {
-    // Load connected accounts from Supabase on mount
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    // Fetch which providers are configured
+    fetch('/api/auth/providers')
+      .then(r => r.json())
+      .then(data => {
+        setConfiguredProviders(data.providers || {});
+        setLoadingProviders(false);
+      })
+      .catch(() => setLoadingProviders(false));
+
+    // Load connected accounts from Supabase (with account names)
     const fetchAccounts = async () => {
       const supabase = getSupabase();
       if (!supabase) return;
-      
+
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data } = await (supabase as any)
           .from('social_accounts')
-          .select('provider')
+          .select('provider, provider_account_name')
           .eq('user_id', user.id);
-          
+
         if (data) {
-          setConnectedAccounts(data.map((a: any) => a.provider));
+          setConnectedAccounts(data as ConnectedAccount[]);
         }
       }
     };
-    
+
     fetchAccounts();
 
     const handleMessage = async (event: MessageEvent) => {
-      // Validate origin is from AI Studio preview or localhost
-      const origin = event.origin;
-      if (!origin.endsWith('.run.app') && !origin.includes('localhost')) {
-        return;
-      }
-      
+      // Only accept messages from same origin
+      if (event.origin !== window.location.origin) return;
+
       if (event.data?.type === 'OAUTH_AUTH_SUCCESS') {
         const provider = event.data.provider;
         const tokens = event.data.tokens;
-        
+
         const supabase = getSupabase();
         if (supabase && tokens?.accessToken) {
           const { data: { user } } = await supabase.auth.getUser();
           if (user) {
-            // Save to Supabase
             await (supabase as any)
               .from('social_accounts')
               .upsert({
@@ -73,49 +145,82 @@ export default function AccountsPage() {
               }, { onConflict: 'user_id,provider' });
           }
         }
-        
+
+        const accountName = tokens?.providerAccountName || null;
         setConnectedAccounts(prev => {
-          const newAccounts = prev.includes(provider) ? prev : [...prev, provider];
-          // Fallback
-          localStorage.setItem('connectedSocialAccounts', JSON.stringify(newAccounts));
-          return newAccounts;
+          const filtered = prev.filter(a => a.provider !== provider);
+          return [...filtered, { provider, provider_account_name: accountName }];
         });
-        
+
+        const platformName = platforms.find(p => p.id === provider)?.name || provider;
+        setSuccessMessage(`${platformName} connected successfully! You're all set to publish.`);
+        setTimeout(() => setSuccessMessage(null), 5000);
+
         setConnecting(null);
+        setError(null);
+        if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+      }
+
+      if (event.data?.type === 'OAUTH_AUTH_ERROR') {
+        setError(event.data.error || 'Connection failed. Please try again.');
+        setConnecting(null);
+        if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
       }
     };
-    
+
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleConnect = async (platformId: string) => {
     try {
       setConnecting(platformId);
       setError(null);
-      
-      // 1. Fetch the OAuth URL from the server
+      setSuccessMessage(null);
+
       const response = await fetch(`/api/auth/url?provider=${platformId}`);
       if (!response.ok) {
-        throw new Error('Failed to get auth URL');
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to start connection. Please try again.');
       }
       const { url } = await response.json();
 
-      // 2. Open the OAuth PROVIDER's URL directly in a popup
+      const width = 600;
+      const height = 700;
+      const left = window.screenX + (window.innerWidth - width) / 2;
+      const top = window.screenY + (window.innerHeight - height) / 2;
+
       const authWindow = window.open(
         url,
         'oauth_popup',
-        'width=600,height=700'
+        `width=${width},height=${height},left=${left},top=${top},scrollbars=yes`
       );
 
       if (!authWindow) {
-        // Popup was blocked
-        setError('Please allow popups for this site to connect your account.');
+        setError('Pop-up was blocked by your browser. Please allow pop-ups for this site and try again.');
         setConnecting(null);
+        return;
       }
+
+      // Poll for popup close to reset connecting state
+      if (pollRef.current) clearInterval(pollRef.current);
+      pollRef.current = setInterval(() => {
+        if (authWindow.closed) {
+          if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+          // Give a small delay for postMessage to arrive before resetting
+          setTimeout(() => {
+            setConnecting(prev => {
+              if (prev === platformId) return null;
+              return prev;
+            });
+          }, 500);
+        }
+      }, 1000);
+
     } catch (err: any) {
       console.error('OAuth error:', err);
-      setError(err.message || 'An error occurred while connecting.');
+      setError(err.message || 'An error occurred while connecting. Please try again.');
       setConnecting(null);
     }
   };
@@ -137,50 +242,120 @@ export default function AccountsPage() {
       console.error('Failed to disconnect account:', err);
     }
 
-    setConnectedAccounts(prev => {
-      const newAccounts = prev.filter(id => id !== platformId);
-      localStorage.setItem('connectedSocialAccounts', JSON.stringify(newAccounts));
-      return newAccounts;
-    });
+    setConnectedAccounts(prev => prev.filter(a => a.provider !== platformId));
   };
+
+  const connectedProviders = connectedAccounts.map(a => a.provider);
+  const connectedCount = connectedAccounts.length;
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div>
         <h2 className="text-3xl font-light tracking-tight text-white mb-2">Connected Accounts</h2>
-        <p className="text-white/50">Link your social media profiles to enable one-click auto-publishing.</p>
+        <p className="text-white/50">
+          Connect your social media accounts in one click — PostPilot handles publishing for you automatically.
+        </p>
       </div>
 
-      <div className="bg-[#111] border border-white/10 rounded-2xl p-8">
-        <div className="flex items-start gap-3 mb-6 p-4 bg-emerald-400/10 border border-emerald-400/20 rounded-xl">
-          <AlertCircle className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-          <div className="space-y-2">
-            <p className="text-sm text-emerald-400/90 font-medium">
-              Connect your accounts securely via OAuth.
+      {/* How it works — for non-technical users */}
+      <div className="bg-white/[0.02] backdrop-blur-xl border border-white/[0.08] shadow-glass-card rounded-2xl p-6 hover:border-white/30 transition-colors duration-500 transition-colors">
+        <h3 className="text-sm font-medium text-white/70 uppercase tracking-wider mb-4">How it works</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center shrink-0 mt-0.5">
+              <span className="text-white text-sm font-bold">1</span>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-white">Click Connect</p>
+              <p className="text-xs text-white/40 mt-0.5">A secure login window opens</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center shrink-0 mt-0.5">
+              <span className="text-white text-sm font-bold">2</span>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-white">Authorize access</p>
+              <p className="text-xs text-white/40 mt-0.5">Log in and click &quot;Allow&quot; or &quot;Authorize&quot;</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center shrink-0 mt-0.5">
+              <span className="text-white text-sm font-bold">3</span>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-white">Done!</p>
+              <p className="text-xs text-white/40 mt-0.5">The window closes and you&apos;re connected</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white/[0.02] backdrop-blur-xl border border-white/[0.08] shadow-glass-card rounded-2xl p-8 mt-8">
+        {/* Security notice */}
+        <div className="flex items-start gap-3 mb-6 p-4 bg-white/10 border border-white/20 rounded-xl">
+          <Shield className="w-5 h-5 text-white shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm text-white/80 font-medium">
+              Your accounts are secure
             </p>
-            <p className="text-xs text-emerald-400/70">
-              We never store your passwords, only secure access tokens to publish on your behalf. 
-              This uses real OAuth flows. To fully configure, you need to add the callback URL to your provider&apos;s dashboard.
+            <p className="text-xs text-white/60 mt-1">
+              We never see or store your passwords. You&apos;re granting PostPilot permission to publish on your behalf — you can revoke access at any time by clicking Disconnect.
             </p>
           </div>
         </div>
 
+        {/* Success toast */}
+        {successMessage && (
+          <div className="mb-6 p-4 bg-white/10 border border-white/20 rounded-xl flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-white" />
+              <span className="text-sm text-white">{successMessage}</span>
+            </div>
+            <button onClick={() => setSuccessMessage(null)} className="text-white/50 hover:text-white/80">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {/* Error message */}
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
-            {error}
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm text-red-400">{error}</p>
+                <p className="text-xs text-red-400/60 mt-1">
+                  If the problem persists, try refreshing the page or using a different browser.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Connected count */}
+        {connectedCount > 0 && (
+          <div className="mb-6 text-sm text-white/40">
+            {connectedCount} of {platforms.length} platform{connectedCount !== 1 ? 's' : ''} connected
           </div>
         )}
 
         <div className="space-y-4">
           {platforms.map((platform) => {
-            const isConnected = connectedAccounts.includes(platform.id);
+            const account = connectedAccounts.find(a => a.provider === platform.id);
+            const isConnected = !!account;
             const isConnecting = connecting === platform.id;
+            const isConfigured = configuredProviders[platform.id] !== false;
             const Icon = platform.icon;
 
             return (
-              <div 
-                key={platform.id} 
-                className="flex items-center justify-between p-4 border border-white/10 rounded-xl bg-black/20 hover:bg-white/5 transition-colors"
+              <div
+                key={platform.id}
+                className={`flex items-center justify-between p-4 border rounded-xl transition-all ${
+                  isConnected
+                    ? 'border-white/[0.2] bg-white/[0.05] shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]'
+                    : 'border-white/[0.08] bg-white/[0.01] hover:bg-white/[0.03] hover:border-white/30 transition-colors duration-500'
+                }`}
               >
                 <div className="flex items-center gap-4">
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${platform.color} ${platform.border || ''}`}>
@@ -189,29 +364,42 @@ export default function AccountsPage() {
                   <div>
                     <h3 className="font-medium text-white">{platform.name}</h3>
                     <p className="text-sm text-white/50">
-                      {isConnected ? 'Connected and ready to publish' : 'Not connected'}
+                      {isConnected
+                        ? account.provider_account_name
+                          ? `@${account.provider_account_name} · Connected`
+                          : 'Connected and ready to publish'
+                        : isConnecting
+                          ? platform.connectHint
+                          : !isConfigured && !loadingProviders
+                            ? 'Coming soon'
+                            : platform.description}
                     </p>
                   </div>
                 </div>
 
                 {isConnected ? (
                   <div className="flex items-center gap-4">
-                    <span className="flex items-center gap-1 text-sm text-emerald-400 font-medium">
+                    <span className="flex items-center gap-1 text-sm text-white font-medium">
                       <CheckCircle2 className="w-4 h-4" />
                       Connected
                     </span>
-                    <button 
+                    <button
                       onClick={() => handleDisconnect(platform.id)}
                       className="text-sm text-white/40 hover:text-red-400 transition-colors px-3 py-1.5 rounded-md hover:bg-red-400/10"
                     >
                       Disconnect
                     </button>
                   </div>
+                ) : !isConfigured && !loadingProviders ? (
+                  <span className="flex items-center gap-1.5 text-sm text-white/30 font-medium px-4 py-2">
+                    <Clock className="w-4 h-4" />
+                    Coming Soon
+                  </span>
                 ) : (
                   <button
                     onClick={() => handleConnect(platform.id)}
-                    disabled={isConnecting}
-                    className="flex items-center gap-2 bg-white text-black px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-white/90 disabled:opacity-50 transition-all"
+                    disabled={isConnecting || loadingProviders}
+                    className="flex items-center gap-2 bg-white text-black backdrop-blur-md px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-white/90 disabled:opacity-50 transition-all min-w-[130px] justify-center"
                   >
                     {isConnecting ? (
                       <>
@@ -220,7 +408,7 @@ export default function AccountsPage() {
                       </>
                     ) : (
                       <>
-                        <LinkIcon className="w-4 h-4" />
+                        <ExternalLink className="w-4 h-4" />
                         Connect
                       </>
                     )}
@@ -229,63 +417,6 @@ export default function AccountsPage() {
               </div>
             );
           })}
-        </div>
-      </div>
-
-      <div className="bg-[#111] border border-white/10 rounded-2xl p-8">
-        <h3 className="text-xl font-medium text-white mb-4">OAuth Setup Instructions</h3>
-        <p className="text-white/60 mb-6 text-sm">
-          To make these connections work, you need to configure the OAuth apps in each provider&apos;s developer portal.
-        </p>
-        
-        <div className="space-y-6">
-          <div>
-            <h4 className="text-white font-medium mb-2 text-sm">1. Your Callback URL</h4>
-            <p className="text-white/50 text-xs mb-2">Copy this exact URL and paste it into the &quot;Redirect URI&quot; or &quot;Callback URL&quot; field in your provider&apos;s dashboard:</p>
-            <div className="bg-black/50 border border-white/10 rounded-lg p-3 flex items-center justify-between">
-              <code className="text-emerald-400 text-sm">
-                {typeof window !== 'undefined' ? `${window.location.origin}/api/auth/callback` : 'https://your-app-url.run.app/api/auth/callback'}
-              </code>
-              <button 
-                onClick={() => {
-                  if (typeof window !== 'undefined') {
-                    navigator.clipboard.writeText(`${window.location.origin}/api/auth/callback`);
-                    alert('Copied to clipboard!');
-                  }
-                }}
-                className="text-xs bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded transition-colors"
-              >
-                Copy
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <h4 className="text-white font-medium mb-2 text-sm">2. Required Environment Variables</h4>
-            <p className="text-white/50 text-xs mb-3">Set these variables in your AI Studio environment settings:</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-black/30 border border-white/5 rounded-lg p-3">
-                <h5 className="text-white/80 text-xs font-medium mb-1">X (Twitter)</h5>
-                <code className="block text-white/50 text-xs">TWITTER_CLIENT_ID</code>
-                <code className="block text-white/50 text-xs">TWITTER_CLIENT_SECRET</code>
-              </div>
-              <div className="bg-black/30 border border-white/5 rounded-lg p-3">
-                <h5 className="text-white/80 text-xs font-medium mb-1">LinkedIn</h5>
-                <code className="block text-white/50 text-xs">LINKEDIN_CLIENT_ID</code>
-                <code className="block text-white/50 text-xs">LINKEDIN_CLIENT_SECRET</code>
-              </div>
-              <div className="bg-black/30 border border-white/5 rounded-lg p-3">
-                <h5 className="text-white/80 text-xs font-medium mb-1">Facebook / Instagram</h5>
-                <code className="block text-white/50 text-xs">FACEBOOK_CLIENT_ID</code>
-                <code className="block text-white/50 text-xs">FACEBOOK_CLIENT_SECRET</code>
-              </div>
-              <div className="bg-black/30 border border-white/5 rounded-lg p-3">
-                <h5 className="text-white/80 text-xs font-medium mb-1">TikTok</h5>
-                <code className="block text-white/50 text-xs">TIKTOK_CLIENT_KEY</code>
-                <code className="block text-white/50 text-xs">TIKTOK_CLIENT_SECRET</code>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

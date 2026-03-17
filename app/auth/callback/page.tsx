@@ -41,7 +41,7 @@ export default function AuthCallbackPage() {
   return (
     <div className="min-h-screen bg-[#050505] flex items-center justify-center">
       <div className="text-center">
-        <Loader2 className="w-8 h-8 text-emerald-400 animate-spin mx-auto mb-4" />
+        <Loader2 className="w-8 h-8 text-white animate-spin mx-auto mb-4" />
         <p className="text-white/60 text-sm">Confirming your email...</p>
       </div>
     </div>

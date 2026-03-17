@@ -1,19 +1,7 @@
 import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
 import { getSupabaseAdmin } from '@/lib/supabase';
 import { getSupabaseServer } from '@/lib/supabase-server';
-
-let stripeClient: Stripe | null = null;
-
-function getStripe(): Stripe | null {
-  if (!stripeClient) {
-    let key = process.env.STRIPE_SECRET_KEY;
-    if (!key) return null;
-    key = key.replace(/^.*(sk_live_|sk_test_)/i, '$1').trim();
-    stripeClient = new Stripe(key, { apiVersion: '2026-02-25.clover' });
-  }
-  return stripeClient;
-}
+import { getStripe } from '@/lib/stripe';
 
 export async function POST(req: Request) {
   try {
@@ -65,6 +53,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('Account deletion error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Failed to delete account. Please try again." }, { status: 500 });
   }
 }

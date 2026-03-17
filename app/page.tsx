@@ -4,20 +4,22 @@ import HowItWorks from "@/components/landing/HowItWorks";
 import ProductPreview from "@/components/landing/ProductPreview";
 import Pricing from "@/components/landing/Pricing";
 import Footer from "@/components/landing/Footer";
+import BackgroundSystem from "@/components/landing/BackgroundSystem";
+import { getSupabaseServer } from "@/lib/supabase-server";
+import { redirect } from "next/navigation";
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await getSupabaseServer();
+  if (supabase) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      redirect('/dashboard');
+    }
+  }
+
   return (
-    <div className="relative min-h-screen bg-black overflow-hidden">
-      {/* Full-page background video */}
-      <video
-        className="fixed inset-0 w-full h-full object-cover z-0 opacity-60"
-        autoPlay
-        muted
-        loop
-        playsInline
-      >
-        <source src="https://s3.amazonaws.com/webflow-prod-assets/69a9f01be85c61dc8d88d4ae/69a9f01ce85c61dc8d88d684_Video%20home%2022.mp4" type="video/mp4" />
-      </video>
+    <div className="relative min-h-screen bg-canvas-base overflow-hidden">
+      <BackgroundSystem />
 
       {/* Content overlay */}
       <div className="relative z-10">

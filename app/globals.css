@@ -1,6 +1,59 @@
-@import "tailwindcss";
+@import "tailwindcss" source(none);
 
-/* Restrict Tailwind v4 content scanning to project source dirs only.
-   Without a git repo, the scanner has no boundary and hangs on parent node_modules. */
-@source "../app";
-@source "../components";
+@source "../app/**/*.tsx";
+@source "../app/**/*.ts";
+@source "../components/**/*.tsx";
+@source "../lib/**/*.tsx";
+
+@theme {
+  /* Colors - Base and Canvas */
+  --color-canvas-base: #030303;
+  --color-surface-glass-sm: rgba(255, 255, 255, 0.02);
+  --color-surface-glass-md: rgba(255, 255, 255, 0.04);
+  --color-surface-glass-lg: rgba(255, 255, 255, 0.08);
+
+  /* Colors - Iridescent Accents */
+  --color-accent-violet: hsl(260, 80%, 65%);
+  --color-accent-rose: hsl(340, 75%, 60%);
+  --color-accent-cyan: hsl(210, 50%, 95%);
+  --color-accent-diamond: #f0faff;
+
+  /* Typography */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: rgba(255, 255, 255, 0.7);
+  --color-text-muted: rgba(255, 255, 255, 0.4);
+
+  /* Borders & Glows */
+  --color-border-glass: rgba(255, 255, 255, 0.08);
+  --color-border-glass-hover: rgba(255, 255, 255, 0.15);
+  
+  /* Blurs for Glassmorphism */
+  --blur-glass-sm: 8px;
+  --blur-glass-md: 16px;
+  --blur-glass-lg: 24px;
+
+  /* Depth & Shadows */
+  --shadow-glass-card: inset 0 1px 0 0 rgba(255,255,255,0.06), 0 4px 24px -4px rgba(0,0,0,0.5);
+  --shadow-glass-elevated: inset 0 1px 0 0 rgba(255,255,255,0.1), 0 12px 32px -8px rgba(0,0,0,0.6);
+  --shadow-glow-accent: 0 0 20px -5px var(--color-accent-violet);
+
+  /* Border Radii */
+  --radius-card: 1.25rem;
+  --radius-button: 0.75rem;
+  --radius-badge: 9999px;
+  
+  /* Motion Constants */
+  --transition-glass: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Animations that are highly resuable but difficult to configure fully via tokens alone */
+@layer utilities {
+  @keyframes gradient-rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  .animate-gradient-rotate {
+    animation: gradient-rotate 4s linear infinite;
+  }
+}
+

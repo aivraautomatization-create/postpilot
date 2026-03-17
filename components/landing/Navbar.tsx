@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { Command, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import PremiumMenu from "./PremiumMenu";
 
 export default function Navbar() {
   const { user, signOut } = useAuth();
 
   return (
-    <nav className="fixed top-0 w-full z-50 border-b border-white/10 bg-black/20 backdrop-blur-md">
+    <nav className="fixed top-0 w-full z-50 border-b border-white/[0.08] bg-white/[0.02] backdrop-blur-xl transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link href="/" className="flex items-center gap-2">
@@ -21,25 +22,27 @@ export default function Navbar() {
             
             {user ? (
               <div className="flex items-center gap-4">
-                <Link href="/dashboard" className="text-sm font-medium text-black bg-white px-4 py-2 rounded-full hover:bg-white/90 transition-colors">
+                <Link href="/dashboard" className="hidden sm:block text-sm font-semibold bg-white text-black backdrop-blur-md px-5 py-2.5 rounded-full hover:shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-all hover:scale-105 active:scale-95">
                   Dashboard
                 </Link>
+                <PremiumMenu />
                 <button 
                   onClick={() => signOut()}
-                  className="text-white/50 hover:text-white transition-colors"
+                  className="hidden sm:block text-white/50 hover:text-white transition-colors"
                   title="Log out"
                 >
                   <LogOut className="w-5 h-5" />
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-4">
-                <Link href="/auth/login" className="text-sm text-white/70 hover:text-white transition-colors">
+              <div className="flex items-center gap-2 sm:gap-4">
+                <Link href="/auth/login" className="hidden sm:block text-sm font-medium text-white/70 hover:text-white transition-colors">
                   Log in
                 </Link>
-                <Link href="/auth/signup" className="text-sm font-medium text-black bg-white px-4 py-2 rounded-full hover:bg-white/90 transition-colors">
+                <Link href="/auth/signup" className="hidden sm:block text-sm font-semibold bg-white text-black backdrop-blur-md px-5 py-2.5 rounded-full hover:shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-all hover:scale-105 active:scale-95">
                   Start Free Trial
                 </Link>
+                <PremiumMenu />
               </div>
             )}
           </div>

@@ -1,6 +1,6 @@
 export const PLAN_LIMITS: Record<string, { posts: number; videos: number; name: string }> = {
   'tier-entry': { posts: 28, videos: 0, name: 'Entry' },
-  'tier-pro': { posts: 50, videos: 10, name: 'Pro' },
+  'tier-pro': { posts: 50, videos: 5, name: 'Pro' },
   'tier-business': { posts: 100, videos: 50, name: 'Business' },
 };
 
@@ -15,30 +15,22 @@ export function getPlanName(tier: string | null | undefined): string {
 }
 
 export function isSubscriptionActive(profile: {
-  plan_status?: string | null;
   subscription_status?: string | null;
   trial_ends_at?: string | null;
-  stripe_subscription_id?: string | null;
   stripe_customer_id?: string | null;
 }): boolean {
   if (!profile) return false;
 
-  // Support both column names (plan_status or subscription_status)
-  const status = profile.plan_status || profile.subscription_status;
-  const hasPaidSub = profile.stripe_subscription_id || profile.stripe_customer_id;
+  const status = profile.subscription_status;
 
-  // Active paid subscriber
-  if (status === 'active' && hasPaidSub) {
+  // Active subscriber (paid or admin/test accounts)
+  if (status === 'active') {
     return true;
   }
 
-  // In trial period
-  if (status === 'trialing' || !hasPaidSub) {
-    if (profile.trial_ends_at) {
-      return new Date(profile.trial_ends_at) > new Date();
-    }
-    // No trial end date set — allow access (safe fallback for new users)
-    return true;
+  // In trial period — must have a valid trial_ends_at date
+  if (status === 'trialing' && profile.trial_ends_at) {
+    return new Date(profile.trial_ends_at) > new Date();
   }
 
   return false;

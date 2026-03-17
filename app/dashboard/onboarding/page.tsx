@@ -22,14 +22,45 @@ export default function OnboardingPage() {
   });
 
   useEffect(() => {
-    // If they already have a profile, redirect to dashboard
-    const existingProfile = localStorage.getItem('companyProfile');
-    if (existingProfile) {
-      router.push('/dashboard');
+    // If they already have a profile with onboarding completed, redirect to dashboard
+    const checkOnboarding = async () => {
+      const supabase = getSupabase();
+      if (!supabase || !user) return;
+      const { data: profile } = await (supabase as any)
+        .from('profiles')
+        .select('onboarding_completed')
+        .eq('id', user.id)
+        .single();
+      if (profile?.onboarding_completed) {
+        router.push('/dashboard');
+      }
+    };
+    checkOnboarding();
+  }, [router, user]);
+
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  const isStepValid = () => {
+    switch (step) {
+      case 1: return formData.companyName.trim().length > 0;
+      case 2: return formData.niche.trim().length > 0;
+      case 3: return formData.targetAudience.trim().length > 0;
+      case 4: return true; // toneOfVoice has a default
+      default: return false;
     }
-  }, [router]);
+  };
 
   const handleNext = () => {
+    if (!isStepValid()) {
+      const fields: Record<number, string> = {
+        1: "Company name is required",
+        2: "Industry / niche is required",
+        3: "Target audience is required",
+      };
+      setValidationError(fields[step] || null);
+      return;
+    }
+    setValidationError(null);
     if (step < 4) setStep(step + 1);
   };
 
@@ -71,7 +102,7 @@ export default function OnboardingPage() {
   return (
     <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-white/10 rounded-full blur-[120px] pointer-events-none" />
       
       <div className="w-full max-w-xl bg-[#111] border border-white/10 rounded-3xl p-8 md:p-12 relative z-10 shadow-2xl">
         <div className="mb-8">
@@ -80,7 +111,7 @@ export default function OnboardingPage() {
               {[1, 2, 3, 4].map((i) => (
                 <div 
                   key={i} 
-                  className={`h-1.5 w-12 rounded-full transition-colors ${i <= step ? 'bg-emerald-400' : 'bg-white/10'}`} 
+                  className={`h-1.5 w-12 rounded-full transition-colors ${i <= step ? 'bg-white' : 'bg-white/10'}`} 
                 />
               ))}
             </div>
@@ -104,7 +135,7 @@ export default function OnboardingPage() {
             <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div>
                 <label className="block text-sm font-medium text-white/80 mb-2 flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-emerald-400" />
+                  <Building2 className="w-4 h-4 text-white" />
                   Company Name
                 </label>
                 <input
@@ -112,20 +143,20 @@ export default function OnboardingPage() {
                   value={formData.companyName}
                   onChange={(e) => setFormData({...formData, companyName: e.target.value})}
                   placeholder="e.g. Acme Corp"
-                  className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 transition-all"
+                  className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all"
                   autoFocus
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-white/80 mb-2 flex items-center gap-2">
-                  <Briefcase className="w-4 h-4 text-emerald-400" />
+                  <Briefcase className="w-4 h-4 text-white" />
                   What do you offer? (Products/Services)
                 </label>
                 <textarea
                   value={formData.offerings}
                   onChange={(e) => setFormData({...formData, offerings: e.target.value})}
                   placeholder="e.g. B2B SaaS for HR management, payroll automation..."
-                  className="w-full h-24 bg-black/50 border border-white/10 rounded-xl p-4 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 transition-all resize-none"
+                  className="w-full h-24 bg-black/50 border border-white/10 rounded-xl p-4 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all resize-none"
                 />
               </div>
             </div>
@@ -135,7 +166,7 @@ export default function OnboardingPage() {
             <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div>
                 <label className="block text-sm font-medium text-white/80 mb-2 flex items-center gap-2">
-                  <Target className="w-4 h-4 text-emerald-400" />
+                  <Target className="w-4 h-4 text-white" />
                   Industry / Niche
                 </label>
                 <input
@@ -143,7 +174,7 @@ export default function OnboardingPage() {
                   value={formData.niche}
                   onChange={(e) => setFormData({...formData, niche: e.target.value})}
                   placeholder="e.g. B2B Software, Fitness Coaching, Real Estate..."
-                  className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 transition-all"
+                  className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all"
                   autoFocus
                 />
               </div>
@@ -154,14 +185,14 @@ export default function OnboardingPage() {
             <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div>
                 <label className="block text-sm font-medium text-white/80 mb-2 flex items-center gap-2">
-                  <Target className="w-4 h-4 text-emerald-400" />
+                  <Target className="w-4 h-4 text-white" />
                   Target Audience
                 </label>
                 <textarea
                   value={formData.targetAudience}
                   onChange={(e) => setFormData({...formData, targetAudience: e.target.value})}
                   placeholder="e.g. HR Managers at mid-sized tech companies who struggle with compliance..."
-                  className="w-full h-32 bg-black/50 border border-white/10 rounded-xl p-4 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 transition-all resize-none"
+                  className="w-full h-32 bg-black/50 border border-white/10 rounded-xl p-4 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all resize-none"
                   autoFocus
                 />
               </div>
@@ -172,7 +203,7 @@ export default function OnboardingPage() {
             <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div>
                 <label className="block text-sm font-medium text-white/80 mb-2 flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-emerald-400" />
+                  <Zap className="w-4 h-4 text-white" />
                   Tone of Voice
                 </label>
                 <div className="grid grid-cols-2 gap-3">
@@ -182,7 +213,7 @@ export default function OnboardingPage() {
                       onClick={() => setFormData({...formData, toneOfVoice: tone})}
                       className={`p-4 rounded-xl border text-sm font-medium text-left transition-all ${
                         formData.toneOfVoice === tone 
-                          ? 'bg-emerald-400/10 border-emerald-400 text-emerald-400' 
+                          ? 'bg-white/10 border-white text-white' 
                           : 'bg-black/50 border-white/10 text-white/60 hover:border-white/30 hover:text-white'
                       }`}
                     >
@@ -205,19 +236,23 @@ export default function OnboardingPage() {
           </button>
           
           {step < 4 ? (
-            <button
-              onClick={handleNext}
-              disabled={step === 1 && !formData.companyName}
-              className="flex items-center gap-2 bg-white text-black px-8 py-3 rounded-full text-sm font-medium hover:bg-white/90 disabled:opacity-50 transition-all"
-            >
-              Continue
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            <div className="flex flex-col items-end gap-2">
+              {validationError && (
+                <p className="text-red-400 text-xs">{validationError}</p>
+              )}
+              <button
+                onClick={handleNext}
+                className="flex items-center gap-2 bg-white text-black backdrop-blur-md px-8 py-3 rounded-full text-sm font-medium hover:bg-white/90 disabled:opacity-50 transition-all"
+              >
+                Continue
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
           ) : (
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="flex items-center gap-2 bg-emerald-400 text-black px-8 py-3 rounded-full text-sm font-medium hover:bg-emerald-300 disabled:opacity-50 transition-all"
+              className="flex items-center gap-2 bg-white text-black backdrop-blur-md px-8 py-3 rounded-full text-sm font-medium hover:bg-white/90 disabled:opacity-50 transition-all"
             >
               {isSaving ? (
                 <>

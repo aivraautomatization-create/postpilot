@@ -34,7 +34,7 @@ export async function sendWelcomeEmail(email: string, name?: string) {
               <li><strong>Schedule ahead</strong> — Plan your content calendar in advance</li>
             </ul>
             <div style="margin: 32px 0;">
-              <a href="${APP_URL}/dashboard" style="background: #10b981; color: #000; padding: 14px 28px; border-radius: 10px; text-decoration: none; font-weight: 600; display: inline-block;">Go to Dashboard</a>
+              <a href="${APP_URL}/dashboard" style="background: #ffffff; color: #000; padding: 14px 28px; border-radius: 10px; text-decoration: none; font-weight: 600; display: inline-block;">Go to Dashboard</a>
             </div>
             <p style="color: #888; font-size: 14px;">Your 7-day free trial is now active. Enjoy!</p>
             <p style="color: #444; margin-top: 24px;">Best,<br/>The PostPilot Team</p>
@@ -62,7 +62,7 @@ export async function sendTrialWarningEmail(email: string, daysLeft: number) {
             <p style="color: #444; line-height: 1.6;">We hope you're enjoying PostPilot! This is a friendly reminder that your 7-day free trial will end in <strong>${daysLeft} days</strong>.</p>
             <p style="color: #444; line-height: 1.6;">To keep using all our AI features and automated publishing, upgrade to a paid plan now.</p>
             <div style="margin: 32px 0;">
-              <a href="${APP_URL}/#pricing" style="background: #10b981; color: #000; padding: 14px 28px; border-radius: 10px; text-decoration: none; font-weight: 600; display: inline-block;">Upgrade Now</a>
+              <a href="${APP_URL}/#pricing" style="background: #ffffff; color: #000; padding: 14px 28px; border-radius: 10px; text-decoration: none; font-weight: 600; display: inline-block;">Upgrade Now</a>
             </div>
             <p style="color: #888; font-size: 14px;">If you have any questions, just reply to this email!</p>
             <p style="color: #444; margin-top: 24px;">Best,<br/>The PostPilot Team</p>
@@ -95,7 +95,7 @@ export async function sendSubscriptionConfirmationEmail(email: string, planName:
               <li>Analytics and performance tracking</li>
             </ul>
             <div style="margin: 32px 0;">
-              <a href="${APP_URL}/dashboard" style="background: #10b981; color: #000; padding: 14px 28px; border-radius: 10px; text-decoration: none; font-weight: 600; display: inline-block;">Go to Dashboard</a>
+              <a href="${APP_URL}/dashboard" style="background: #ffffff; color: #000; padding: 14px 28px; border-radius: 10px; text-decoration: none; font-weight: 600; display: inline-block;">Go to Dashboard</a>
             </div>
             <p style="color: #888; font-size: 14px;">You can manage your subscription anytime from your dashboard settings.</p>
             <p style="color: #444; margin-top: 24px;">Best,<br/>The PostPilot Team</p>

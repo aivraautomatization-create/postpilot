@@ -22,9 +22,15 @@ export async function getSupabaseServer() {
         return cookieStore.getAll();
       },
       setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value, options }) => {
-          cookieStore.set(name, value, options);
-        });
+        try {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, options);
+          });
+        } catch {
+          // In Server Components, cookies are read-only.
+          // Supabase calls setAll during token refresh; silently ignore here.
+          // The middleware handles cookie refresh for subsequent requests.
+        }
       },
     },
   });

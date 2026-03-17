@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { Video, Loader2, Sparkles, FileText } from "lucide-react";
-import { GoogleGenAI } from "@google/genai";
 import Markdown from "react-markdown";
+import { validateFile, MAX_VIDEO_SIZE, ALLOWED_VIDEO_TYPES } from "@/lib/upload-validation";
 
 export default function AnalyzeVideo() {
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -15,12 +15,18 @@ export default function AnalyzeVideo() {
 
   const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setVideoFile(file);
-      setVideoUrl(URL.createObjectURL(file));
-      setResult(null);
-      setError(null);
+    if (!file) return;
+
+    const validation = validateFile(file, { maxSize: MAX_VIDEO_SIZE, allowedTypes: ALLOWED_VIDEO_TYPES });
+    if (!validation.valid) {
+      setError(validation.error || "Invalid file.");
+      return;
     }
+
+    setVideoFile(file);
+    setVideoUrl(URL.createObjectURL(file));
+    setResult(null);
+    setError(null);
   };
 
   const handleAnalyze = async () => {
@@ -31,42 +37,26 @@ export default function AnalyzeVideo() {
     setError(null);
     
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY });
-      
-      // Convert video to base64
-      const reader = new FileReader();
-      reader.readAsDataURL(videoFile);
-      
-      reader.onloadend = async () => {
-        try {
-          const base64Data = (reader.result as string).split(',')[1];
-          
-          const response = await ai.models.generateContent({
-            model: "gemini-3.1-pro-preview",
-            contents: {
-              parts: [
-                {
-                  inlineData: {
-                    data: base64Data,
-                    mimeType: videoFile.type,
-                  }
-                },
-                { text: prompt }
-              ]
-            }
-          });
-          
-          setResult(response.text || "Failed to analyze video.");
-        } catch (err: any) {
-          console.error(err);
-          setError(err.message || "An error occurred during analysis.");
-        } finally {
-          setIsAnalyzing(false);
-        }
-      };
+      const formData = new FormData();
+      formData.append("video", videoFile);
+      formData.append("prompt", prompt);
+
+      const response = await fetch('/api/generate/analyze', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to analyze video.");
+      }
+
+      setResult(data.content || "Failed to analyze video.");
     } catch (err: any) {
       console.error(err);
       setError(err.message || "An error occurred during analysis.");
+    } finally {
       setIsAnalyzing(false);
     }
   };
@@ -108,14 +98,14 @@ export default function AnalyzeVideo() {
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              className="w-full h-32 bg-[#111] border border-white/10 rounded-2xl p-4 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-white/20 resize-none"
+              className="w-full h-32 bg-white/[0.02] backdrop-blur-md border border-white/[0.08] hover:border-white/30 transition-colors duration-500 rounded-2xl p-4 text-white placeholder:text-white/30 focus:outline-none focus:border-white focus:ring-1 focus:ring-white/20 resize-none transition-all"
             />
           </div>
 
           <button
             onClick={handleAnalyze}
             disabled={isAnalyzing || !videoFile}
-            className="w-full flex items-center justify-center gap-2 bg-white text-black py-4 rounded-xl font-medium hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="w-full flex items-center justify-center gap-2 bg-white text-black backdrop-blur-md shadow-lg hover:shadow-[0_0_20px_rgba(255,255,255,0.15)] py-4 rounded-xl font-semibold hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all font-outfit"
           >
             {isAnalyzing ? (
               <>
@@ -137,7 +127,7 @@ export default function AnalyzeVideo() {
           )}
         </div>
 
-        <div className="bg-[#111] border border-white/10 rounded-2xl p-6 flex flex-col min-h-[500px]">
+        <div className="bg-white/[0.02] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-6 flex flex-col min-h-[500px]">
           <h3 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
             <FileText className="w-5 h-5" />
             Analysis Results

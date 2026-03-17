@@ -1,41 +1,46 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { getSupabaseMiddleware } from '@/lib/supabase-middleware';
 
-export function middleware(request: NextRequest) {
+const protectedRoutes = ['/dashboard', '/api/checkout', '/api/generate', '/api/publish', '/api/portal', '/api/posts', '/api/video-proxy', '/api/analytics', '/api/account'];
+const publicRoutes = ['/auth', '/api/webhooks', '/api/auth', '/api/inngest'];
+
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
-  // Protect both dashboard and sensitive API routes
-  const isProtectedRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/api/checkout');
-
-  if (!isProtectedRoute) {
+  
+  // Skip middleware for public routes
+  const isPublic = publicRoutes.some(route => pathname.startsWith(route));
+  if (isPublic) {
     return NextResponse.next();
   }
 
-  // Skip auth enforcement if Supabase is not configured (local dev without Supabase)
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  // Check if this is a protected route
+  const isProtected = protectedRoutes.some(route => pathname.startsWith(route));
+  if (!isProtected) {
     return NextResponse.next();
   }
 
-  // Onboarding is publicly accessible (user needs to complete it first)
-  if (pathname === '/dashboard/onboarding') {
-    return NextResponse.next();
-  }
-
-  // Check for a Supabase session cookie. Full token validation happens
-  // inside each API route via getSupabaseServer() — middleware just gates pages.
-  const cookieHeader = request.headers.get('cookie') || '';
-  const hasSession = /sb-[a-z0-9]+-auth-token=/.test(cookieHeader);
-
-  if (!hasSession) {
-    if (pathname.startsWith('/api/')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  // Validate session via Supabase
+  try {
+    const result = getSupabaseMiddleware(request);
+    
+    if (!result) {
+      return NextResponse.redirect(new URL('/auth/login', request.url));
     }
+
+    const { supabase, response } = result;
+
+    const { data: { user }, error } = await supabase.auth.getUser();
+    
+    if (error || !user) {
+      return NextResponse.redirect(new URL('/auth/login', request.url));
+    }
+
+    return response;
+  } catch {
     return NextResponse.redirect(new URL('/auth/login', request.url));
   }
-
-  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/api/checkout/:path*'],
+  matcher: ['/dashboard/:path*', '/api/checkout/:path*', '/api/generate/:path*', '/api/publish/:path*', '/api/portal/:path*', '/api/posts/:path*', '/api/video-proxy/:path*', '/api/analytics/:path*', '/api/account/:path*']
 };

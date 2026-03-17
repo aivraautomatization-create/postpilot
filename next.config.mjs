@@ -1,8 +1,12 @@
-import type {NextConfig} from 'next';
-import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
-const nextConfig: NextConfig = {
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   reactStrictMode: true,
+  outputFileTracingRoot: __dirname,
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -19,10 +23,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  transpilePackages: ['motion'],
-  turbopack: {
-    root: path.resolve(__dirname),
-  },
+  serverExternalPackages: ['@google/genai', 'gcp-metadata'],
 };
 
 export default nextConfig;

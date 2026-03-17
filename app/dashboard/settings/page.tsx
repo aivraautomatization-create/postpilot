@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   Loader2,
@@ -30,6 +30,9 @@ export default function SettingsPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [isManagingSub, setIsManagingSub] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [portalError, setPortalError] = useState<string | null>(null);
+  const deleteInputRef = useRef<HTMLInputElement>(null);
 
   // Form state
   const [fullName, setFullName] = useState("");
@@ -119,9 +122,13 @@ export default function SettingsPage() {
         body: JSON.stringify({ customerId }),
       });
       const data = await response.json();
-      if (data.url) window.location.href = data.url;
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        setPortalError("Failed to open subscription portal. Please try again.");
+      }
     } catch {
-      alert("Failed to open subscription portal.");
+      setPortalError("Failed to open subscription portal. Please try again.");
     } finally {
       setIsManagingSub(false);
     }
@@ -130,6 +137,7 @@ export default function SettingsPage() {
   const handleDeleteAccount = async () => {
     if (deleteConfirmText !== "DELETE") return;
     setDeleting(true);
+    setDeleteError(null);
 
     try {
       const response = await fetch("/api/account/delete", {
@@ -143,10 +151,10 @@ export default function SettingsPage() {
         router.push("/");
       } else {
         const data = await response.json();
-        alert(data.error || "Failed to delete account");
+        setDeleteError(data.error || "Failed to delete account. Please try again.");
       }
     } catch {
-      alert("An error occurred while deleting your account.");
+      setDeleteError("An error occurred while deleting your account. Please try again.");
     } finally {
       setDeleting(false);
     }
@@ -167,7 +175,7 @@ export default function SettingsPage() {
   return (
     <div className="space-y-8 max-w-3xl">
       {/* Profile Information */}
-      <div className="bg-[#111] border border-white/10 rounded-2xl p-8">
+      <div className="bg-white/[0.02] backdrop-blur-xl border border-white/[0.08] shadow-glass-card hover:border-white/30 transition-colors duration-500 transition-colors rounded-2xl p-8">
         <h2 className="text-lg font-semibold text-white mb-6">Profile Information</h2>
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -177,7 +185,7 @@ export default function SettingsPage() {
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full bg-black border border-white/10 rounded-xl py-2.5 px-4 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all"
+                className="w-full bg-white/[0.02] backdrop-blur-md border border-white/[0.08] hover:border-white/30 transition-colors duration-500 rounded-xl py-2.5 px-4 text-white placeholder:text-white/20 focus:outline-none focus:border-white/50 focus:ring-1 focus:ring-white/20 transition-all font-outfit"
               />
             </div>
             <div>
@@ -186,7 +194,7 @@ export default function SettingsPage() {
                 type="email"
                 value={user?.email || ""}
                 disabled
-                className="w-full bg-black/50 border border-white/5 rounded-xl py-2.5 px-4 text-white/40 cursor-not-allowed"
+                className="w-full bg-white/[0.01] border border-white/[0.04] rounded-xl py-2.5 px-4 text-white/40 cursor-not-allowed font-outfit"
               />
             </div>
           </div>
@@ -196,7 +204,7 @@ export default function SettingsPage() {
               type="text"
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
-              className="w-full bg-black border border-white/10 rounded-xl py-2.5 px-4 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all"
+              className="w-full bg-white/[0.02] backdrop-blur-md border border-white/[0.08] hover:border-white/30 transition-colors duration-500 rounded-xl py-2.5 px-4 text-white placeholder:text-white/20 focus:outline-none focus:border-white/50 focus:ring-1 focus:ring-white/20 transition-all font-outfit"
             />
           </div>
           <div>
@@ -205,7 +213,7 @@ export default function SettingsPage() {
               type="text"
               value={niche}
               onChange={(e) => setNiche(e.target.value)}
-              className="w-full bg-black border border-white/10 rounded-xl py-2.5 px-4 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all"
+              className="w-full bg-white/[0.02] backdrop-blur-md border border-white/[0.08] hover:border-white/30 transition-colors duration-500 rounded-xl py-2.5 px-4 text-white placeholder:text-white/20 focus:outline-none focus:border-white/50 focus:ring-1 focus:ring-white/20 transition-all font-outfit"
             />
           </div>
           <div>
@@ -214,7 +222,7 @@ export default function SettingsPage() {
               value={offerings}
               onChange={(e) => setOfferings(e.target.value)}
               rows={2}
-              className="w-full bg-black border border-white/10 rounded-xl py-2.5 px-4 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all resize-none"
+              className="w-full bg-white/[0.02] backdrop-blur-md border border-white/[0.08] hover:border-white/30 transition-colors duration-500 rounded-xl py-2.5 px-4 text-white placeholder:text-white/20 focus:outline-none focus:border-white/50 focus:ring-1 focus:ring-white/20 transition-all resize-none font-outfit"
             />
           </div>
           <div>
@@ -223,7 +231,7 @@ export default function SettingsPage() {
               value={targetAudience}
               onChange={(e) => setTargetAudience(e.target.value)}
               rows={2}
-              className="w-full bg-black border border-white/10 rounded-xl py-2.5 px-4 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all resize-none"
+              className="w-full bg-white/[0.02] backdrop-blur-md border border-white/[0.08] hover:border-white/30 transition-colors duration-500 rounded-xl py-2.5 px-4 text-white placeholder:text-white/20 focus:outline-none focus:border-white/50 focus:ring-1 focus:ring-white/20 transition-all resize-none font-outfit"
             />
           </div>
           <div>
@@ -232,19 +240,19 @@ export default function SettingsPage() {
               type="text"
               value={toneOfVoice}
               onChange={(e) => setToneOfVoice(e.target.value)}
-              className="w-full bg-black border border-white/10 rounded-xl py-2.5 px-4 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all"
+              className="w-full bg-white/[0.02] backdrop-blur-md border border-white/[0.08] hover:border-white/30 transition-colors duration-500 rounded-xl py-2.5 px-4 text-white placeholder:text-white/20 focus:outline-none focus:border-white/50 focus:ring-1 focus:ring-white/20 transition-all font-outfit"
             />
           </div>
 
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center gap-2 bg-white text-black font-semibold py-2.5 px-6 rounded-xl hover:bg-white/90 transition-all disabled:opacity-50"
+            className="flex items-center gap-2 bg-white text-black backdrop-blur-md shadow-lg hover:shadow-[0_0_20px_rgba(255,255,255,0.15)] font-semibold py-2.5 px-6 rounded-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:hover:scale-100 mt-4"
           >
             {saving ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : saved ? (
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <CheckCircle2 className="w-4 h-4 text-white/80" />
             ) : (
               <Save className="w-4 h-4" />
             )}
@@ -254,7 +262,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Subscription & Plan */}
-      <div className="bg-[#111] border border-white/10 rounded-2xl p-8">
+      <div className="bg-white/[0.02] backdrop-blur-xl border border-white/[0.08] shadow-glass-card hover:border-white/30 transition-colors duration-500 transition-colors rounded-2xl p-8">
         <h2 className="text-lg font-semibold text-white mb-6">Subscription & Plan</h2>
         <div className="space-y-6">
           <div className="flex items-center justify-between">
@@ -267,7 +275,7 @@ export default function SettingsPage() {
             <span
               className={`px-3 py-1 rounded-full text-xs font-medium ${
                 (profile?.plan_status || profile?.subscription_status) === "active"
-                  ? "bg-emerald-500/10 text-emerald-400"
+                  ? "bg-white/10 text-white"
                   : (profile?.plan_status || profile?.subscription_status) === "trialing"
                   ? "bg-blue-500/10 text-blue-400"
                   : "bg-amber-500/10 text-amber-400"
@@ -288,16 +296,22 @@ export default function SettingsPage() {
             <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all ${
-                  usagePercent >= 90 ? "bg-red-500" : usagePercent >= 70 ? "bg-amber-500" : "bg-emerald-500"
+                  usagePercent >= 90 ? "bg-red-500" : usagePercent >= 70 ? "bg-amber-500" : "bg-white"
                 }`}
                 style={{ width: `${usagePercent}%` }}
               />
             </div>
           </div>
 
+          {portalError && (
+            <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+              <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
+              <p className="text-sm text-red-400">{portalError}</p>
+            </div>
+          )}
           <div className="flex gap-3">
             <button
-              onClick={handleManageSubscription}
+              onClick={() => { setPortalError(null); handleManageSubscription(); }}
               disabled={isManagingSub}
               className="flex items-center gap-2 bg-white/10 text-white py-2.5 px-4 rounded-xl hover:bg-white/20 transition-all text-sm font-medium disabled:opacity-50"
             >
@@ -306,7 +320,7 @@ export default function SettingsPage() {
             </button>
             <a
               href="/#pricing"
-              className="flex items-center gap-2 bg-emerald-500/10 text-emerald-400 py-2.5 px-4 rounded-xl hover:bg-emerald-500/20 transition-all text-sm font-medium"
+              className="flex items-center gap-2 bg-white/10 text-white py-2.5 px-4 rounded-xl hover:bg-white/15 transition-all text-sm font-medium"
             >
               <Zap className="w-4 h-4" />
               Change Plan
@@ -316,7 +330,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Connected Accounts */}
-      <div className="bg-[#111] border border-white/10 rounded-2xl p-8">
+      <div className="bg-white/[0.02] backdrop-blur-xl border border-white/[0.08] shadow-glass-card hover:border-white/30 transition-colors duration-500 transition-colors rounded-2xl p-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-white">Connected Accounts</h2>
           <a
@@ -337,7 +351,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Danger Zone */}
-      <div className="bg-[#111] border border-red-500/20 rounded-2xl p-8">
+      <div className="bg-red-500/[0.02] backdrop-blur-xl border border-red-500/[0.15] rounded-2xl p-8">
         <h2 className="text-lg font-semibold text-red-400 mb-2">Danger Zone</h2>
         <p className="text-sm text-white/50 mb-6">
           Once you delete your account, there is no going back. All your data, posts, and connected accounts will be
@@ -361,12 +375,20 @@ export default function SettingsPage() {
               </p>
             </div>
             <input
+              ref={deleteInputRef}
+              autoFocus
               type="text"
               value={deleteConfirmText}
               onChange={(e) => setDeleteConfirmText(e.target.value)}
               placeholder="Type DELETE"
               className="w-full bg-black border border-red-500/20 rounded-xl py-2.5 px-4 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-red-500/30 transition-all"
             />
+            {deleteError && (
+              <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
+                <p className="text-sm text-red-400">{deleteError}</p>
+              </div>
+            )}
             <div className="flex gap-3">
               <button
                 onClick={handleDeleteAccount}

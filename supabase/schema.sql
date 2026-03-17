@@ -2,7 +2,6 @@
 CREATE TABLE IF NOT EXISTS profiles (
   id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
   full_name TEXT,
-  avatar_url TEXT,
   company_name TEXT,
   niche TEXT,
   offerings TEXT,
@@ -13,9 +12,9 @@ CREATE TABLE IF NOT EXISTS profiles (
   trial_ends_at TIMESTAMP WITH TIME ZONE DEFAULT (NOW() + INTERVAL '7 days'),
   trial_claimed BOOLEAN DEFAULT FALSE,
   stripe_customer_id TEXT,
-  stripe_subscription_id TEXT,
-  plan_status TEXT DEFAULT 'trialing', -- 'trialing', 'active', 'canceled', 'past_due'
-  subscription_tier TEXT DEFAULT 'tier-entry', -- 'tier-entry', 'tier-pro', 'tier-business'
+  subscription_status TEXT DEFAULT 'inactive', -- 'inactive', 'trialing', 'active', 'canceled', 'past_due'
+  subscription_tier TEXT DEFAULT 'free', -- 'free', 'tier-entry', 'tier-pro', 'tier-business'
+  latest_strategy TEXT, -- AI-generated viral strategy, applied during content creation
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -33,11 +32,11 @@ CREATE POLICY "Users can update own profile"
   USING (auth.uid() = id);
 
 -- Function to handle new user signup
-CREATE OR REPLACE FUNCTION public.handle_new_user() 
+CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
-  INSERT INTO public.profiles (id, full_name, avatar_url)
-  VALUES (new.id, new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'avatar_url');
+  INSERT INTO public.profiles (id, full_name)
+  VALUES (new.id, new.raw_user_meta_data->>'full_name');
   RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -140,3 +139,34 @@ CREATE INDEX IF NOT EXISTS idx_posts_user_id ON posts(user_id);
 CREATE INDEX IF NOT EXISTS idx_posts_status ON posts(status);
 CREATE INDEX IF NOT EXISTS idx_posts_created_at ON posts(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_usage_user_period ON usage(user_id, period);
+
+-- Chat messages table: persistent chat sessions
+CREATE TABLE IF NOT EXISTS chat_messages (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  session_id UUID NOT NULL,
+  role TEXT NOT NULL, -- 'user' or 'model'
+  content TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE chat_messages ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own chat messages"
+  ON chat_messages FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own chat messages"
+  ON chat_messages FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own chat messages"
+  ON chat_messages FOR DELETE
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Service role can manage chat messages"
+  ON chat_messages FOR ALL
+  USING (true)
+  WITH CHECK (true);
+
+CREATE INDEX IF NOT EXISTS idx_chat_messages_user_session ON chat_messages(user_id, session_id, created_at);

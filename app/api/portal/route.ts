@@ -1,24 +1,7 @@
 import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { getSupabaseAdmin } from '@/lib/supabase';
-
-let stripeClient: Stripe | null = null;
-
-function getStripe(): Stripe {
-  if (!stripeClient) {
-    let key = process.env.STRIPE_SECRET_KEY;
-    if (!key) {
-      throw new Error('STRIPE_SECRET_KEY environment variable is required');
-    }
-    
-    // Clean up the key in case it was pasted with a prefix
-    key = key.replace(/^.*(sk_live_|sk_test_)/i, '$1').trim();
-    
-    stripeClient = new Stripe(key, { apiVersion: '2026-02-25.clover' });
-  }
-  return stripeClient;
-}
+import { getStripe } from '@/lib/stripe';
 
 export async function POST(req: Request) {
   try {
@@ -49,6 +32,9 @@ export async function POST(req: Request) {
     }
 
     const stripe = getStripe();
+    if (!stripe) {
+      return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 });
+    }
     const origin = req.headers.get('origin') || 'http://localhost:3000';
 
     // Create a billing portal session
@@ -60,6 +46,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ url: session.url });
   } catch (error: any) {
     console.error('Stripe Portal error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Failed to create billing portal. Please try again." }, { status: 500 });
   }
 }

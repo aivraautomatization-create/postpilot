@@ -10,7 +10,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: 'Autopilot Social',
+  title: 'PostPilot',
   description: 'AI-powered social media management',
 };
 
