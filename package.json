@@ -32,7 +32,6 @@
     "formdata-polyfill": "^4.0.10",
     "inngest": "^3.52.6",
     "is-plain-obj": "^4.1.0",
-    "lightningcss-darwin-arm64": "^1.32.0",
     "lucide-react": "^0.553.0",
     "motion": "^12.23.24",
     "next": "^15.4.9",
