@@ -137,6 +137,11 @@ export default function CreateContent() {
     );
   };
 
+  const safeJson = async (res: Response) => {
+    const text = await res.text();
+    try { return JSON.parse(text); } catch { return { error: text || "Server error" }; }
+  };
+
   const handlePublish = async () => {
     if (!result || selectedPlatforms.length === 0) return;
 
@@ -184,11 +189,6 @@ export default function CreateContent() {
     setShowEnhanced(false);
     setError(null);
     setVideoError(false);
-
-    const safeJson = async (res: Response) => {
-      const text = await res.text();
-      try { return JSON.parse(text); } catch { return { error: text || "Server error" }; }
-    };
 
     try {
       if (activeTab === "text") {
