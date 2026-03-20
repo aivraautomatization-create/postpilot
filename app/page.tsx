@@ -3,6 +3,8 @@ import Hero from "@/components/landing/Hero";
 import HowItWorks from "@/components/landing/HowItWorks";
 import ProductPreview from "@/components/landing/ProductPreview";
 import Pricing from "@/components/landing/Pricing";
+import Testimonials from "@/components/landing/Testimonials";
+import Results from "@/components/landing/Results";
 import Footer from "@/components/landing/Footer";
 import BackgroundSystem from "@/components/landing/BackgroundSystem";
 import { getSupabaseServer } from "@/lib/supabase-server";
@@ -27,6 +29,8 @@ export default async function Home() {
         <Hero />
         <HowItWorks />
         <ProductPreview />
+        <Testimonials />
+        <Results />
         <Pricing />
         <Footer />
       </div>

@@ -1,0 +1,328 @@
+export interface ContentTemplate {
+  id: string;
+  title: string;
+  content: string;
+  niche: string;
+  platform: string;
+  contentType: string;
+  tags: string[];
+}
+
+export const NICHES = ["All", "SaaS", "Coaching", "E-commerce", "Agency", "Creator", "Fitness", "Real Estate"] as const;
+export const PLATFORMS = ["All", "Twitter", "LinkedIn", "Instagram", "TikTok", "Facebook", "YouTube"] as const;
+export const CONTENT_TYPES = ["All", "Hook", "Story", "CTA", "Thread", "Carousel", "Tip", "Controversy"] as const;
+
+export const contentTemplates: ContentTemplate[] = [
+  // SaaS Templates
+  {
+    id: "saas-hook-1",
+    title: "The Problem Agitator",
+    content: "You're spending {X} hours a week on {painful task}.\n\nThat's {X × 52} hours a year.\n\nHere's what I built to get it down to {small number} minutes:",
+    niche: "SaaS",
+    platform: "Twitter",
+    contentType: "Hook",
+    tags: ["engagement", "problem-solution"],
+  },
+  {
+    id: "saas-hook-2",
+    title: "The Myth Buster",
+    content: "Everyone says you need {common belief} to {goal}.\n\nI built a {product type} that proves them wrong.\n\nHere's the data from {timeframe}:",
+    niche: "SaaS",
+    platform: "Twitter",
+    contentType: "Hook",
+    tags: ["contrarian", "data-driven"],
+  },
+  {
+    id: "saas-thread-1",
+    title: "Building in Public Thread",
+    content: "I just hit {milestone} with my {product}.\n\nHere are {number} lessons I learned building it from scratch:\n\n🧵 Thread ↓\n\n1/ {Lesson about market validation}\n2/ {Lesson about first users}\n3/ {Lesson about pricing}\n4/ {Lesson about growth}\n5/ {Lesson about mindset}\n\nThe biggest surprise? {unexpected insight}.\n\nIf you're building something similar, DM me. Happy to share what worked.",
+    niche: "SaaS",
+    platform: "Twitter",
+    contentType: "Thread",
+    tags: ["building-in-public", "storytelling"],
+  },
+  {
+    id: "saas-linkedin-1",
+    title: "Founder Journey Post",
+    content: "6 months ago, I quit my job to build {product}.\n\nHere's what nobody tells you about being a solo founder:\n\n→ The first 3 months are terrifying\n→ Your first 10 users will change everything\n→ Revenue doesn't fix imposter syndrome\n→ Building alone doesn't mean being alone\n\nThe tool now helps {number} {who} do {what} every week.\n\nBut the real win? I wake up excited to work.\n\nIf you're thinking about making the leap — your idea is probably better than you think.",
+    niche: "SaaS",
+    platform: "LinkedIn",
+    contentType: "Story",
+    tags: ["founder-story", "inspiration"],
+  },
+  {
+    id: "saas-cta-1",
+    title: "Free Trial Push",
+    content: "I spent {timeframe} building {product} so you don't have to spend {painful time} on {task}.\n\n✅ {Benefit 1}\n✅ {Benefit 2}\n✅ {Benefit 3}\n\nTry it free for 7 days. No credit card needed.\n\n→ {link}",
+    niche: "SaaS",
+    platform: "Twitter",
+    contentType: "CTA",
+    tags: ["conversion", "free-trial"],
+  },
+  {
+    id: "saas-tiktok-1",
+    title: "Quick Product Demo",
+    content: "POV: You just discovered an AI tool that does {task} in {time}\n\n[Show screen recording of the tool]\n\nStep 1: {action}\nStep 2: {action}\nStep 3: Mind blown 🤯\n\nLink in bio to try it free",
+    niche: "SaaS",
+    platform: "TikTok",
+    contentType: "Hook",
+    tags: ["demo", "viral"],
+  },
+  {
+    id: "saas-controversy-1",
+    title: "Hot Take on Tools",
+    content: "Unpopular opinion: {Popular tool} is making you LESS productive.\n\nHere's why:\n\n1. {Reason — complexity}\n2. {Reason — cost}\n3. {Reason — time wasted}\n\nThe alternative? {Your simpler approach}.\n\nI built {product} to prove it. Results after 30 days: {metric}.",
+    niche: "SaaS",
+    platform: "LinkedIn",
+    contentType: "Controversy",
+    tags: ["hot-take", "contrarian"],
+  },
+
+  // Coaching Templates
+  {
+    id: "coach-hook-1",
+    title: "The Transformation Hook",
+    content: "My client went from {before state} to {after state} in {timeframe}.\n\nThey didn't change their {common thing people change}.\n\nThey changed this one thing instead:",
+    niche: "Coaching",
+    platform: "Instagram",
+    contentType: "Hook",
+    tags: ["transformation", "curiosity"],
+  },
+  {
+    id: "coach-story-1",
+    title: "Client Win Story",
+    content: "\"I never thought I could {achievement}.\"\n\nThat's what {client name/type} told me 3 months ago.\n\nToday, they {incredible result}.\n\nHere's exactly what we did together:\n\nWeek 1-2: {Foundation step}\nWeek 3-4: {Building step}\nWeek 5-8: {Scaling step}\nWeek 9-12: {Result step}\n\nThe secret wasn't working harder. It was {insight}.\n\nDM me \"{keyword}\" if you want the same roadmap.",
+    niche: "Coaching",
+    platform: "Instagram",
+    contentType: "Story",
+    tags: ["testimonial", "dm-trigger"],
+  },
+  {
+    id: "coach-carousel-1",
+    title: "5-Step Framework Carousel",
+    content: "Slide 1: {Number} Steps to {Desired Outcome} (Without {Common Objection})\n\nSlide 2: Step 1 — {Step name}\n{2-3 line explanation}\n\nSlide 3: Step 2 — {Step name}\n{2-3 line explanation}\n\nSlide 4: Step 3 — {Step name}\n{2-3 line explanation}\n\nSlide 5: Step 4 — {Step name}\n{2-3 line explanation}\n\nSlide 6: Step 5 — {Step name}\n{2-3 line explanation}\n\nSlide 7: Want the full breakdown? Link in bio or DM me \"{keyword}\"",
+    niche: "Coaching",
+    platform: "Instagram",
+    contentType: "Carousel",
+    tags: ["educational", "framework"],
+  },
+  {
+    id: "coach-linkedin-1",
+    title: "Lessons From Coaching",
+    content: "After coaching {number} {type of people}, here's what I know for sure:\n\n1. {Insight about mindset}\n2. {Insight about habits}\n3. {Insight about consistency}\n4. {Insight about support}\n5. {Insight about the journey}\n\nThe people who succeed aren't the most talented.\n\nThey're the ones who {key differentiator}.\n\n♻️ Repost if this resonates",
+    niche: "Coaching",
+    platform: "LinkedIn",
+    contentType: "Tip",
+    tags: ["wisdom", "engagement"],
+  },
+  {
+    id: "coach-tiktok-1",
+    title: "Quick Mindset Shift",
+    content: "The reason you're stuck isn't what you think 👇\n\nYou keep saying: \"{limiting belief}\"\n\nReplace it with: \"{empowering belief}\"\n\nWatch what happens in 30 days.\n\n#mindset #growth #coaching",
+    niche: "Coaching",
+    platform: "TikTok",
+    contentType: "Hook",
+    tags: ["mindset", "quick-tip"],
+  },
+
+  // E-commerce Templates
+  {
+    id: "ecom-hook-1",
+    title: "The Before/After",
+    content: "This is what {product category} looked like before we redesigned everything.\n\n[Before photo]\n\nAnd this is what {number} customers are now obsessed with.\n\n[After photo]\n\nShop the collection → link in bio",
+    niche: "E-commerce",
+    platform: "Instagram",
+    contentType: "Hook",
+    tags: ["visual", "product-showcase"],
+  },
+  {
+    id: "ecom-story-1",
+    title: "Origin Story",
+    content: "I started {brand} because I was tired of {problem with existing products}.\n\nI tried {number} different {products} and none of them {what you needed}.\n\nSo I made my own.\n\n{Timeframe} later:\n→ {Number} happy customers\n→ {Metric} 5-star reviews\n→ Featured in {publication/platform}\n\nThe best businesses solve problems you've personally experienced. What's yours?",
+    niche: "E-commerce",
+    platform: "LinkedIn",
+    contentType: "Story",
+    tags: ["founder-story", "brand-building"],
+  },
+  {
+    id: "ecom-cta-1",
+    title: "Flash Sale Announcement",
+    content: "🚨 {X}% OFF everything.\n\n{Number} hours only.\n\nNo code needed. No catch.\n\nWe're doing this because {genuine reason — anniversary, milestone, clearing stock}.\n\nOur bestsellers sell out fast:\n→ {Product 1}\n→ {Product 2}\n→ {Product 3}\n\nShop now before it's gone → {link}",
+    niche: "E-commerce",
+    platform: "Instagram",
+    contentType: "CTA",
+    tags: ["sale", "urgency"],
+  },
+  {
+    id: "ecom-tiktok-1",
+    title: "Unboxing / Packing Orders",
+    content: "Packing orders for you guys 📦✨\n\n[ASMR-style packing video]\n\nEvery order gets:\n✨ {Special touch 1}\n✨ {Special touch 2}\n✨ {Special touch 3}\n\nThank you for supporting a small business 🤍\n\n#smallbusiness #packingorders #asmr",
+    niche: "E-commerce",
+    platform: "TikTok",
+    contentType: "Story",
+    tags: ["behind-the-scenes", "asmr"],
+  },
+
+  // Agency Templates
+  {
+    id: "agency-hook-1",
+    title: "Case Study Teaser",
+    content: "We took {client type} from {before metric} to {after metric} in {timeframe}.\n\nNo tricks. No gimmicks. Just {your methodology}.\n\nHere's the 3-step framework we used:",
+    niche: "Agency",
+    platform: "LinkedIn",
+    contentType: "Hook",
+    tags: ["case-study", "results"],
+  },
+  {
+    id: "agency-thread-1",
+    title: "Industry Predictions Thread",
+    content: "My {year} predictions for {industry}:\n\n1/ {Trend} is dead. Here's what's replacing it.\n2/ {Platform} will become the #1 channel for {audience}.\n3/ The agencies that survive will {key differentiator}.\n4/ {Technology} will change how we {activity} forever.\n5/ The biggest opportunity? {Untapped area}.\n\nBookmark this. I'll revisit in December.\n\nWhich prediction surprises you most?",
+    niche: "Agency",
+    platform: "Twitter",
+    contentType: "Thread",
+    tags: ["thought-leadership", "predictions"],
+  },
+  {
+    id: "agency-tip-1",
+    title: "Quick Win Tip",
+    content: "90% of {industry} businesses make this mistake with their {marketing channel}:\n\nThey {common mistake}.\n\nInstead, do this:\n\n1. {Step 1 — the fix}\n2. {Step 2 — implementation}\n3. {Step 3 — measurement}\n\nWe've seen this single change increase {metric} by {percentage} for our clients.\n\nSave this for later 🔖",
+    niche: "Agency",
+    platform: "Instagram",
+    contentType: "Tip",
+    tags: ["quick-win", "educational"],
+  },
+
+  // Creator Templates
+  {
+    id: "creator-hook-1",
+    title: "The Vulnerable Open",
+    content: "I almost gave up on {creative pursuit} last month.\n\nHere's what happened:\n\n{Brief story of the low point}\n\nBut then {turning point}.\n\nAnd now I'm more committed than ever. Here's why:",
+    niche: "Creator",
+    platform: "Twitter",
+    contentType: "Hook",
+    tags: ["vulnerability", "storytelling"],
+  },
+  {
+    id: "creator-story-1",
+    title: "Growth Milestone Post",
+    content: "When I started posting {timeframe} ago, I had {small number} followers.\n\nToday: {current number}.\n\nBut the number doesn't matter. Here's what actually changed:\n\n→ {Real benefit 1 — opportunities}\n→ {Real benefit 2 — connections}\n→ {Real benefit 3 — income/freedom}\n\nThe algorithm didn't change. My approach did.\n\n{Number} things I'd tell my past self:\n1. {Advice}\n2. {Advice}\n3. {Advice}\n\nDrop a 🔥 if you're on the same journey.",
+    niche: "Creator",
+    platform: "Instagram",
+    contentType: "Story",
+    tags: ["milestone", "growth"],
+  },
+  {
+    id: "creator-tiktok-1",
+    title: "Day in the Life",
+    content: "A day in my life as a {creator type} 📱\n\n6:00 AM — {Morning routine}\n8:00 AM — {Content creation}\n10:00 AM — {Engagement/community}\n12:00 PM — {Business tasks}\n2:00 PM — {More creation}\n5:00 PM — {Wind down}\n\nThe best part about this life? {Freedom/passion statement}\n\n#dayinmylife #creator #behindthescenes",
+    niche: "Creator",
+    platform: "TikTok",
+    contentType: "Story",
+    tags: ["lifestyle", "day-in-life"],
+  },
+
+  // Fitness Templates
+  {
+    id: "fitness-hook-1",
+    title: "Myth Buster",
+    content: "Stop doing {popular exercise/diet} if you want {goal}.\n\nI know, controversial. But hear me out.\n\n{Brief scientific or experience-based explanation}\n\nDo this instead:\n→ {Alternative 1}\n→ {Alternative 2}\n→ {Alternative 3}\n\nYour {body part/goal} will thank you in 30 days.",
+    niche: "Fitness",
+    platform: "Instagram",
+    contentType: "Controversy",
+    tags: ["myth-busting", "education"],
+  },
+  {
+    id: "fitness-carousel-1",
+    title: "Workout of the Week",
+    content: "Slide 1: {Muscle group} Workout — No Equipment Needed 💪\n\nSlide 2: Exercise 1 — {Name}\n{Reps} × {Sets} | Rest: {time}\n\nSlide 3: Exercise 2 — {Name}\n{Reps} × {Sets} | Rest: {time}\n\nSlide 4: Exercise 3 — {Name}\n{Reps} × {Sets} | Rest: {time}\n\nSlide 5: Exercise 4 — {Name}\n{Reps} × {Sets} | Rest: {time}\n\nSlide 6: Save this workout & tag me when you try it! 🏋️",
+    niche: "Fitness",
+    platform: "Instagram",
+    contentType: "Carousel",
+    tags: ["workout", "save-worthy"],
+  },
+  {
+    id: "fitness-tiktok-1",
+    title: "Quick Fitness Tip",
+    content: "The {goal} tip nobody talks about 👇\n\nEveryone focuses on {common focus}.\n\nBut the real game changer is {surprising tip}.\n\nI saw {result} in {timeframe} just by making this one switch.\n\nTry it for a week and tell me I'm wrong 💪\n\n#fitness #gym #workout #tips",
+    niche: "Fitness",
+    platform: "TikTok",
+    contentType: "Tip",
+    tags: ["quick-tip", "viral"],
+  },
+
+  // Real Estate Templates
+  {
+    id: "realestate-hook-1",
+    title: "Market Insight",
+    content: "The {city/area} housing market just did something we haven't seen in {timeframe}.\n\nHere's what it means for {buyers/sellers/investors}:\n\n📊 {Data point 1}\n📊 {Data point 2}\n📊 {Data point 3}\n\nMy take? {Professional opinion}.\n\nDM me if you want a free market analysis for your area.",
+    niche: "Real Estate",
+    platform: "Instagram",
+    contentType: "Hook",
+    tags: ["market-update", "authority"],
+  },
+  {
+    id: "realestate-story-1",
+    title: "Client Success Story",
+    content: "My client was about to give up on finding a home in {area}.\n\nThey'd been searching for {timeframe}. {Number} offers rejected.\n\nHere's what we did differently on attempt #{final number}:\n\n1. {Strategy 1}\n2. {Strategy 2}\n3. {Strategy 3}\n\nThey closed {timeframe} later — ${amount} under asking.\n\nThe market is tough, but it's not impossible. It's about strategy.\n\nLooking for your dream home? Let's talk.",
+    niche: "Real Estate",
+    platform: "LinkedIn",
+    contentType: "Story",
+    tags: ["success-story", "client-win"],
+  },
+  {
+    id: "realestate-tiktok-1",
+    title: "Home Tour Hook",
+    content: "Wait until you see the backyard on this one 😱\n\n📍 {Neighborhood}, {City}\n💰 ${Price}\n🛏️ {Beds} bed | 🛁 {Baths} bath\n📐 {Sqft} sqft\n\n[Walk-through video with trending audio]\n\nWould you live here? Comment below 👇\n\n#realestate #hometour #dreamhome #{city}",
+    niche: "Real Estate",
+    platform: "TikTok",
+    contentType: "Hook",
+    tags: ["home-tour", "viral"],
+  },
+
+  // Universal / Cross-niche Templates
+  {
+    id: "universal-hook-1",
+    title: "The Contrarian Take",
+    content: "I'm going to say something most people in {industry} won't:\n\n{Bold contrarian statement}\n\nHere's my evidence:\n→ {Point 1}\n→ {Point 2}\n→ {Point 3}\n\nAgree or disagree? Drop your take below 👇",
+    niche: "SaaS",
+    platform: "Twitter",
+    contentType: "Controversy",
+    tags: ["engagement", "contrarian"],
+  },
+  {
+    id: "universal-cta-1",
+    title: "The Value Stack CTA",
+    content: "Here's everything you get with {product/service}:\n\n✅ {Feature 1} (worth ${value})\n✅ {Feature 2} (worth ${value})\n✅ {Feature 3} (worth ${value})\n✅ {Feature 4} (worth ${value})\n✅ {Bonus} (worth ${value})\n\nTotal value: ${total}\nYour price: ${actual price}\n\nThat's {percentage}% off — but only until {deadline}.\n\n→ {Link/CTA}",
+    niche: "E-commerce",
+    platform: "Instagram",
+    contentType: "CTA",
+    tags: ["value-stack", "conversion"],
+  },
+  {
+    id: "universal-tip-1",
+    title: "The Counterintuitive Tip",
+    content: "Want to grow on {platform}? Stop doing these 3 things:\n\n❌ {Common mistake 1} — Do {better approach} instead\n❌ {Common mistake 2} — Do {better approach} instead\n❌ {Common mistake 3} — Do {better approach} instead\n\nI grew from {before} to {after} in {timeframe} by making these shifts.\n\nSave this for later 🔖",
+    niche: "Creator",
+    platform: "Instagram",
+    contentType: "Tip",
+    tags: ["growth-tips", "save-worthy"],
+  },
+  {
+    id: "universal-youtube-1",
+    title: "YouTube Video Script Outline",
+    content: "🎬 HOOK (0:00-0:30)\n\"{Shocking statement or question that makes viewers stay}\"\n\n📖 INTRO (0:30-1:30)\nQuickly establish credibility and preview what they'll learn.\n\"By the end of this video, you'll know exactly how to {outcome}.\"\n\n🔑 MAIN CONTENT (1:30-8:00)\nPoint 1: {Key insight + example}\nPoint 2: {Key insight + example}\nPoint 3: {Key insight + example}\n\n💡 BONUS TIP (8:00-9:00)\n\"Most people miss this, but {bonus insight}.\"\n\n📢 CTA (9:00-9:30)\n\"If this helped, hit subscribe. Drop a comment with {engagement prompt}. And check out {related content} next.\"",
+    niche: "Creator",
+    platform: "YouTube",
+    contentType: "Hook",
+    tags: ["script", "youtube"],
+  },
+  {
+    id: "universal-facebook-1",
+    title: "Community Question Post",
+    content: "I'm curious about something... 🤔\n\nIf you could solve ONE problem in your {business/life/fitness/etc} right now, what would it be?\n\nDrop it in the comments. I'll personally respond to every single one with my best advice.\n\n(No selling, just helping. Let's go 👇)",
+    niche: "Coaching",
+    platform: "Facebook",
+    contentType: "Hook",
+    tags: ["engagement", "community"],
+  },
+];

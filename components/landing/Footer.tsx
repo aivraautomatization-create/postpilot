@@ -1,11 +1,89 @@
 import Link from "next/link";
 import { Command } from "lucide-react";
 
+const productLinks = [
+  { name: "Features", href: "#" },
+  { name: "Pricing", href: "#pricing" },
+  { name: "Templates", href: "#" },
+  { name: "Dashboard", href: "/dashboard" },
+];
+
+const resourceLinks = [
+  { name: "Blog", href: "#" },
+  { name: "Help Center", href: "#" },
+  { name: "API Docs", href: "#" },
+  { name: "Status", href: "#" },
+];
+
+const companyLinks = [
+  { name: "About", href: "#" },
+  { name: "Privacy", href: "#" },
+  { name: "Terms", href: "#" },
+  { name: "Contact", href: "#" },
+];
+
 export default function Footer() {
   return (
     <footer className="bg-white/[0.02] backdrop-blur-xl border-t border-white/[0.06] relative z-10">
-      <div className="mx-auto max-w-7xl px-6 py-12 md:flex md:items-center md:justify-between lg:px-8">
-        <div className="flex justify-center space-x-6 md:order-2">
+      <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+        {/* 4-column grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+          {/* Column 1: Logo + tagline */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Command className="w-5 h-5 text-white" />
+              <span className="text-lg font-medium text-white tracking-tight">Postpilot</span>
+            </div>
+            <p className="text-sm text-white/40 leading-relaxed">
+              AI-powered social media for solo founders
+            </p>
+          </div>
+
+          {/* Column 2: Product */}
+          <div>
+            <h3 className="text-sm font-medium text-white mb-4">Product</h3>
+            <ul className="space-y-3">
+              {productLinks.map((link) => (
+                <li key={link.name}>
+                  <Link href={link.href} className="text-sm text-white/40 hover:text-white/80 transition-colors">
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 3: Resources */}
+          <div>
+            <h3 className="text-sm font-medium text-white mb-4">Resources</h3>
+            <ul className="space-y-3">
+              {resourceLinks.map((link) => (
+                <li key={link.name}>
+                  <Link href={link.href} className="text-sm text-white/40 hover:text-white/80 transition-colors">
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 4: Company */}
+          <div>
+            <h3 className="text-sm font-medium text-white mb-4">Company</h3>
+            <ul className="space-y-3">
+              {companyLinks.map((link) => (
+                <li key={link.name}>
+                  <Link href={link.href} className="text-sm text-white/40 hover:text-white/80 transition-colors">
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* Social icons row */}
+        <div className="flex justify-center space-x-6 mb-8">
           <Link href="#" className="text-white/40 hover:text-white/80">
             <span className="sr-only">Twitter</span>
             <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -19,8 +97,10 @@ export default function Footer() {
             </svg>
           </Link>
         </div>
-        <div className="mt-8 md:order-1 md:mt-0 flex items-center gap-2">
-          <Command className="w-5 h-5 text-white" />
+
+        {/* Copyright */}
+        <div className="border-t border-white/[0.06] pt-8 flex items-center justify-center gap-2">
+          <Command className="w-4 h-4 text-white/30" />
           <p className="text-center text-xs leading-5 text-white/40">
             &copy; 2026 Postpilot, Inc. All rights reserved.
           </p>

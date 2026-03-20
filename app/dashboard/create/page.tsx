@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { clsx } from "clsx";
 import {
@@ -17,8 +17,11 @@ import {
   AlertCircle,
   RefreshCw
 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { validateFile, MAX_IMAGE_SIZE, ALLOWED_IMAGE_TYPES } from "@/lib/upload-validation";
+import { contentTemplates } from "@/lib/content-templates";
+import ContentScorePanel from "@/components/dashboard/ContentScorePanel";
 
 const tabs = [
   { id: "text", name: "Text Content", icon: Type },
@@ -27,8 +30,9 @@ const tabs = [
   { id: "animate", name: "Animate Image", icon: Wand2 },
 ];
 
-export default function CreateContent() {
+function CreateContentInner() {
   const { profile, loading: authLoading } = useAuth();
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState("text");
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -103,6 +107,17 @@ export default function CreateContent() {
       setStrategy(profile.latest_strategy);
     }
   }, [profile]);
+
+  // Template pre-fill from search params
+  useEffect(() => {
+    const templateId = searchParams.get('template');
+    if (templateId) {
+      const template = contentTemplates.find(t => t.id === templateId);
+      if (template) {
+        setPrompt(template.content);
+      }
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (selectedPlatform === "tiktok" || selectedPlatform === "reel") {
@@ -671,6 +686,11 @@ export default function CreateContent() {
                       </p>
                     </details>
                   )}
+
+                  {/* Content Score Panel */}
+                  {engagementScore !== null && (
+                    <ContentScorePanel score={engagementScore} suggestions={suggestions} />
+                  )}
                 </>
               )}
               {activeTab === "image" && (
@@ -835,5 +855,13 @@ export default function CreateContent() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CreateContent() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-[400px]"><Loader2 className="w-8 h-8 text-white animate-spin" /></div>}>
+      <CreateContentInner />
+    </Suspense>
   );
 }
