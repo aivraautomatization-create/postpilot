@@ -1,8 +1,9 @@
 import Navbar from "@/components/landing/Navbar";
 import Hero from "@/components/landing/Hero";
 import HowItWorks from "@/components/landing/HowItWorks";
-import DashboardPreview from "@/components/landing/DashboardPreview";
 import ProductPreview from "@/components/landing/ProductPreview";
+import TryItNow from "@/components/landing/TryItNow";
+import ROICalculator from "@/components/landing/ROICalculator";
 import Pricing from "@/components/landing/Pricing";
 import Testimonials from "@/components/landing/Testimonials";
 import Results from "@/components/landing/Results";
@@ -30,10 +31,11 @@ export default async function Home() {
         <Navbar />
         <Hero />
         <HowItWorks />
-        <DashboardPreview />
         <ProductPreview />
+        <TryItNow />
         <Testimonials />
         <Results />
+        <ROICalculator />
         <ComparisonTable />
         <Pricing />
         <Footer />
