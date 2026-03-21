@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { motion, useMotionValue, useMotionTemplate, animate } from "framer-motion";
 
 export default function BackgroundSystem() {
-  const [videoEnded, setVideoEnded] = useState(false);
   const color1 = useMotionValue("#0a0a1a");
   const color2 = useMotionValue("#1a0b2e");
   const color3 = useMotionValue("#000000");
@@ -21,12 +20,6 @@ export default function BackgroundSystem() {
     animate(color3, ["#000000", "#050010", "#000510", "#000000"], {
       ease: "easeInOut", duration: 20, repeat: Infinity, repeatType: "mirror"
     });
-    
-    // Fallback: fade video out after 30 seconds if `onEnded` doesn't fire
-    const timer = setTimeout(() => {
-      setVideoEnded(true);
-    }, 30000);
-    return () => clearTimeout(timer);
   }, [color1, color2, color3]);
 
   return (
@@ -36,27 +29,6 @@ export default function BackgroundSystem() {
         style={{ backgroundImage: bgImage }}
       />
       <div className="absolute inset-0 z-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay pointer-events-none" />
-      {/* First Video: Plays once and fades out */}
-      <video
-        className={`absolute inset-0 w-full h-full object-cover z-20 transition-opacity duration-[3000ms] ease-in-out ${videoEnded ? 'opacity-0' : 'opacity-60'}`}
-        autoPlay
-        muted
-        playsInline
-        onEnded={() => setVideoEnded(true)}
-      >
-        <source src="https://s3.amazonaws.com/webflow-prod-assets/69a9f01be85c61dc8d88d4ae/69a9f01ce85c61dc8d88d684_Video%20home%2022.mp4" type="video/mp4" />
-      </video>
-
-      {/* Second Video: Fades in and loops after the first video ends */}
-      <video
-        className={`absolute inset-0 w-full h-full object-cover z-[15] transition-opacity duration-[3000ms] ease-in-out ${videoEnded ? 'opacity-80' : 'opacity-0'}`}
-        autoPlay
-        loop
-        muted
-        playsInline
-      >
-        <source src="https://s3.amazonaws.com/webflow-prod-assets/69a9f01be85c61dc8d88d4ae/69a9f01ce85c61dc8d88d6f0_spark_dribbbles.mp4" type="video/mp4" />
-      </video>
     </div>
   );
 }

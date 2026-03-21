@@ -1,57 +1,84 @@
 "use client";
 
-import { Check, Command, Loader2 } from "lucide-react";
+import { Check, Loader2, Crown, Zap, Building2, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { motion } from "framer-motion";
+import { scrollReveal } from "@/lib/motion";
+
+type BillingCycle = "monthly" | "annual";
 
 const tiers = [
   {
-    name: "Entry",
+    name: "Starter",
     id: "tier-entry",
-    priceMonthly: "$69",
-    description: "Automate your weekly presence and save hours of manual work.",
+    priceMonthly: 27,
+    priceAnnual: 22,
+    dailyMonthly: "0.90",
+    dailyAnnual: "0.72",
+    coffeeLabel: "Less than your morning coffee",
+    description: "Start building your audience consistently.",
+    badge: null,
+    BadgeIcon: Zap,
     features: [
-      "28 posts per month (7/week)",
-      "Auto-post to Instagram, Facebook, LinkedIn, TikTok",
-      "AI text & image generation",
+      "28 AI posts/month",
+      "5 platforms (Instagram, LinkedIn, Twitter, Facebook, TikTok)",
+      "AI image generation",
       "Basic analytics",
-      "Additional credits: $2.50/post"
+      "Email support",
     ],
     hasTrial: false,
     mostPopular: false,
+    cta: "Get started",
+    gradient: false,
   },
   {
     name: "Pro",
     id: "tier-pro",
-    priceMonthly: "$99",
-    description: "Scale your growth with deeper insights and video content.",
+    priceMonthly: 49,
+    priceAnnual: 39,
+    dailyMonthly: "1.63",
+    dailyAnnual: "1.28",
+    coffeeLabel: "Cheaper than a latte",
+    description: "The growth engine serious founders choose.",
+    badge: "Most Popular · 73% choose this",
+    BadgeIcon: Crown,
     features: [
       "7-day free trial included",
-      "50 posts per month",
-      "5 Reels/TikToks per month",
-      "Unlimited AI video refreshes",
-      "Auto-post to all platforms",
-      "Advanced AI Analyst features",
-      "Additional credits: $2.00/post"
+      "50 posts + 5 Reels/TikToks/month",
+      "All 6 platforms",
+      "Viral strategy engine",
+      "Advanced AI Analyst",
+      "Priority support",
     ],
     hasTrial: true,
     mostPopular: true,
+    cta: "Start 7-day free trial",
+    gradient: true,
   },
   {
-    name: "Business",
+    name: "Agency",
     id: "tier-business",
-    priceMonthly: "$199",
-    description: "Dominate your market with maximum volume and priority AI.",
+    priceMonthly: 97,
+    priceAnnual: 78,
+    dailyMonthly: "3.23",
+    dailyAnnual: "2.56",
+    coffeeLabel: "One fancy coffee per day",
+    description: "For founders who refuse to be second.",
+    badge: "Lock in founder pricing",
+    BadgeIcon: Building2,
     features: [
-      "100 posts & 50 Reels/TikToks per month",
-      "Priority AI video generation",
-      "Auto-post to all platforms",
-      "Best quality priority generation",
+      "Everything in Pro +",
+      "100 posts + 50 Reels/TikToks/month",
+      "Priority AI generation",
+      "Client reporting dashboard",
       "Early access to new features",
-      "Additional credits: $1.80/post"
+      "Dedicated success manager",
     ],
     hasTrial: false,
     mostPopular: false,
+    cta: "Get started",
+    gradient: false,
   },
 ];
 
@@ -61,124 +88,234 @@ function classNames(...classes: string[]) {
 
 export default function Pricing() {
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
+  const [billing, setBilling] = useState<BillingCycle>("monthly");
   const { user } = useAuth();
 
   const handleCheckout = async (tierId: string) => {
     if (!user) {
-      // Redirect to signup with plan info if not logged in
       window.location.href = `/auth/signup?plan=${tierId}`;
       return;
     }
-
     try {
       setLoadingTier(tierId);
-      const response = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tierId }),
       });
-
       const data = await response.json();
-
       if (data.customerId) {
-        // Save the customer ID to local storage so we can use it for the billing portal
-        localStorage.setItem('stripeCustomerId', data.customerId);
-        localStorage.setItem('subscriptionTier', tierId);
+        localStorage.setItem("stripeCustomerId", data.customerId);
+        localStorage.setItem("subscriptionTier", tierId);
       }
-
       if (data.url) {
         window.location.href = data.url;
       } else {
-        console.error('Checkout error:', data.error);
+        console.error("Checkout error:", data.error);
       }
     } catch (error) {
-      console.error('Checkout error:', error);
+      console.error("Checkout error:", error);
     } finally {
       setLoadingTier(null);
     }
   };
 
+  const cardVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: [0.4, 0, 0.2, 1] as const, delay: i * 0.12 },
+    }),
+  };
+
   return (
     <div id="pricing" className="py-24 sm:py-32 relative z-10">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-4xl text-center">
-          <h2 className="text-base font-medium leading-7 text-white">Pricing</h2>
-          <p className="mt-2 text-4xl font-light tracking-tight text-white sm:text-5xl">
-            Choose your autopilot plan
+
+        {/* ROI anchor — loss aversion framing */}
+        <motion.div {...scrollReveal} className="mx-auto max-w-3xl text-center mb-8">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-white/60 mb-6">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+            Agencies charge <span className="font-semibold text-white">$3,000–$8,000/month</span> for what PostPilot does in 3 minutes
+          </div>
+
+          <h2 className="text-4xl font-light tracking-tight text-white sm:text-5xl">
+            Choose your plan.
+            <br />
+            <span className="text-white/50">Cancel anytime.</span>
+          </h2>
+
+          {/* The one-line loss aversion hook */}
+          <p className="mt-5 text-base text-white/60 leading-relaxed max-w-xl mx-auto">
+            Most founders recoup the cost in the first week — in time saved.
           </p>
-        </div>
-        <p className="mx-auto mt-6 max-w-2xl text-center text-lg leading-8 text-white/60">
-          You can always buy more credits if you reach your monthly limit. Never stop growing and innovating with premium content.
-        </p>
-        <div className="isolate mx-auto mt-16 grid max-w-md grid-cols-1 gap-y-8 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-3 lg:gap-x-8 lg:gap-y-0">
-          {tiers.map((tier) => (
-              <div
-              key={tier.id}
-              className={classNames(
-                tier.mostPopular ? "bg-white/[0.04] border-white/[0.2] shadow-glass-card shadow-purple-500/10" : "bg-white/[0.02] border-white/[0.08]",
-                "border rounded-3xl p-8 xl:p-10 relative backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-white/50 transition-colors duration-500"
-              )}
-            >
-              {tier.mostPopular && (
-                <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-blue-50/10 via-transparent to-white/5 pointer-events-none" />
-              )}
-              {tier.mostPopular && (
-                <div className="absolute top-0 right-6 -translate-y-1/2 shadow-[0_0_20px_rgba(255,255,255,0.15)] rounded-full">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white text-black backdrop-blur-md px-3 py-1 text-sm font-semibold leading-5  shadow-lg">
-                    <Command className="w-4 h-4 text-white" />
-                    Most popular
-                  </span>
-                </div>
-              )}
-              <div className="flex items-center justify-between gap-x-4">
-                <h3
-                  id={tier.id}
-                  className={classNames(
-                    tier.mostPopular ? "text-white" : "text-white",
-                    "text-lg font-medium leading-8"
-                  )}
-                >
-                  {tier.name}
-                </h3>
-              </div>
-              <p className="mt-4 text-sm leading-6 text-white/60">{tier.description}</p>
-              <p className="mt-6 flex items-baseline gap-x-1">
-                <span className="text-4xl font-light tracking-tight text-white">{tier.priceMonthly}</span>
-                <span className="text-sm font-medium leading-6 text-white/60">/month</span>
-              </p>
-              <button
-                onClick={() => handleCheckout(tier.id)}
-                aria-describedby={tier.id}
-                disabled={loadingTier === tier.id}
+        </motion.div>
+
+        {/* Enterprise anchor — shown above tiers to make prices feel small */}
+        <motion.div {...scrollReveal} className="mx-auto max-w-2xl mb-12">
+          <div className="flex items-center justify-between rounded-2xl border border-white/[0.06] bg-white/[0.02] px-6 py-4 backdrop-blur-sm">
+            <div>
+              <p className="text-sm font-medium text-white">Enterprise</p>
+              <p className="text-xs text-white/40 mt-0.5">Full customization · SLA · Dedicated support · White label</p>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-light text-white">$500+<span className="text-white/40">/mo</span></span>
+              <a href="mailto:hello@postpilot.ai" className="text-xs text-white/60 hover:text-white border border-white/10 px-3 py-1.5 rounded-lg transition-colors">
+                Contact sales
+              </a>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Billing toggle */}
+        <motion.div {...scrollReveal} className="flex items-center justify-center gap-4 mb-12">
+          <span className={classNames(billing === "monthly" ? "text-white" : "text-white/40", "text-sm font-medium transition-colors duration-200")}>
+            Monthly
+          </span>
+          <button
+            onClick={() => setBilling(billing === "monthly" ? "annual" : "monthly")}
+            className={classNames(
+              "relative inline-flex h-7 w-14 items-center rounded-full border transition-all duration-300",
+              billing === "annual" ? "bg-emerald-500/20 border-emerald-500/30" : "bg-white/[0.06] border-white/[0.1]"
+            )}
+            aria-label="Toggle billing cycle"
+          >
+            <span className={classNames(
+              "inline-block h-5 w-5 rounded-full bg-white shadow-md transform transition-transform duration-300",
+              billing === "annual" ? "translate-x-8" : "translate-x-1"
+            )} />
+          </button>
+          <span className={classNames(billing === "annual" ? "text-white" : "text-white/40", "text-sm font-medium transition-colors duration-200 flex items-center gap-2")}>
+            Annual
+            <span className="inline-flex items-center rounded-full bg-emerald-500/15 border border-emerald-500/25 px-2 py-0.5 text-xs text-emerald-400 font-semibold">
+              Save 20%
+            </span>
+          </span>
+        </motion.div>
+
+        {/* Pricing cards */}
+        <div className="isolate mx-auto grid max-w-md grid-cols-1 gap-y-8 sm:mt-4 lg:mx-0 lg:max-w-none lg:grid-cols-3 lg:gap-x-6 lg:gap-y-0 lg:items-center">
+          {tiers.map((tier, i) => {
+            const { BadgeIcon } = tier;
+            const displayPrice = billing === "annual" ? tier.priceAnnual : tier.priceMonthly;
+            const dailyCost = billing === "annual" ? tier.dailyAnnual : tier.dailyMonthly;
+
+            return (
+              <motion.div
+                key={tier.id}
+                custom={i}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-50px" }}
+                variants={cardVariants}
                 className={classNames(
                   tier.mostPopular
-                    ? "bg-white text-black backdrop-blur-md hover:shadow-[0_0_20px_rgba(255,255,255,0.15)] hover:scale-[1.02] border-none"
-                    : "bg-white/[0.08] text-white hover:bg-white/[0.12] border border-white/[0.1]",
-                  "mt-6 w-full flex items-center justify-center gap-2 rounded-xl py-2.5 px-3 text-center text-sm font-semibold leading-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 z-10 relative"
+                    ? "-translate-y-3 bg-white/[0.06] border-purple-500/30 shadow-[0_0_50px_rgba(168,85,247,0.12),0_0_0_1px_rgba(168,85,247,0.08)]"
+                    : "bg-white/[0.02] border-white/[0.08]",
+                  "border rounded-3xl p-8 xl:p-10 relative backdrop-blur-xl transition-all duration-300 hover:border-white/25"
                 )}
               >
-                {loadingTier === tier.id ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  tier.hasTrial ? "Start 7-day free trial" : "Get started"
+                {tier.mostPopular && (
+                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-purple-500/[0.08] via-transparent to-transparent pointer-events-none" />
                 )}
-              </button>
-              <ul role="list" className="mt-8 space-y-3 text-sm leading-6 text-white/60">
-                {tier.features.map((feature) => (
-                  <li key={feature} className="flex gap-x-3">
-                    <Check className="h-6 w-5 flex-none text-white" aria-hidden="true" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+
+                {/* Badge */}
+                {tier.badge && (
+                  <div className="absolute top-0 right-6 -translate-y-1/2">
+                    <span className={classNames(
+                      tier.mostPopular
+                        ? "bg-white text-black"
+                        : "bg-white/[0.08] text-white/70 border border-white/[0.12]",
+                      "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold shadow-lg"
+                    )}>
+                      <BadgeIcon className="w-3 h-3" />
+                      {tier.badge}
+                    </span>
+                  </div>
+                )}
+
+                {/* Name */}
+                <h3 id={tier.id} className="text-xl font-semibold text-white">
+                  {tier.name}
+                </h3>
+                <p className="mt-1.5 text-sm text-white/50">{tier.description}</p>
+
+                {/* Price */}
+                <div className="mt-6">
+                  <div className="flex items-baseline gap-x-1.5">
+                    <span className="text-5xl font-light tracking-tight text-white">${displayPrice}</span>
+                    <span className="text-sm font-medium text-white/50">/mo</span>
+                  </div>
+
+                  {/* Daily framing — mental accounting */}
+                  <p className="mt-1.5 text-xs text-white/35">
+                    ${dailyCost}/day · {tier.coffeeLabel}
+                  </p>
+
+                  {billing === "annual" ? (
+                    <p className="mt-1 text-xs text-emerald-400 font-medium">
+                      Saving 20% — billed annually
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-xs text-white/25">
+                      ${tier.priceAnnual}/mo billed annually
+                    </p>
+                  )}
+                </div>
+
+                {/* CTA */}
+                <button
+                  onClick={() => handleCheckout(tier.id)}
+                  aria-describedby={tier.id}
+                  disabled={loadingTier === tier.id}
+                  className={classNames(
+                    tier.mostPopular
+                      ? "bg-white text-black hover:shadow-[0_0_24px_rgba(255,255,255,0.2)] hover:scale-[1.02]"
+                      : "bg-white/[0.08] text-white hover:bg-white/[0.13] border border-white/[0.1]",
+                    "mt-7 w-full flex items-center justify-center gap-2 rounded-xl py-3 px-3 text-sm font-semibold leading-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 relative z-10"
+                  )}
+                >
+                  {loadingTier === tier.id ? (
+                    <><Loader2 className="w-4 h-4 animate-spin" />Processing...</>
+                  ) : (
+                    tier.cta
+                  )}
+                </button>
+
+                {/* Features */}
+                <ul role="list" className="mt-8 space-y-3 text-sm leading-6 text-white/55">
+                  {tier.features.map((feature) => (
+                    <li key={feature} className="flex gap-x-3">
+                      <Check
+                        className={classNames(
+                          tier.mostPopular ? "text-emerald-400" : "text-white/40",
+                          "h-5 w-5 flex-none mt-0.5"
+                        )}
+                        aria-hidden="true"
+                      />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            );
+          })}
         </div>
+
+        {/* Upgrade path hint */}
+        <motion.div {...scrollReveal} className="mt-10 flex items-center justify-center gap-6 text-xs text-white/25">
+          <span>Starter <ArrowRight className="inline w-3 h-3 mx-1" /> Pro</span>
+          <span className="w-px h-4 bg-white/10" />
+          <span>Pro <ArrowRight className="inline w-3 h-3 mx-1" /> Agency</span>
+          <span className="w-px h-4 bg-white/10" />
+          <span>Agency <ArrowRight className="inline w-3 h-3 mx-1" /> Enterprise</span>
+        </motion.div>
+
+        {/* Footer */}
+        <motion.p {...scrollReveal} className="mt-6 text-center text-sm text-white/25">
+          Cancel anytime · No setup fees · 30-day money-back guarantee
+        </motion.p>
       </div>
     </div>
   );
