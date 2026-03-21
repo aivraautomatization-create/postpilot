@@ -42,7 +42,7 @@ export async function GET() {
 
   const posts = postsResult.data || [];
   const profile = profileResult.data;
-  const metrics = metricsResult.data || [];
+  const metrics: any[] = (metricsResult.data || []) as any[];
 
   const postsAnalyzed = posts.length;
   const confidenceScore = Math.min(100, postsAnalyzed * 2);
@@ -123,8 +123,8 @@ export async function GET() {
     bestPlatform,
     engagementTrend,
     voiceProfile: {
-      toneOfVoice: profile?.tone_of_voice || null,
-      niche: profile?.niche || null,
+      toneOfVoice: (profile as any)?.tone_of_voice || null,
+      niche: (profile as any)?.niche || null,
     },
   });
 }

@@ -275,7 +275,7 @@ export default function InsightsPage() {
                   color: "white",
                 }}
                 labelFormatter={(label) => label}
-                formatter={(value: number) => [value, "Avg Engagement"]}
+                formatter={(value: any) => [value, "Avg Engagement"]}
               />
               <Area
                 type="monotone"
