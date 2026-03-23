@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { getSupabase } from "@/lib/supabase";
 import ContentPillars from "@/components/dashboard/ContentPillars";
 import PlatformPlaybook from "@/components/dashboard/PlatformPlaybook";
+import { PlaceholdersAndVanishInput } from "@/components/ui/placeholders-and-vanish-input";
 
 interface StructuredStrategy {
   pillars: { title: string; description: string; color: string; topics: string[] }[];
@@ -135,6 +136,18 @@ export default function StrategyPage() {
           {error}
         </div>
       )}
+
+      {/* Vanish Input Search Bar */}
+      <div className="w-full max-w-2xl mx-auto py-6">
+        <PlaceholdersAndVanishInput
+          placeholders={["What kind of strategy do you need today?", "Analyze a new viral trend...", "Brainstorm a campaign..."]}
+          onChange={() => {}}
+          onSubmit={(e) => {
+            e.preventDefault();
+            generateStrategy();
+          }}
+        />
+      </div>
 
       {/* Loading State */}
       {isLoading && !insights ? (

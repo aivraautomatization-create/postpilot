@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { getSupabase } from '@/lib/supabase';
@@ -8,7 +8,7 @@ import { useAuth } from '@/lib/auth-context';
 
 type PageState = 'loading' | 'success' | 'error' | 'redirecting';
 
-export default function AcceptInvitePage() {
+function AcceptInviteContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
@@ -125,7 +125,7 @@ export default function AcceptInvitePage() {
       <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4">
         <CheckCircle2 className="w-6 h-6 text-white" />
       </div>
-      <h2 className="text-lg font-semibold text-white mb-2">You've joined the workspace!</h2>
+      <h2 className="text-lg font-semibold text-white mb-2">You&apos;ve joined the workspace!</h2>
       <p className="text-white/50 text-sm mb-6">
         You now have access to the shared PostPilot workspace. Head to the dashboard to get started.
       </p>
@@ -136,5 +136,20 @@ export default function AcceptInvitePage() {
         Go to Dashboard
       </a>
     </div>
+  );
+}
+
+export default function AcceptInvitePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="bg-[#111] border border-white/10 rounded-2xl p-8 shadow-2xl text-center">
+          <Loader2 className="w-8 h-8 text-white/40 animate-spin mx-auto mb-4" />
+          <p className="text-white/60 text-sm">Loading…</p>
+        </div>
+      }
+    >
+      <AcceptInviteContent />
+    </Suspense>
   );
 }

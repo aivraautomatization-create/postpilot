@@ -22,7 +22,7 @@ interface WavesProps {
     pointerSize?: number
 }
 
-export default function Waves({
+export function Waves({
     className = "",
     strokeColor = "#ffffff",  // White lines
     backgroundColor = "#000000",  // Black background
@@ -78,10 +78,8 @@ export default function Waves({
     // Set SVG size
     const setSize = () => {
         if (!containerRef.current || !svgRef.current) return
-
         boundingRef.current = containerRef.current.getBoundingClientRect()
         const { width, height } = boundingRef.current
-
         svgRef.current.style.width = `${width}px`
         svgRef.current.style.height = `${height}px`
     }
@@ -89,7 +87,6 @@ export default function Waves({
     // Setup lines - more points for smoother curves
     const setLines = () => {
         if (!svgRef.current || !boundingRef.current) return
-
         const { width, height } = boundingRef.current
         linesRef.current = []
 
@@ -102,20 +99,16 @@ export default function Waves({
         // Use smaller spacing to generate more lines and points for smoother results
         const xGap = 8  // Reduced horizontal spacing
         const yGap = 8  // Reduced vertical spacing for denser points
-
         const oWidth = width + 200
         const oHeight = height + 30
-
         const totalLines = Math.ceil(oWidth / xGap)
         const totalPoints = Math.ceil(oHeight / yGap)
-
         const xStart = (width - xGap * totalLines) / 2
         const yStart = (height - yGap * totalPoints) / 2
 
         // Create vertical lines
         for (let i = 0; i < totalLines; i++) {
             const points: Point[] = []
-
             for (let j = 0; j < totalPoints; j++) {
                 const point: Point = {
                     x: xStart + xGap * i,
@@ -123,7 +116,6 @@ export default function Waves({
                     wave: { x: 0, y: 0 },
                     cursor: { x: 0, y: 0, vx: 0, vy: 0 },
                 }
-
                 points.push(point)
             }
 
@@ -137,7 +129,6 @@ export default function Waves({
             path.setAttribute('fill', 'none')
             path.setAttribute('stroke', strokeColor)
             path.setAttribute('stroke-width', '1')
-
             svgRef.current.appendChild(path)
             pathsRef.current.push(path)
 
@@ -167,20 +158,16 @@ export default function Waves({
     // Update mouse position
     const updateMousePosition = (x: number, y: number) => {
         if (!boundingRef.current) return
-
         const mouse = mouseRef.current
         mouse.x = x - boundingRef.current.left
         mouse.y = y - boundingRef.current.top + window.scrollY
-
         if (!mouse.set) {
             mouse.sx = mouse.x
             mouse.sy = mouse.y
             mouse.lx = mouse.x
             mouse.ly = mouse.y
-
             mouse.set = true
         }
-
         // Update CSS variables
         if (containerRef.current) {
             containerRef.current.style.setProperty('--x', `${mouse.sx}px`)
@@ -193,7 +180,6 @@ export default function Waves({
         const { current: lines } = linesRef
         const { current: mouse } = mouseRef
         const { current: noise } = noiseRef
-
         if (!noise) return
 
         lines.forEach((points) => {
@@ -203,7 +189,6 @@ export default function Waves({
                     (p.x + time * 0.008) * 0.003,  // Adjusted frequency
                     (p.y + time * 0.003) * 0.002   // Adjusted frequency
                 ) * 8  // Reduced amplitude for smoother waves
-
                 p.wave.x = Math.cos(move) * 12  // Reduced horizontal amplitude
                 p.wave.y = Math.sin(move) * 6   // Reduced vertical amplitude
 
@@ -216,20 +201,16 @@ export default function Waves({
                 if (d < l) {
                     const s = 1 - d / l
                     const f = Math.cos(d * 0.001) * s
-
                     p.cursor.vx += Math.cos(mouse.a) * f * l * mouse.vs * 0.00035  // Reduced influence
                     p.cursor.vy += Math.sin(mouse.a) * f * l * mouse.vs * 0.00035  // Reduced influence
                 }
 
                 p.cursor.vx += (0 - p.cursor.x) * 0.01   // Increased restoration force
                 p.cursor.vy += (0 - p.cursor.y) * 0.01   // Increased restoration force
-
                 p.cursor.vx *= 0.95  // Increased smoothness
                 p.cursor.vy *= 0.95  // Increased smoothness
-
                 p.cursor.x += p.cursor.vx
                 p.cursor.y += p.cursor.vy
-
                 p.cursor.x = Math.min(50, Math.max(-50, p.cursor.x))  // Limited deformation range
                 p.cursor.y = Math.min(50, Math.max(-50, p.cursor.y))  // Limited deformation range
             })
@@ -242,7 +223,6 @@ export default function Waves({
             x: point.x + point.wave.x + (withCursorForce ? point.cursor.x : 0),
             y: point.y + point.wave.y + (withCursorForce ? point.cursor.y : 0),
         }
-
         return coords
     }
 
@@ -280,7 +260,6 @@ export default function Waves({
         const dx = mouse.x - mouse.lx
         const dy = mouse.y - mouse.ly
         const d = Math.hypot(dx, dy)
-
         mouse.v = d
         mouse.vs += (d - mouse.vs) * 0.1
         mouse.vs = Math.min(100, mouse.vs)

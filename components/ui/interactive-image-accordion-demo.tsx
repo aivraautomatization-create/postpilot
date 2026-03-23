@@ -1,9 +1,8 @@
-"use client";
 import { LandingAccordionItem } from "@/components/ui/interactive-image-accordion";
 
-export default function HowItWorks() {
+export default function DemoOne() {
   return (
-    <div id="features" className="relative z-10">
+    <div className="w-full">
       <LandingAccordionItem />
     </div>
   );

@@ -34,6 +34,7 @@ const nextConfig = {
     'micromark',
     'decode-named-character-reference',
     'character-entities',
+    'estree-util-is-identifier-name',
   ],
   images: {
     remotePatterns: [
