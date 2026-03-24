@@ -22,6 +22,8 @@ import { useAuth } from "@/lib/auth-context";
 import { validateFile, MAX_IMAGE_SIZE, ALLOWED_IMAGE_TYPES } from "@/lib/upload-validation";
 import { contentTemplates } from "@/lib/content-templates";
 import ContentScorePanel from "@/components/dashboard/ContentScorePanel";
+import ABVariantsPanel from "@/components/dashboard/ABVariantsPanel";
+import ReviewModal from "@/components/dashboard/ReviewModal";
 
 const tabs = [
   { id: "text", name: "Text Content", icon: Type },
@@ -69,6 +71,10 @@ function CreateContentInner() {
   // Strategy state
   const [strategy, setStrategy] = useState<string | null>(null);
   const [strategyEnabled, setStrategyEnabled] = useState(true);
+
+  // A/B Variants + Review modal state
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [pendingPublishAction, setPendingPublishAction] = useState<(() => void) | null>(null);
 
   // Reset tab-specific state when switching tabs
   useEffect(() => {
@@ -155,6 +161,13 @@ function CreateContentInner() {
   const safeJson = async (res: Response) => {
     const text = await res.text();
     try { return JSON.parse(text); } catch { return { error: text || "Server error" }; }
+  };
+
+  const handlePublishReviewed = async () => {
+    if (!result || selectedPlatforms.length === 0) return;
+    // Store the actual publish action, then open review modal
+    setPendingPublishAction(() => handlePublish);
+    setIsReviewModalOpen(true);
   };
 
   const handlePublish = async () => {
@@ -691,6 +704,17 @@ function CreateContentInner() {
                   {engagementScore !== null && (
                     <ContentScorePanel score={engagementScore} suggestions={suggestions} />
                   )}
+
+                  {/* A/B Variants Panel */}
+                  <ABVariantsPanel
+                    content={showEnhanced && enhancedResult ? enhancedResult : (result ?? "")}
+                    platform={selectedPlatforms.length > 0 ? selectedPlatforms[0] : "general"}
+                    niche={profile?.niche}
+                    onSelectVariant={(variantContent) => {
+                      setResult(variantContent);
+                      setShowEnhanced(false);
+                    }}
+                  />
                 </>
               )}
               {activeTab === "image" && (
@@ -837,7 +861,7 @@ function CreateContentInner() {
                 </div>
 
                 <button
-                  onClick={handlePublish}
+                  onClick={handlePublishReviewed}
                   disabled={isPublishing || selectedPlatforms.length === 0}
                   className="w-full flex items-center justify-center gap-2 bg-white/10 border border-white/10 text-white py-3 rounded-xl font-medium"
                 >
@@ -854,6 +878,25 @@ function CreateContentInner() {
           )}
         </div>
       </div>
+
+      {/* Review Modal — opens before publish */}
+      <ReviewModal
+        postId=""
+        content={result && activeTab === "text" ? (showEnhanced && enhancedResult ? enhancedResult : result) : ""}
+        platform={selectedPlatforms.length > 0 ? selectedPlatforms[0] : "general"}
+        isOpen={isReviewModalOpen}
+        onClose={() => {
+          setIsReviewModalOpen(false);
+          setPendingPublishAction(null);
+        }}
+        onApprove={() => {
+          setIsReviewModalOpen(false);
+          if (pendingPublishAction) {
+            pendingPublishAction();
+            setPendingPublishAction(null);
+          }
+        }}
+      />
     </div>
   );
 }
