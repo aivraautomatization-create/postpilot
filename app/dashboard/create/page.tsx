@@ -24,6 +24,7 @@ import { contentTemplates } from "@/lib/content-templates";
 import ContentScorePanel from "@/components/dashboard/ContentScorePanel";
 import ABVariantsPanel from "@/components/dashboard/ABVariantsPanel";
 import ReviewModal from "@/components/dashboard/ReviewModal";
+import { getSuggestedCTAs, type JourneyStage } from '@/lib/cta-suggestions';
 
 const tabs = [
   { id: "text", name: "Text Content", icon: Type },
@@ -71,6 +72,10 @@ function CreateContentInner() {
   // Strategy state
   const [strategy, setStrategy] = useState<string | null>(null);
   const [strategyEnabled, setStrategyEnabled] = useState(true);
+
+  // Journey stage + CTA state
+  const [journeyStage, setJourneyStage] = useState<JourneyStage | null>(null);
+  const [selectedCTA, setSelectedCTA] = useState<string | null>(null);
 
   // A/B Variants + Review modal state
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -233,7 +238,9 @@ function CreateContentInner() {
               target_audience: profile?.target_audience || profile?.targetAudience,
               tone_of_voice: profile?.tone_of_voice || profile?.toneOfVoice
             },
-            strategy: strategyEnabled && strategy ? strategy : null
+            strategy: strategyEnabled && strategy ? strategy : null,
+            journeyStage: journeyStage || undefined,
+            suggestedCTAs: selectedCTA ? [selectedCTA] : undefined
           })
         });
 
@@ -585,6 +592,45 @@ function CreateContentInner() {
                           <p className="text-[10px] text-white/50 leading-relaxed">Vertical layout captures 100% screen real estate. Hook within 0.8s will be applied.</p>
                         </div>
                       </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Journey Stage */}
+              {activeTab === "text" && (
+                <div>
+                  <label className="text-xs text-white/40 mb-2 block">Content Goal (optional)</label>
+                  <div className="flex gap-2 flex-wrap">
+                    {(['awareness', 'engagement', 'conversion'] as JourneyStage[]).map(stage => (
+                      <button
+                        key={stage}
+                        onClick={() => { setJourneyStage(journeyStage === stage ? null : stage); setSelectedCTA(null); }}
+                        className={`px-3 py-1.5 rounded-lg text-xs border transition-all capitalize ${
+                          journeyStage === stage
+                            ? 'bg-white/10 border-white/30 text-white'
+                            : 'bg-transparent border-white/[0.08] text-white/40 hover:border-white/20 hover:text-white/60'
+                        }`}
+                      >
+                        {stage}
+                      </button>
+                    ))}
+                  </div>
+                  {journeyStage && (
+                    <div className="mt-2 flex gap-2 flex-wrap">
+                      {getSuggestedCTAs(journeyStage, profile?.goals).map(cta => (
+                        <button
+                          key={cta}
+                          onClick={() => setSelectedCTA(selectedCTA === cta ? null : cta)}
+                          className={`px-2.5 py-1 rounded-lg text-xs border transition-all ${
+                            selectedCTA === cta
+                              ? 'bg-purple-500/20 border-purple-500/40 text-purple-300'
+                              : 'bg-white/[0.03] border-white/[0.06] text-white/40 hover:border-white/20'
+                          }`}
+                        >
+                          {cta}
+                        </button>
+                      ))}
                     </div>
                   )}
                 </div>

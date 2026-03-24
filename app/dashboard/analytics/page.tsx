@@ -101,6 +101,7 @@ export default function AnalyticsPage() {
   const supabase = getSupabase();
 
   const [metrics, setMetrics] = useState<PostMetric[]>([]);
+  const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<{ synced: number; errors: string[] } | null>(null);
@@ -140,6 +141,13 @@ export default function AnalyticsPage() {
 
       if (fetchError) throw fetchError;
       setMetrics(data || []);
+
+      // Fetch posts for journey stage breakdown
+      const { data: postsData } = await (supabase as any)
+        .from("posts")
+        .select("id, journey_stage")
+        .eq("user_id", user.id);
+      setPosts(postsData || []);
     } catch (err: any) {
       console.error("Failed to fetch metrics:", err);
       setError("Failed to load metrics. The post_metrics table may not exist yet.");
@@ -598,6 +606,24 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Section B — Top Performing Posts */}
+          {/* Journey Stage Breakdown */}
+          <div className="bg-white/[0.02] border border-white/[0.06] backdrop-blur-xl rounded-2xl p-6">
+            <h3 className="text-sm font-medium text-white mb-4">Content by Journey Stage</h3>
+            <div className="grid grid-cols-3 gap-4">
+              {(['awareness', 'engagement', 'conversion'] as const).map(stage => {
+                const count = posts?.filter((p: any) => p.journey_stage === stage).length || 0;
+                const colors = { awareness: 'from-blue-500/20 to-blue-600/10 border-blue-500/20', engagement: 'from-purple-500/20 to-purple-600/10 border-purple-500/20', conversion: 'from-green-500/20 to-green-600/10 border-green-500/20' };
+                return (
+                  <div key={stage} className={`bg-gradient-to-br ${colors[stage]} border rounded-xl p-4`}>
+                    <p className="text-xs text-white/40 capitalize mb-1">{stage}</p>
+                    <p className="text-2xl font-light text-white">{count}</p>
+                    <p className="text-xs text-white/30">posts</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
           {topPosts.length > 0 && (
             <div className="bg-white/[0.02] backdrop-blur-xl border border-white/[0.08] rounded-2xl overflow-hidden">
               <div className="p-6 border-b border-white/[0.06]">

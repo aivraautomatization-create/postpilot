@@ -11,7 +11,7 @@ import { buildBrainContext } from "@/lib/ai-brain";
 
 export async function POST(req: Request) {
   try {
-    const { topic, platform, profile, strategy } = await req.json();
+    const { topic, platform, profile, strategy, journeyStage, suggestedCTAs } = await req.json();
 
     const parsed = generateSchema.safeParse({ topic, platform, profile, strategy });
     if (!parsed.success) {
@@ -112,6 +112,8 @@ export async function POST(req: Request) {
     ${trendData ? `REAL-TIME TREND DATA (from live research — USE THIS to make the content timely and relevant):\n${trendData}` : ''}
 
     ${brainContext ? `AI-BRAIN MEMORY (patterns learned from this brand's past performance — USE THIS to replicate what works):\n${brainContext}` : ''}
+
+    ${journeyStage ? `\nContent Journey Stage: ${journeyStage}. ${(suggestedCTAs as string[] | undefined)?.length ? `Suggested CTAs to consider: ${(suggestedCTAs as string[]).join(', ')}` : ''}` : ''}
 
     FINAL RULE: If the user reads this and thinks "An AI wrote this," you have failed. Write like a human master of the craft.
     `.trim();

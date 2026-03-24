@@ -3,11 +3,13 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import { fadeInUp, staggerContainer } from "@/lib/motion";
 import {
   Search,
   ArrowRight,
   Sparkles,
+  CalendarDays,
   Twitter,
   Linkedin,
   Instagram,
@@ -22,6 +24,7 @@ import {
   CONTENT_TYPES,
   type ContentTemplate,
 } from "@/lib/content-templates";
+import { BUSINESS_TEMPLATES, getTemplate, type BusinessNiche } from "@/lib/business-templates";
 
 const platformIcons: Record<string, any> = {
   Twitter,
@@ -56,6 +59,9 @@ export default function TemplatesPage() {
   const [selectedPlatform, setSelectedPlatform] = useState<string>("All");
   const [selectedType, setSelectedType] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTemplate, setSelectedTemplate] = useState<BusinessNiche | null>(null);
+  const [calendarForm, setCalendarForm] = useState({ companyName: '', location: '' });
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const filteredTemplates = useMemo(() => {
     return contentTemplates.filter((t) => {
@@ -97,6 +103,91 @@ export default function TemplatesPage() {
           </div>
         </motion.div>
       </motion.div>
+
+      {/* Business Calendar Templates */}
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <CalendarDays className="w-4 h-4 text-white/50" />
+          <h3 className="text-sm font-medium text-white">30-Day Business Calendars</h3>
+          <span className="text-xs text-white/30 ml-1">— generate a full month of posts instantly</span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+          {BUSINESS_TEMPLATES.map(template => (
+            <button
+              key={template.id}
+              onClick={() => setSelectedTemplate(template.id)}
+              className={`bg-gradient-to-br ${template.accentColor} border rounded-2xl p-5 text-left hover:scale-[1.02] active:scale-[0.99] transition-all`}
+            >
+              <div className="text-3xl mb-3">{template.icon}</div>
+              <h3 className="text-sm font-semibold text-white mb-1">{template.name}</h3>
+              <p className="text-xs text-white/50 leading-relaxed">{template.description}</p>
+              <div className="mt-3 text-xs text-white/30">{template.calendar.length} days planned</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Business Calendar Modal */}
+      {selectedTemplate && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#0a0a0a] border border-white/[0.08] rounded-2xl p-6 w-full max-w-md">
+            <h3 className="text-base font-semibold text-white mb-1">
+              {getTemplate(selectedTemplate)?.icon} {getTemplate(selectedTemplate)?.name}
+            </h3>
+            <p className="text-sm text-white/40 mb-4">{getTemplate(selectedTemplate)?.calendar.length}-day content calendar — saved as draft posts</p>
+            <div className="space-y-3 mb-5">
+              <input
+                value={calendarForm.companyName}
+                onChange={e => setCalendarForm(p => ({ ...p, companyName: e.target.value }))}
+                placeholder="Business name"
+                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-white/20"
+              />
+              <input
+                value={calendarForm.location}
+                onChange={e => setCalendarForm(p => ({ ...p, location: e.target.value }))}
+                placeholder="City or location (optional)"
+                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-white/20"
+              />
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setSelectedTemplate(null); setCalendarForm({ companyName: '', location: '' }); }}
+                className="flex-1 py-2.5 rounded-xl border border-white/[0.08] text-white/50 text-sm hover:border-white/20 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                disabled={isGenerating || !calendarForm.companyName}
+                onClick={async () => {
+                  setIsGenerating(true);
+                  try {
+                    const res = await fetch('/api/generate/business-calendar', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ niche: selectedTemplate, ...calendarForm }),
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                      toast.success(`${data.count} posts added to your calendar!`);
+                      setSelectedTemplate(null);
+                      setCalendarForm({ companyName: '', location: '' });
+                    } else {
+                      toast.error(data.error || 'Failed to generate calendar');
+                    }
+                  } catch {
+                    toast.error('Something went wrong');
+                  } finally {
+                    setIsGenerating(false);
+                  }
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-white text-black text-sm font-semibold hover:bg-white/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isGenerating ? 'Generating...' : 'Generate Calendar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Search + Filters */}
       <div className="space-y-4">
