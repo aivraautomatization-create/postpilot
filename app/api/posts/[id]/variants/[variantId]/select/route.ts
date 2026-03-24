@@ -4,10 +4,10 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 
 export async function PATCH(
   _request: Request,
-  { params }: { params: Promise<{ postId: string; variantId: string }> }
+  { params }: { params: Promise<{ id: string; variantId: string }> }
 ) {
   try {
-    const { postId, variantId } = await params;
+    const { id: postId, variantId } = await params;
     const supabase = await getSupabaseServer();
 
     if (!supabase) {

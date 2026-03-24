@@ -2,6 +2,7 @@ import type {Metadata} from 'next';
 import { Outfit } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/lib/auth-context';
+import { Toaster } from 'sonner';
 
 const outfit = Outfit({
   subsets: ['latin'],
@@ -20,6 +21,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
       <body className="bg-black text-white antialiased" suppressHydrationWarning>
         <AuthProvider>
           {children}
+          <Toaster position="bottom-right" theme="dark" />
         </AuthProvider>
       </body>
     </html>
