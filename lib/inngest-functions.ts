@@ -166,6 +166,13 @@ export const publishScheduledPost = inngest.createFunction(
         publish_results: results,
         published_at: hasSuccess ? new Date().toISOString() : null,
       }).eq('id', postId);
+
+      if (hasSuccess) {
+        await inngest.send({
+          name: 'post/published',
+          data: { userId, postId },
+        });
+      }
     }
 
     // Update usage if any publish succeeded
@@ -243,5 +250,16 @@ export const trialWarningCron = inngest.createFunction(
   }
 );
 
+export const autoLearnFromPost = inngest.createFunction(
+  { id: 'auto-learn-from-post', name: 'Auto-Learn from Published Post' },
+  { event: 'post/published' },
+  async ({ event }) => {
+    const { userId, postId } = event.data;
+    const { learnFromPost } = await import('./ai-brain');
+    await learnFromPost(userId, postId);
+    return { success: true, postId };
+  }
+);
+
 // Export all functions for the serve handler
-export const inngestFunctions = [publishScheduledPost, trialWarningCron];
+export const inngestFunctions = [publishScheduledPost, trialWarningCron, autoLearnFromPost];

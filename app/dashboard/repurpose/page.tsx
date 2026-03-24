@@ -227,7 +227,7 @@ function PostCard({ post, index }: { post: RepurposedPost; index: number }) {
       )}
 
       {/* Actions */}
-      <div className="flex items-center gap-2 mt-auto pt-1">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-auto pt-1">
         <Link
           href={`/dashboard/create?prefill=${prefillParam}`}
           className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] hover:border-white/20 text-white/60 hover:text-white text-xs font-medium transition-all duration-300"
@@ -338,7 +338,7 @@ export default function RepurposePage() {
             <div className="p-2.5 rounded-xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 border border-violet-500/20">
               <RefreshCw className="w-6 h-6 text-violet-400" />
             </div>
-            <h1 className="text-3xl font-bold text-white">
+            <h1 className="text-xl sm:text-3xl font-bold text-white">
               Content Repurposer
             </h1>
           </div>
@@ -379,7 +379,7 @@ export default function RepurposePage() {
                   <p className="text-white/60 text-sm font-medium mb-3">
                     Content type
                   </p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {SOURCE_TYPES.map((st) => (
                       <button
                         key={st.id}
@@ -402,7 +402,7 @@ export default function RepurposePage() {
                   <p className="text-white/60 text-sm font-medium mb-3">
                     Target platforms
                   </p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {PLATFORMS.map((platform) => {
                       const active = selectedPlatforms.includes(platform);
                       return (
@@ -428,7 +428,7 @@ export default function RepurposePage() {
                   <p className="text-white/60 text-sm font-medium mb-3">
                     Tone
                   </p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                     {TONES.map((t) => (
                       <button
                         key={t.id}

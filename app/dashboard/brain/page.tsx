@@ -353,7 +353,7 @@ export default function BrandBrainPage() {
             <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/20 to-violet-500/20 border border-purple-500/20">
               <Brain className="w-6 h-6 text-purple-400" />
             </div>
-            <h1 className="text-3xl font-bold text-white">Your Brand AI-Brain</h1>
+            <h1 className="text-xl sm:text-3xl font-bold text-white">Your Brand AI-Brain</h1>
           </div>
           <p className="text-white/50 text-sm ml-14">
             Your AI learns what works for your brand and gets smarter over time

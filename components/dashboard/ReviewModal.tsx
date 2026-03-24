@@ -175,7 +175,7 @@ export default function ReviewModal({
             transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
           >
-            <div className="pointer-events-auto w-full max-w-md bg-[#0d0d0d] border border-white/[0.10] backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden">
+            <div className="pointer-events-auto w-full max-w-md mx-4 sm:mx-0 bg-[#0d0d0d] border border-white/[0.10] backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden">
               {/* Header */}
               <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08]">
                 <div className="flex items-center gap-3">
@@ -245,13 +245,13 @@ export default function ReviewModal({
                       className="space-y-5"
                     >
                       {/* Score + verdict */}
-                      <div className="flex items-center gap-5">
+                      <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5">
                         <ScoreCircle score={feedback.score} />
-                        <div className="flex-1">
+                        <div className="flex-1 text-center sm:text-left">
                           <p className="text-[10px] font-medium text-white/40 uppercase tracking-wider mb-1">
                             Verdict
                           </p>
-                          <p className="text-white text-sm leading-relaxed">
+                          <p className="text-white text-sm leading-relaxed break-words">
                             {feedback.verdict}
                           </p>
                         </div>

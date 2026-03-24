@@ -302,7 +302,7 @@ export default function ViralStrategyPage() {
             <div className="p-2.5 rounded-xl bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/20">
               <Flame className="w-6 h-6 text-orange-400" />
             </div>
-            <h1 className="text-3xl font-bold text-white">Viral Strategy</h1>
+            <h1 className="text-xl sm:text-3xl font-bold text-white">Viral Strategy</h1>
           </div>
           <p className="text-white/50 text-sm ml-14">
             Snipe trending topics, decode competitors, and apply platform
