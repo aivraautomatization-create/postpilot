@@ -36,6 +36,7 @@ const navigation = [
   { name: "AI Brain", href: "/dashboard/brain", icon: Brain },
   { name: "Create Content", href: "/dashboard/create", icon: PenTool },
   { name: "Repurpose", href: "/dashboard/repurpose", icon: RefreshCw },
+  { name: "Video Studio", href: "/dashboard/video", icon: Video },
   { name: "Viral Strategy", href: "/dashboard/strategy", icon: TrendingUp },
   { name: "Templates", href: "/dashboard/templates", icon: FileText },
   { name: "Analyze Video", href: "/dashboard/analyze", icon: Video },
