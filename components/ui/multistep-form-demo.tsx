@@ -1,8 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Check, Loader2 } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Check,
+  Loader2,
+  Rocket,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,7 +21,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -26,33 +32,65 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { getSupabase } from "@/lib/supabase";
+import { useAuth } from "@/lib/auth-context";
 
 const steps = [
-  { id: "personal", title: "Personal Info" },
-  { id: "professional", title: "Professional" },
-  { id: "goals", title: "Website Goals" },
-  { id: "design", title: "Design" },
-  { id: "budget", title: "Budget" },
-  { id: "requirements", title: "Requirements" },
+  { id: "business", title: "Your Business" },
+  { id: "audience", title: "Your Audience" },
+  { id: "goals", title: "Your Goals" },
+  { id: "launch", title: "Launch" },
+];
+
+const industries = [
+  "Hotels & Hospitality",
+  "Restaurants & Food",
+  "Coaching & Consulting",
+  "Real Estate",
+  "Fitness & Wellness",
+  "Retail & E-commerce",
+  "Beauty & Salon",
+  "Tours & Travel",
+  "Education",
+  "Other",
+];
+
+const toneOptions = [
+  "Friendly & Casual",
+  "Professional & Authoritative",
+  "Inspirational & Motivational",
+  "Playful & Humorous",
+  "Luxury & Premium",
+];
+
+const goalOptions = [
+  "More Bookings",
+  "More Leads",
+  "More Followers",
+  "Brand Awareness",
+  "Customer Retention",
+  "Drive Sales",
+];
+
+const platformOptions = [
+  "Instagram",
+  "Facebook",
+  "LinkedIn",
+  "Twitter/X",
+  "TikTok",
+  "YouTube",
 ];
 
 interface FormData {
-  name: string;
-  email: string;
-  company: string;
-  profession: string;
-  experience: string;
+  fullName: string;
+  companyName: string;
   industry: string;
-  primaryGoal: string;
+  niche: string;
   targetAudience: string;
-  contentTypes: string[];
-  colorPreference: string;
-  stylePreference: string;
-  inspirations: string;
-  budget: string;
-  timeline: string;
-  features: string[];
-  additionalInfo: string;
+  offerings: string;
+  toneOfVoice: string;
+  goals: string[];
+  platforms: string[];
 }
 
 const fadeInUp = {
@@ -67,49 +105,35 @@ const contentVariants = {
 };
 
 const OnboardingForm = () => {
+  const router = useRouter();
+  const supabase = getSupabase();
+  const { user } = useAuth();
+
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<FormData>({
-    name: "",
-    email: "",
-    company: "",
-    profession: "",
-    experience: "",
+    fullName: "",
+    companyName: "",
     industry: "",
-    primaryGoal: "",
+    niche: "",
     targetAudience: "",
-    contentTypes: [],
-    colorPreference: "",
-    stylePreference: "",
-    inspirations: "",
-    budget: "",
-    timeline: "",
-    features: [],
-    additionalInfo: "",
+    offerings: "",
+    toneOfVoice: "",
+    goals: [],
+    platforms: [],
   });
 
   const updateFormData = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const toggleFeature = (feature: string) => {
+  const toggleArrayField = (field: "goals" | "platforms", item: string) => {
     setFormData((prev) => {
-      const features = [...prev.features];
-      if (features.includes(feature)) {
-        return { ...prev, features: features.filter((f) => f !== feature) };
+      const current = [...prev[field]];
+      if (current.includes(item)) {
+        return { ...prev, [field]: current.filter((i) => i !== item) };
       } else {
-        return { ...prev, features: [...features, feature] };
-      }
-    });
-  };
-
-  const toggleContentType = (type: string) => {
-    setFormData((prev) => {
-      const types = [...prev.contentTypes];
-      if (types.includes(type)) {
-        return { ...prev, contentTypes: types.filter((t) => t !== type) };
-      } else {
-        return { ...prev, contentTypes: [...types, type] };
+        return { ...prev, [field]: [...current, item] };
       }
     });
   };
@@ -126,35 +150,70 @@ const OnboardingForm = () => {
     }
   };
 
-  const handleSubmit = () => {
-    setIsSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
-      toast.success("Form submitted successfully!");
-      setIsSubmitting(false);
-    }, 1500);
-  };
+  const handleSubmit = async () => {
+    if (!user) {
+      toast.error("You must be logged in to continue.");
+      return;
+    }
 
-  // Check if step is valid for next button
-  const isStepValid = () => {
-    switch (currentStep) {
-      case 0:
-        return formData.name.trim() !== "" && formData.email.trim() !== "";
-      case 1:
-        return formData.profession.trim() !== "" && formData.industry !== "";
-      case 2:
-        return formData.primaryGoal !== "";
-      case 3:
-        return formData.stylePreference !== "";
-      case 4:
-        return formData.budget !== "" && formData.timeline !== "";
-      default:
-        return true;
+    setIsSubmitting(true);
+
+    try {
+      // Save profile data to Supabase
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
+          full_name: formData.fullName,
+          company_name: formData.companyName,
+          industry: formData.industry,
+          niche: formData.niche,
+          target_audience: formData.targetAudience,
+          offerings: formData.offerings,
+          tone_of_voice: formData.toneOfVoice,
+          goals: formData.goals,
+          onboarding_completed: true,
+        })
+        .eq("id", user.id);
+
+      if (profileError) {
+        throw new Error(profileError.message);
+      }
+
+      // Trigger 30-day calendar generation
+      const calendarRes = await fetch("/api/generate/calendar-plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profile: formData }),
+      });
+
+      if (!calendarRes.ok) {
+        throw new Error("Failed to generate calendar plan.");
+      }
+
+      toast.success("Your 30-day content calendar is ready!");
+      router.push("/dashboard");
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Something went wrong.";
+      toast.error(message);
+      setIsSubmitting(false);
     }
   };
 
-  const preventDefault = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const isStepValid = () => {
+    switch (currentStep) {
+      case 0:
+        return (
+          formData.fullName.trim() !== "" &&
+          formData.companyName.trim() !== ""
+        );
+      case 1:
+        return formData.targetAudience.trim() !== "";
+      case 2:
+        return formData.goals.length > 0 && formData.platforms.length > 0;
+      default:
+        return true;
+    }
   };
 
   return (
@@ -183,7 +242,6 @@ const OnboardingForm = () => {
                       : "bg-muted",
                 )}
                 onClick={() => {
-                  // Only allow going back or to completed steps
                   if (index <= currentStep) {
                     setCurrentStep(index);
                   }
@@ -207,7 +265,9 @@ const OnboardingForm = () => {
           <motion.div
             className="h-full bg-primary"
             initial={{ width: 0 }}
-            animate={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
+            animate={{
+              width: `${(currentStep / (steps.length - 1)) * 100}%`,
+            }}
             transition={{ duration: 0.3 }}
           />
         </div>
@@ -229,87 +289,43 @@ const OnboardingForm = () => {
                 exit="exit"
                 variants={contentVariants}
               >
-                {/* Step 1: Personal Info */}
+                {/* Step 1: Your Business */}
                 {currentStep === 0 && (
                   <>
                     <CardHeader>
-                      <CardTitle>Tell us about yourself</CardTitle>
+                      <CardTitle>Your Business</CardTitle>
                       <CardDescription>
-                        Let&apos;s start with some basic information
+                        Tell us about your brand so our AI can craft the perfect
+                        strategy.
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <motion.div variants={fadeInUp} className="space-y-2">
-                        <Label htmlFor="name">Full Name</Label>
+                        <Label htmlFor="fullName">Full Name</Label>
                         <Input
-                          id="name"
-                          placeholder="John Doe"
-                          value={formData.name}
+                          id="fullName"
+                          placeholder="Your full name"
+                          value={formData.fullName}
                           onChange={(e) =>
-                            updateFormData("name", e.target.value)
+                            updateFormData("fullName", e.target.value)
                           }
                           className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary"
                         />
                       </motion.div>
                       <motion.div variants={fadeInUp} className="space-y-2">
-                        <Label htmlFor="email">Email Address</Label>
+                        <Label htmlFor="companyName">Company / Brand Name</Label>
                         <Input
-                          id="email"
-                          type="email"
-                          placeholder="john@example.com"
-                          value={formData.email}
+                          id="companyName"
+                          placeholder="Your company or brand name"
+                          value={formData.companyName}
                           onChange={(e) =>
-                            updateFormData("email", e.target.value)
+                            updateFormData("companyName", e.target.value)
                           }
                           className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary"
                         />
                       </motion.div>
                       <motion.div variants={fadeInUp} className="space-y-2">
-                        <Label htmlFor="company">
-                          Company/Organization (Optional)
-                        </Label>
-                        <Input
-                          id="company"
-                          placeholder="Your Company"
-                          value={formData.company}
-                          onChange={(e) =>
-                            updateFormData("company", e.target.value)
-                          }
-                          className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                        />
-                      </motion.div>
-                    </CardContent>
-                  </>
-                )}
-
-                {/* Step 2: Professional Background */}
-                {currentStep === 1 && (
-                  <>
-                    <CardHeader>
-                      <CardTitle>Professional Background</CardTitle>
-                      <CardDescription>
-                        Tell us about your professional experience
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <motion.div variants={fadeInUp} className="space-y-2">
-                        <Label htmlFor="profession">
-                          What&apos;s your profession?
-                        </Label>
-                        <Input
-                          id="profession"
-                          placeholder="e.g. Designer, Developer, Marketer"
-                          value={formData.profession}
-                          onChange={(e) =>
-                            updateFormData("profession", e.target.value)
-                          }
-                          className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                        />
-                      </motion.div>
-                      <motion.div variants={fadeInUp} className="space-y-2">
-                        <Label htmlFor="industry">
-                          What industry do you work in?
-                        </Label>
+                        <Label htmlFor="industry">Industry</Label>
                         <Select
                           value={formData.industry}
                           onValueChange={(value) =>
@@ -320,103 +336,49 @@ const OnboardingForm = () => {
                             id="industry"
                             className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary"
                           >
-                            <SelectValue placeholder="Select an industry" />
+                            <SelectValue placeholder="Select your industry" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="technology">
-                              Technology
-                            </SelectItem>
-                            <SelectItem value="healthcare">
-                              Healthcare
-                            </SelectItem>
-                            <SelectItem value="education">Education</SelectItem>
-                            <SelectItem value="finance">Finance</SelectItem>
-                            <SelectItem value="retail">Retail</SelectItem>
-                            <SelectItem value="creative">
-                              Creative Arts
-                            </SelectItem>
-                            <SelectItem value="other">Other</SelectItem>
+                            {industries.map((industry) => (
+                              <SelectItem key={industry} value={industry}>
+                                {industry}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
+                      </motion.div>
+                      <motion.div variants={fadeInUp} className="space-y-2">
+                        <Label htmlFor="niche">Niche</Label>
+                        <Input
+                          id="niche"
+                          placeholder="e.g. Boutique hotel in Cabo, Fitness coach for busy moms"
+                          value={formData.niche}
+                          onChange={(e) =>
+                            updateFormData("niche", e.target.value)
+                          }
+                          className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                        />
                       </motion.div>
                     </CardContent>
                   </>
                 )}
 
-                {/* Step 3: Website Goals */}
-                {currentStep === 2 && (
+                {/* Step 2: Your Audience */}
+                {currentStep === 1 && (
                   <>
                     <CardHeader>
-                      <CardTitle>Website Goals</CardTitle>
+                      <CardTitle>Your Audience</CardTitle>
                       <CardDescription>
-                        What are you trying to achieve with your website?
+                        Help us understand who you&apos;re speaking to and what
+                        you offer.
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <motion.div variants={fadeInUp} className="space-y-2">
-                        <Label>
-                          What&apos;s the primary goal of your website?
-                        </Label>
-                        <RadioGroup
-                          value={formData.primaryGoal}
-                          onValueChange={(value) =>
-                            updateFormData("primaryGoal", value)
-                          }
-                          className="space-y-2"
-                        >
-                          {[
-                            {
-                              value: "showcase",
-                              label: "Showcase portfolio/work",
-                            },
-                            { value: "sell", label: "Sell products/services" },
-                            {
-                              value: "generate-leads",
-                              label: "Generate leads/inquiries",
-                            },
-                            {
-                              value: "provide-info",
-                              label: "Provide information",
-                            },
-                            { value: "blog", label: "Blog/content publishing" },
-                          ].map((goal, index) => (
-                            <motion.div
-                              key={goal.value}
-                              className="flex items-center space-x-2 rounded-md border p-3 cursor-pointer hover:bg-accent transition-colors"
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              transition={{ duration: 0.2 }}
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{
-                                opacity: 1,
-                                x: 0,
-                                transition: {
-                                  delay: 0.1 * index,
-                                  duration: 0.3,
-                                },
-                              }}
-                            >
-                              <RadioGroupItem
-                                value={goal.value}
-                                id={`goal-${index + 1}`}
-                              />
-                              <Label
-                                htmlFor={`goal-${index + 1}`}
-                                className="cursor-pointer w-full"
-                              >
-                                {goal.label}
-                              </Label>
-                            </motion.div>
-                          ))}
-                        </RadioGroup>
-                      </motion.div>
-                      <motion.div variants={fadeInUp} className="space-y-2">
-                        <Label htmlFor="targetAudience">
-                          Who is your target audience?
-                        </Label>
+                        <Label htmlFor="targetAudience">Target Audience</Label>
                         <Textarea
                           id="targetAudience"
-                          placeholder="Describe your ideal visitors/customers"
+                          placeholder="Describe your ideal customer: age, interests, location"
                           value={formData.targetAudience}
                           onChange={(e) =>
                             updateFormData("targetAudience", e.target.value)
@@ -424,43 +386,67 @@ const OnboardingForm = () => {
                           className="min-h-[80px] transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary"
                         />
                       </motion.div>
+                      <motion.div variants={fadeInUp} className="space-y-2">
+                        <Label htmlFor="offerings">Offerings</Label>
+                        <Textarea
+                          id="offerings"
+                          placeholder="What products or services do you offer?"
+                          value={formData.offerings}
+                          onChange={(e) =>
+                            updateFormData("offerings", e.target.value)
+                          }
+                          className="min-h-[80px] transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                        />
+                      </motion.div>
+                      <motion.div variants={fadeInUp} className="space-y-2">
+                        <Label htmlFor="toneOfVoice">Tone of Voice</Label>
+                        <Select
+                          value={formData.toneOfVoice}
+                          onValueChange={(value) =>
+                            updateFormData("toneOfVoice", value)
+                          }
+                        >
+                          <SelectTrigger
+                            id="toneOfVoice"
+                            className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                          >
+                            <SelectValue placeholder="Select your brand tone" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {toneOptions.map((tone) => (
+                              <SelectItem key={tone} value={tone}>
+                                {tone}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </motion.div>
                     </CardContent>
                   </>
                 )}
 
-                {/* Step 4: Design Preferences */}
-                {currentStep === 3 && (
+                {/* Step 3: Your Goals */}
+                {currentStep === 2 && (
                   <>
                     <CardHeader>
-                      <CardTitle>Design Preferences</CardTitle>
+                      <CardTitle>Your Goals</CardTitle>
                       <CardDescription>
-                        Tell us about your aesthetic preferences
+                        What do you want to achieve and where do you want to post?
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                      <motion.div variants={fadeInUp} className="space-y-2">
-                        <Label>
-                          What style do you prefer for your website?
-                        </Label>
-                        <RadioGroup
-                          value={formData.stylePreference}
-                          onValueChange={(value) =>
-                            updateFormData("stylePreference", value)
-                          }
-                          className="space-y-2"
-                        >
-                          {[
-                            { value: "modern", label: "Modern & Sleek" },
-                            { value: "minimalist", label: "Minimalist" },
-                            { value: "bold", label: "Bold & Creative" },
-                            {
-                              value: "corporate",
-                              label: "Corporate & Professional",
-                            },
-                          ].map((style, index) => (
+                    <CardContent className="space-y-6">
+                      <motion.div variants={fadeInUp} className="space-y-3">
+                        <Label>Primary Goals</Label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {goalOptions.map((goal, index) => (
                             <motion.div
-                              key={style.value}
-                              className="flex items-center space-x-2 rounded-md border p-3 cursor-pointer hover:bg-accent transition-colors"
+                              key={goal}
+                              className={cn(
+                                "flex items-center space-x-2 rounded-md border p-3 cursor-pointer transition-colors",
+                                formData.goals.includes(goal)
+                                  ? "border-primary bg-primary/10"
+                                  : "hover:bg-accent",
+                              )}
                               whileHover={{ scale: 1.02 }}
                               whileTap={{ scale: 0.98 }}
                               transition={{ duration: 0.2 }}
@@ -469,163 +455,41 @@ const OnboardingForm = () => {
                                 opacity: 1,
                                 y: 0,
                                 transition: {
-                                  delay: 0.1 * index,
+                                  delay: 0.05 * index,
                                   duration: 0.3,
                                 },
                               }}
+                              onClick={() => toggleArrayField("goals", goal)}
                             >
-                              <RadioGroupItem
-                                value={style.value}
-                                id={`style-${index + 1}`}
+                              <Checkbox
+                                id={`goal-${goal}`}
+                                checked={formData.goals.includes(goal)}
+                                onCheckedChange={() =>
+                                  toggleArrayField("goals", goal)
+                                }
                               />
                               <Label
-                                htmlFor={`style-${index + 1}`}
+                                htmlFor={`goal-${goal}`}
                                 className="cursor-pointer w-full"
                               >
-                                {style.label}
+                                {goal}
                               </Label>
                             </motion.div>
                           ))}
-                        </RadioGroup>
+                        </div>
                       </motion.div>
-                      <motion.div variants={fadeInUp} className="space-y-2">
-                        <Label htmlFor="inspirations">
-                          Any websites you like for inspiration?
-                        </Label>
-                        <Textarea
-                          id="inspirations"
-                          placeholder="List websites you admire or want to emulate"
-                          value={formData.inspirations}
-                          onChange={(e) =>
-                            updateFormData("inspirations", e.target.value)
-                          }
-                          className="min-h-[80px] transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                        />
-                      </motion.div>
-                    </CardContent>
-                  </>
-                )}
-
-                {/* Step 5: Budget & Timeline */}
-                {currentStep === 4 && (
-                  <>
-                    <CardHeader>
-                      <CardTitle>Budget & Timeline</CardTitle>
-                      <CardDescription>
-                        Let&apos;s talk about your investment and timeline
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <motion.div variants={fadeInUp} className="space-y-2">
-                        <Label htmlFor="budget">
-                          What&apos;s your budget range? (USD)
-                        </Label>
-                        <Select
-                          value={formData.budget}
-                          onValueChange={(value) =>
-                            updateFormData("budget", value)
-                          }
-                        >
-                          <SelectTrigger
-                            id="budget"
-                            className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                          >
-                            <SelectValue placeholder="Select your budget" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="under-1000">
-                              Under $1,000
-                            </SelectItem>
-                            <SelectItem value="1000-3000">
-                              $1,000 - $3,000
-                            </SelectItem>
-                            <SelectItem value="3000-5000">
-                              $3,000 - $5,000
-                            </SelectItem>
-                            <SelectItem value="5000-10000">
-                              $5,000 - $10,000
-                            </SelectItem>
-                            <SelectItem value="over-10000">
-                              Over $10,000
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </motion.div>
-                      <motion.div variants={fadeInUp} className="space-y-2">
-                        <Label>What&apos;s your expected timeline?</Label>
-                        <RadioGroup
-                          value={formData.timeline}
-                          onValueChange={(value) =>
-                            updateFormData("timeline", value)
-                          }
-                          className="space-y-2"
-                        >
-                          {[
-                            { value: "asap", label: "ASAP" },
-                            { value: "1-month", label: "Within 1 month" },
-                            { value: "3-months", label: "1-3 months" },
-                            { value: "flexible", label: "Flexible" },
-                          ].map((time, index) => (
+                      <motion.div variants={fadeInUp} className="space-y-3">
+                        <Label>Which platforms?</Label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {platformOptions.map((platform, index) => (
                             <motion.div
-                              key={time.value}
-                              className="flex items-center space-x-2 rounded-md border p-3 cursor-pointer hover:bg-accent transition-colors"
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              transition={{ duration: 0.2 }}
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{
-                                opacity: 1,
-                                x: 0,
-                                transition: {
-                                  delay: 0.1 * index,
-                                  duration: 0.3,
-                                },
-                              }}
-                            >
-                              <RadioGroupItem
-                                value={time.value}
-                                id={`time-${index + 1}`}
-                              />
-                              <Label
-                                htmlFor={`time-${index + 1}`}
-                                className="cursor-pointer w-full"
-                              >
-                                {time.label}
-                              </Label>
-                            </motion.div>
-                          ))}
-                        </RadioGroup>
-                      </motion.div>
-                    </CardContent>
-                  </>
-                )}
-
-                {/* Step 6: Additional Requirements */}
-                {currentStep === 5 && (
-                  <>
-                    <CardHeader>
-                      <CardTitle>Additional Requirements</CardTitle>
-                      <CardDescription>
-                        Any other specific needs for your website?
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <motion.div variants={fadeInUp} className="space-y-2">
-                        <Label>Which features do you need?</Label>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                          {[
-                            "Contact Form",
-                            "Blog/News",
-                            "E-commerce",
-                            "User Accounts",
-                            "Search Functionality",
-                            "Social Media Integration",
-                            "Newsletter Signup",
-                            "Analytics",
-                          ].map((feature, index) => (
-                            <motion.div
-                              key={feature}
-                              className="flex items-center space-x-2 rounded-md border p-3 cursor-pointer hover:bg-accent transition-colors"
+                              key={platform}
+                              className={cn(
+                                "flex items-center space-x-2 rounded-md border p-3 cursor-pointer transition-colors",
+                                formData.platforms.includes(platform)
+                                  ? "border-primary bg-primary/10"
+                                  : "hover:bg-accent",
+                              )}
                               whileHover={{ scale: 1.02 }}
                               whileTap={{ scale: 0.98 }}
                               transition={{ duration: 0.2 }}
@@ -639,42 +503,126 @@ const OnboardingForm = () => {
                                 },
                               }}
                               onClick={() =>
-                                toggleFeature(feature.toLowerCase())
+                                toggleArrayField("platforms", platform)
                               }
                             >
                               <Checkbox
-                                id={`feature-${feature}`}
-                                checked={formData.features.includes(
-                                  feature.toLowerCase(),
-                                )}
+                                id={`platform-${platform}`}
+                                checked={formData.platforms.includes(platform)}
                                 onCheckedChange={() =>
-                                  toggleFeature(feature.toLowerCase())
+                                  toggleArrayField("platforms", platform)
                                 }
                               />
                               <Label
-                                htmlFor={`feature-${feature}`}
+                                htmlFor={`platform-${platform}`}
                                 className="cursor-pointer w-full"
                               >
-                                {feature}
+                                {platform}
                               </Label>
                             </motion.div>
                           ))}
                         </div>
                       </motion.div>
-                      <motion.div variants={fadeInUp} className="space-y-2">
-                        <Label htmlFor="additionalInfo">
-                          Anything else we should know?
-                        </Label>
-                        <Textarea
-                          id="additionalInfo"
-                          placeholder="Any additional requirements or information"
-                          value={formData.additionalInfo}
-                          onChange={(e) =>
-                            updateFormData("additionalInfo", e.target.value)
-                          }
-                          className="min-h-[80px] transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                        />
-                      </motion.div>
+                    </CardContent>
+                  </>
+                )}
+
+                {/* Step 4: Launch Your AI Engine */}
+                {currentStep === 3 && (
+                  <>
+                    <CardHeader>
+                      <CardTitle>Launch Your AI Engine</CardTitle>
+                      <CardDescription>
+                        Review your details and let PostPilot build your
+                        personalized content strategy.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {isSubmitting ? (
+                        <motion.div
+                          className="flex flex-col items-center justify-center py-12 space-y-4"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.4 }}
+                        >
+                          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                          <p className="text-lg font-medium text-muted-foreground">
+                            Building your 30-day AI strategy...
+                          </p>
+                        </motion.div>
+                      ) : (
+                        <>
+                          <motion.div
+                            variants={fadeInUp}
+                            className="space-y-3 text-sm"
+                          >
+                            <div className="rounded-lg border p-4 space-y-3">
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">
+                                  Name
+                                </span>
+                                <span className="font-medium">
+                                  {formData.fullName || "--"}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">
+                                  Company
+                                </span>
+                                <span className="font-medium">
+                                  {formData.companyName || "--"}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">
+                                  Industry
+                                </span>
+                                <span className="font-medium">
+                                  {formData.industry || "--"}
+                                </span>
+                              </div>
+                              {formData.niche && (
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">
+                                    Niche
+                                  </span>
+                                  <span className="font-medium text-right max-w-[200px]">
+                                    {formData.niche}
+                                  </span>
+                                </div>
+                              )}
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">
+                                  Tone
+                                </span>
+                                <span className="font-medium">
+                                  {formData.toneOfVoice || "--"}
+                                </span>
+                              </div>
+                              <div className="flex justify-between items-start">
+                                <span className="text-muted-foreground">
+                                  Goals
+                                </span>
+                                <span className="font-medium text-right max-w-[200px]">
+                                  {formData.goals.length > 0
+                                    ? formData.goals.join(", ")
+                                    : "--"}
+                                </span>
+                              </div>
+                              <div className="flex justify-between items-start">
+                                <span className="text-muted-foreground">
+                                  Platforms
+                                </span>
+                                <span className="font-medium text-right max-w-[200px]">
+                                  {formData.platforms.length > 0
+                                    ? formData.platforms.join(", ")
+                                    : "--"}
+                                </span>
+                              </div>
+                            </div>
+                          </motion.div>
+                        </>
+                      )}
                     </CardContent>
                   </>
                 )}
@@ -689,7 +637,7 @@ const OnboardingForm = () => {
                   type="button"
                   variant="outline"
                   onClick={prevStep}
-                  disabled={currentStep === 0}
+                  disabled={currentStep === 0 || isSubmitting}
                   className="flex items-center gap-1 transition-all duration-300 rounded-2xl"
                 >
                   <ChevronLeft className="h-4 w-4" /> Back
@@ -699,32 +647,35 @@ const OnboardingForm = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Button
-                  type="button"
-                  onClick={
-                    currentStep === steps.length - 1 ? handleSubmit : nextStep
-                  }
-                  disabled={!isStepValid() || isSubmitting}
-                  className={cn(
-                    "flex items-center gap-1 transition-all duration-300 rounded-2xl",
-                    currentStep === steps.length - 1 ? "" : "",
-                  )}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" /> Submitting...
-                    </>
-                  ) : (
-                    <>
-                      {currentStep === steps.length - 1 ? "Submit" : "Next"}
-                      {currentStep === steps.length - 1 ? (
-                        <Check className="h-4 w-4" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4" />
-                      )}
-                    </>
-                  )}
-                </Button>
+                {currentStep === steps.length - 1 ? (
+                  <Button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                    className="flex items-center gap-2 transition-all duration-300 rounded-2xl px-6"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />{" "}
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Rocket className="h-4 w-4" /> Generate My 30-Day
+                        Content Calendar
+                      </>
+                    )}
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    onClick={nextStep}
+                    disabled={!isStepValid()}
+                    className="flex items-center gap-1 transition-all duration-300 rounded-2xl"
+                  >
+                    Next <ChevronRight className="h-4 w-4" />
+                  </Button>
+                )}
               </motion.div>
             </CardFooter>
           </div>
