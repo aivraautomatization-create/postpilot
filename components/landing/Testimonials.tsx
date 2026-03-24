@@ -9,7 +9,7 @@ const testimonials = [
     name: "Sarah Chen",
     role: "Founder, LaunchKit",
     avatar: "https://i.pravatar.cc/100?img=32",
-    quote: "I was spending 6 hours a week copy-pasting content across platforms. PostPilot cut that to 3 minutes. Literally.",
+    quote: "I was spending 6 hours a week copy-pasting content across platforms. Puls cut that to 3 minutes. Literally.",
     metric: "6hrs → 3min/week",
   },
   {
@@ -23,7 +23,7 @@ const testimonials = [
     name: "Emma Johansson",
     role: "Fitness Coach",
     avatar: "https://i.pravatar.cc/100?img=45",
-    quote: "Fired my $3K/month agency after the first week. PostPilot writes better content than they ever did.",
+    quote: "Fired my $3K/month agency after the first week. Puls writes better content than they ever did.",
     metric: "Saved $36K/year",
   },
   {
@@ -37,14 +37,14 @@ const testimonials = [
     name: "Aisha Patel",
     role: "E-commerce, GlowBox",
     avatar: "https://i.pravatar.cc/100?img=44",
-    quote: "I post on 6 platforms now. Before PostPilot, I barely managed Instagram. My TikTok is blowing up.",
+    quote: "I post on 6 platforms now. Before Puls, I barely managed Instagram. My TikTok is blowing up.",
     metric: "1 → 6 platforms",
   },
   {
     name: "James Wright",
     role: "Real Estate Agent",
     avatar: "https://i.pravatar.cc/100?img=68",
-    quote: "Clients ask me how I post so consistently. I just smile. PostPilot is my unfair advantage.",
+    quote: "Clients ask me how I post so consistently. I just smile. Puls is my unfair advantage.",
     metric: "Daily posting streak",
   },
 ];

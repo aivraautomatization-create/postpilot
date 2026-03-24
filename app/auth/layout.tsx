@@ -35,7 +35,7 @@ export default function AuthLayout({
           <div className="bg-white text-black p-1.5 rounded-lg">
             <Grid2x2PlusIcon className="size-5" />
           </div>
-          <p className="text-xl font-bold tracking-tight">PostPilot</p>
+          <p className="text-xl font-bold tracking-tight">Puls</p>
         </div>
 
         {/* Testimonial */}
@@ -49,7 +49,7 @@ export default function AuthLayout({
               ))}
             </div>
             <p className="text-lg font-medium leading-relaxed text-white">
-              &ldquo;PostPilot completely automated our content pipeline. We save 12 hours every week and our engagement has tripled.&rdquo;
+              &ldquo;Puls completely automated our content pipeline. We save 12 hours every week and our engagement has tripled.&rdquo;
             </p>
             <footer className="text-sm text-white/40">
               Sarah Jenkins &mdash; Marketing Director
@@ -71,7 +71,7 @@ export default function AuthLayout({
             <div className="bg-white text-black p-1.5 rounded-lg">
               <Grid2x2PlusIcon className="size-5" />
             </div>
-            <p className="text-xl font-bold tracking-tight">PostPilot</p>
+            <p className="text-xl font-bold tracking-tight">Puls</p>
           </div>
           {children}
         </div>

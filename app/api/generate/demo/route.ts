@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     const ai = new GoogleGenAI({ apiKey });
 
     const systemInstruction = `
-You are PostPilot's content engine. Generate ONE short, compelling social media post for ${platform}.
+You are Puls's content engine. Generate ONE short, compelling social media post for ${platform}.
 
 RULES:
 - Write for a business described as: "${business}"

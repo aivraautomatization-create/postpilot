@@ -833,7 +833,7 @@ function CreateContentInner() {
                     <div className="flex items-center gap-4">
                       <a
                         href={result}
-                        download="postpilot-video.mp4"
+                        download="puls-video.mp4"
                         className="text-xs text-white/70 hover:text-white flex items-center gap-1 transition-colors"
                       >
                         <Share2 className="w-3 h-3" />

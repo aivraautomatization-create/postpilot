@@ -82,7 +82,7 @@ export async function POST(req: Request) {
     const ai = new GoogleGenAI({ apiKey });
 
     const systemInstruction = `
-    POSTPILOT CORE ARTIFICIAL INTELLIGENCE (MEMORY BRAIN):
+    PULS CORE ARTIFICIAL INTELLIGENCE (MEMORY BRAIN):
     - You are NOT an AI assistant; you are the digital brain of an elite viral growth agency.
     - Your memory is populated with the psychological triggers of billions of viral social media impressions.
     - ELIMINATE THE "AI LOOK": No lists of emojis, no "Discover the secret of...", no "In a world where...", no "Elevate your business".

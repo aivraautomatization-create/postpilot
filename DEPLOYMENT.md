@@ -1,8 +1,8 @@
-# PostPilot — Production Deployment & Setup Guide
+# Puls — Production Deployment & Setup Guide
 
 ## 📋 Overview
 
-PostPilot is now **production-ready** with all critical features implemented:
+Puls is now **production-ready** with all critical features implemented:
 
 - ✅ Real OAuth token exchange (Twitter, LinkedIn, Facebook, TikTok)
 - ✅ Real social media publishing (all 4 platforms)
@@ -130,7 +130,7 @@ For **Vercel** deployment:
    - Register your functions with Inngest Cloud
 
 4. In Inngest Dashboard, set return URL:
-   - **Dashboard → Apps → PostPilot**
+   - **Dashboard → Apps → Puls**
    - Validate endpoint: `https://yourapp.com/api/inngest`
 
 #### C. Local Testing
@@ -232,7 +232,7 @@ The schema includes:
 ```bash
 # 1. Push to GitHub
 git add .
-git commit -m "feat: postpilot production ready"
+git commit -m "feat: puls production ready"
 git push origin main
 
 # 2. Connect to Vercel
@@ -310,4 +310,4 @@ vercel deploy --prod
 
 ---
 
-**✅ Deployment complete! PostPilot is now production-ready.**
+**✅ Deployment complete! Puls is now production-ready.**

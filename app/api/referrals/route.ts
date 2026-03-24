@@ -47,7 +47,7 @@ export async function GET() {
 
     return NextResponse.json({
       referralCode,
-      referralLink: `${process.env.NEXT_PUBLIC_APP_URL || "https://postpilot.ai"}/auth/signup?ref=${referralCode}`,
+      referralLink: `${process.env.NEXT_PUBLIC_APP_URL || "https://puls.work"}/auth/signup?ref=${referralCode}`,
       bonusPosts: profile?.bonus_posts || 0,
       stats: {
         totalReferrals: (referrals || []).length,

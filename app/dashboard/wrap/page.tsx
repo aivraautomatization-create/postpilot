@@ -122,7 +122,7 @@ export default function WrapPage() {
     <div className="space-y-8 max-w-2xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-light tracking-tight text-white">Your Month in PostPilot</h2>
+          <h2 className="text-2xl font-light tracking-tight text-white">Your Month in Puls</h2>
           <p className="text-white/40 text-sm mt-1">A look back at what you accomplished</p>
         </div>
         <div className="flex items-center gap-2">

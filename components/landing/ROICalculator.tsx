@@ -23,7 +23,7 @@ export default function ROICalculator() {
             How much is social media costing you?
           </p>
           <p className="mt-6 text-lg leading-8 text-white/60">
-            Your time has a price. See what you&apos;re really spending — and what PostPilot saves you.
+            Your time has a price. See what you&apos;re really spending — and what Puls saves you.
           </p>
         </motion.div>
 
@@ -79,7 +79,7 @@ export default function ROICalculator() {
                   <span className="text-lg font-semibold text-white/70 line-through">${monthlyCost.toLocaleString()}/mo</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-white/50">PostPilot costs</span>
+                  <span className="text-sm text-white/50">Puls costs</span>
                   <span className="text-lg font-semibold text-white">$99/mo</span>
                 </div>
                 <div className="h-px bg-white/[0.08]" />
@@ -95,7 +95,7 @@ export default function ROICalculator() {
 
               <div className="pt-2">
                 <p className="text-xs text-white/30 mb-4">
-                  Average agency: $3,500/mo for 15 posts. PostPilot: $99/mo for 50 posts.
+                  Average agency: $3,500/mo for 15 posts. Puls: $99/mo for 50 posts.
                 </p>
                 <Link
                   href="/auth/signup"

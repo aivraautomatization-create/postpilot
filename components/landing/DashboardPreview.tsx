@@ -22,7 +22,7 @@ const examplePost = `🚀 After 6 months of building in public, here's what actu
 → Short-form video drove 80% of new followers.
 → Engaging with comments in the first hour doubled reach.
 
-The algorithm rewards persistence. PostPilot made showing up effortless.
+The algorithm rewards persistence. Puls made showing up effortless.
 
 What's your biggest growth lever this quarter? 👇
 
@@ -36,7 +36,7 @@ export default function DashboardPreview() {
         <br className="hidden sm:block" /> in one place.
       </h2>
       <p className="mt-4 text-base sm:text-lg text-white/50 max-w-xl mx-auto">
-        Watch how PostPilot works while you scroll
+        Watch how Puls works while you scroll
       </p>
     </div>
   );
@@ -53,7 +53,7 @@ export default function DashboardPreview() {
               <div className="w-6 h-6 rounded-md bg-white/90 flex items-center justify-center">
                 <LayoutDashboard className="w-3.5 h-3.5 text-black" />
               </div>
-              <span className="text-sm font-semibold text-white">PostPilot</span>
+              <span className="text-sm font-semibold text-white">Puls</span>
             </div>
             {navItems.map(({ icon: Icon, label }) => (
               <button

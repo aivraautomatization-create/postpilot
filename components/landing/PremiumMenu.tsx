@@ -53,7 +53,7 @@ export default function PremiumMenu() {
     {
       icon: ShieldCheck,
       title: "Why Us?",
-      description: "We don't compromise on quality. Postpilot is engineered to deliver enterprise-grade performance, ensuring your brand is always represented by the highest standard of content."
+      description: "We don't compromise on quality. Puls is engineered to deliver enterprise-grade performance, ensuring your brand is always represented by the highest standard of content."
     },
     {
       icon: TrendingUp,
@@ -92,7 +92,7 @@ export default function PremiumMenu() {
 
             {/* Header (Mobile optimized) */}
             <div className="absolute top-0 w-full p-6 flex justify-between items-center z-20">
-              <span className="text-xl font-medium tracking-tight">Postpilot</span>
+              <span className="text-xl font-medium tracking-tight">Puls</span>
               <button 
                 onClick={() => setIsOpen(false)}
                 className="w-12 h-12 flex items-center justify-center rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
@@ -124,7 +124,7 @@ export default function PremiumMenu() {
                 
                 <motion.div custom={links.length} variants={itemVariants as any} className="mt-12 space-y-4 ml-1">
                   <div className="text-sm text-white/40">
-                    <p>hello@postpilot.ai</p>
+                    <p>hello@puls.work</p>
                     <p>Privacy Policy & Terms</p>
                   </div>
                   <div className="flex gap-4 pt-4 text-sm font-medium">

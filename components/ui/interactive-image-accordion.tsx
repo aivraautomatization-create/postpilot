@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 
-// PostPilot feature accordion — psychology: Progress Illusion (shows the journey step-by-step)
+// Puls feature accordion — psychology: Progress Illusion (shows the journey step-by-step)
 const accordionItems = [
   {
     id: 1,
@@ -94,7 +94,7 @@ export function LandingAccordionItem() {
             </h2>
             {/* Psychology: Specificity — concrete workflow eliminates uncertainty */}
             <p className="mt-6 text-lg text-white/50 max-w-xl mx-auto md:mx-0">
-              From strategy to publishing — PostPilot handles the entire content
+              From strategy to publishing — Puls handles the entire content
               workflow so you can stay focused on what actually grows your business.
             </p>
             <div className="mt-8">

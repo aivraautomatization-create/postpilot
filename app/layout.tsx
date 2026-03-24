@@ -11,7 +11,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: 'PostPilot',
+  title: 'Puls',
   description: 'AI-powered social media management',
 };
 

@@ -16,7 +16,7 @@ const actions = [
   },
   {
     title: "Connect your accounts",
-    description: "Link your social platforms so PostPilot can publish for you",
+    description: "Link your social platforms so Puls can publish for you",
     href: "/dashboard/accounts",
     icon: LinkIcon,
     gradient: "from-blue-500/20 to-cyan-500/20",

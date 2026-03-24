@@ -127,7 +127,7 @@ function AcceptInviteContent() {
       </div>
       <h2 className="text-lg font-semibold text-white mb-2">You&apos;ve joined the workspace!</h2>
       <p className="text-white/50 text-sm mb-6">
-        You now have access to the shared PostPilot workspace. Head to the dashboard to get started.
+        You now have access to the shared Puls workspace. Head to the dashboard to get started.
       </p>
       <a
         href="/dashboard"

@@ -164,7 +164,7 @@ export default function Pricing() {
             </div>
             <div className="flex items-center gap-4">
               <span className="text-sm font-light text-white">$500+<span className="text-white/40">/mo</span></span>
-              <a href="mailto:hello@postpilot.ai" className="text-xs text-white/60 hover:text-white border border-white/10 px-3 py-1.5 rounded-lg transition-colors">
+              <a href="mailto:hello@puls.work" className="text-xs text-white/60 hover:text-white border border-white/10 px-3 py-1.5 rounded-lg transition-colors">
                 Contact sales
               </a>
             </div>

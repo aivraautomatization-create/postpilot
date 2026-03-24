@@ -805,7 +805,7 @@ export default function AccountsPage() {
               Connect your accounts securely via OAuth.
             </p>
             <p className="text-xs text-emerald-400/70">
-              We never store your passwords. Click Connect to authorize Postpilot to publish on your behalf. You can disconnect at any time.
+              We never store your passwords. Click Connect to authorize Puls to publish on your behalf. You can disconnect at any time.
             </p>
           </div>
         </div>

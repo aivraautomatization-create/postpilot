@@ -14,7 +14,7 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           <Link href="/" className="flex items-center gap-2">
             <Command className="w-6 h-6 text-white" />
-            <span className="text-xl font-medium text-white tracking-tight">Postpilot</span>
+            <span className="text-xl font-medium text-white tracking-tight">Puls</span>
           </Link>
           <div className="hidden md:flex items-center space-x-8">
             <Link href="#features" className="text-sm text-white/70 hover:text-white transition-colors">Features</Link>

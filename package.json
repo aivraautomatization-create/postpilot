@@ -1,5 +1,5 @@
 {
-  "name": "postpilot",
+  "name": "puls",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -55,6 +55,7 @@
     "recharts": "^3.7.0",
     "resend": "^6.9.3",
     "simplex-noise": "^4.0.3",
+    "sonner": "^2.0.7",
     "stripe": "^20.4.0",
     "styled-jsx": "^5.1.7",
     "tailwind-merge": "^3.3.1",

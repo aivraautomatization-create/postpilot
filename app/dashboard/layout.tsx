@@ -166,7 +166,7 @@ export default function DashboardLayout({
       <div className="h-16 flex items-center px-6 border-b border-white/10">
         <Link href="/dashboard" className="flex items-center gap-2">
           <Command className="w-5 h-5 text-white" />
-          <span className="text-lg font-medium tracking-tight">Postpilot</span>
+          <span className="text-lg font-medium tracking-tight">Puls</span>
         </Link>
       </div>
 

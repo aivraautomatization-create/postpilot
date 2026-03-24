@@ -3,8 +3,8 @@ import { getSupabaseServer } from '@/lib/supabase-server';
 import { getSupabaseAdmin } from '@/lib/supabase';
 import { Resend } from 'resend';
 
-const APP_URL = process.env.APP_URL || 'https://postpilot.ai';
-const FROM_EMAIL = 'PostPilot <notifications@postpilot.ai>';
+const APP_URL = process.env.APP_URL || 'https://puls.work';
+const FROM_EMAIL = 'Puls <notifications@puls.work>';
 
 function getResend(): Resend {
   const key = process.env.RESEND_API_KEY;
@@ -86,18 +86,18 @@ export async function POST(req: Request) {
       await resend.emails.send({
         from: FROM_EMAIL,
         to: invitedEmail,
-        subject: "You've been invited to join PostPilot",
+        subject: "You've been invited to join Puls",
         html: `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #fafafa; padding: 40px 20px;">
             <div style="background: #fff; border-radius: 12px; padding: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-              <h1 style="color: #000; font-size: 24px; margin-bottom: 16px;">You've been invited to PostPilot</h1>
-              <p style="color: #444; line-height: 1.6;">You've been invited to join a workspace on PostPilot as a <strong>${role === 'admin' ? 'Admin' : 'Member'}</strong>.</p>
-              <p style="color: #444; line-height: 1.6;">PostPilot is an AI-powered social media management platform. Accept the invite to get started.</p>
+              <h1 style="color: #000; font-size: 24px; margin-bottom: 16px;">You've been invited to Puls</h1>
+              <p style="color: #444; line-height: 1.6;">You've been invited to join a workspace on Puls as a <strong>${role === 'admin' ? 'Admin' : 'Member'}</strong>.</p>
+              <p style="color: #444; line-height: 1.6;">Puls is an AI-powered social media management platform. Accept the invite to get started.</p>
               <div style="margin: 32px 0;">
                 <a href="${inviteLink}" style="background: #000; color: #fff; padding: 14px 28px; border-radius: 10px; text-decoration: none; font-weight: 600; display: inline-block;">Accept Invitation</a>
               </div>
               <p style="color: #888; font-size: 14px;">This invite link is unique to you. Do not share it with others.</p>
-              <p style="color: #444; margin-top: 24px;">Best,<br/>The PostPilot Team</p>
+              <p style="color: #444; margin-top: 24px;">Best,<br/>The Puls Team</p>
             </div>
           </div>
         `,

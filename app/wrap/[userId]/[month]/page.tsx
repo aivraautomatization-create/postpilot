@@ -62,7 +62,7 @@ async function getWrapData(userId: string, month: string) {
       : `${timeSavedMinutes}m`;
 
   return {
-    name: profile.full_name || profile.company_name || "A PostPilot User",
+    name: profile.full_name || profile.company_name || "A Puls User",
     totalPosts: publishedPosts.length,
     totalPlatforms: platformSet.size,
     platforms: Array.from(platformSet),
@@ -82,10 +82,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const data = await getWrapData(userId, month);
   const title = data
     ? `${data.name}'s ${formatMonthLabel(month)} Content Wrap`
-    : "Content Wrap - PostPilot";
+    : "Content Wrap - Puls";
   const description = data
     ? `${data.totalPosts} posts published across ${data.totalPlatforms} platforms with ${data.totalEngagement.toLocaleString()} total engagement. See the full wrap.`
-    : "See this creator's monthly content wrap on PostPilot.";
+    : "See this creator's monthly content wrap on Puls.";
 
   return {
     title,
@@ -93,7 +93,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title,
       description,
-      siteName: "PostPilot",
+      siteName: "Puls",
       type: "website",
     },
     twitter: {
@@ -144,7 +144,7 @@ export default async function PublicWrapPage({ params }: Props) {
           <div className="relative">
             <div className="flex items-center gap-2 mb-8">
               <Command className="w-5 h-5 text-white" />
-              <span className="text-sm font-medium text-white tracking-tight">PostPilot</span>
+              <span className="text-sm font-medium text-white tracking-tight">Puls</span>
             </div>
 
             <p className="text-white/40 text-xs uppercase tracking-widest mb-2">

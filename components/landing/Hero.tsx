@@ -7,7 +7,7 @@ import { fadeInUp, staggerContainer } from "@/lib/motion";
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
 
 // Psychology: Loss Aversion + Specificity + Social Proof + Authority Bias
-// "The average creator wastes 14 hrs/week on content. PostPilot users don't."
+// "The average creator wastes 14 hrs/week on content. Puls users don't."
 
 export default function Hero() {
   return (

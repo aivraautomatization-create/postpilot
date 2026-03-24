@@ -253,7 +253,7 @@ export default function AccountsPage() {
       <div>
         <h2 className="text-3xl font-light tracking-tight text-white mb-2">Connected Accounts</h2>
         <p className="text-white/50">
-          Connect your social media accounts in one click — PostPilot handles publishing for you automatically.
+          Connect your social media accounts in one click — Puls handles publishing for you automatically.
         </p>
       </div>
 
@@ -300,7 +300,7 @@ export default function AccountsPage() {
               Your accounts are secure
             </p>
             <p className="text-xs text-white/60 mt-1">
-              We never see or store your passwords. You&apos;re granting PostPilot permission to publish on your behalf — you can revoke access at any time by clicking Disconnect.
+              We never see or store your passwords. You&apos;re granting Puls permission to publish on your behalf — you can revoke access at any time by clicking Disconnect.
             </p>
           </div>
         </div>

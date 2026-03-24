@@ -22,7 +22,7 @@ export function FooterSection() {
           <div className="relative">
             <h2 className="mb-2 text-2xl font-bold tracking-tight">Stay ahead.</h2>
             <p className="mb-6 text-white/50 text-sm">
-              Get weekly content strategy tips, PostPilot updates, and creator growth ideas — free.
+              Get weekly content strategy tips, Puls updates, and creator growth ideas — free.
             </p>
             <form className="relative">
               <Input
@@ -98,7 +98,7 @@ export function FooterSection() {
                       <span className="sr-only">Twitter / X</span>
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent><p>Follow @PostPilotAI</p></TooltipContent>
+                  <TooltipContent><p>Follow @PulsAI</p></TooltipContent>
                 </Tooltip>
               </TooltipProvider>
               <TooltipProvider>
@@ -109,7 +109,7 @@ export function FooterSection() {
                       <span className="sr-only">Instagram</span>
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent><p>@postpilot</p></TooltipContent>
+                  <TooltipContent><p>@puls</p></TooltipContent>
                 </Tooltip>
               </TooltipProvider>
               <TooltipProvider>
@@ -120,12 +120,12 @@ export function FooterSection() {
                       <span className="sr-only">LinkedIn</span>
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent><p>PostPilot on LinkedIn</p></TooltipContent>
+                  <TooltipContent><p>Puls on LinkedIn</p></TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </div>
             <address className="not-italic text-sm space-y-1 text-white/40">
-              <p>hello@postpilot.ai</p>
+              <p>hello@puls.work</p>
               <p>San Francisco, CA</p>
             </address>
           </div>
@@ -133,7 +133,7 @@ export function FooterSection() {
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 text-center md:flex-row">
           <p className="text-sm text-white/30">
-            © {new Date().getFullYear()} PostPilot. All rights reserved.
+            © {new Date().getFullYear()} Puls. All rights reserved.
           </p>
           <nav className="flex gap-6 text-sm">
             <Link href="/privacy" className="text-white/30 transition-colors hover:text-white">

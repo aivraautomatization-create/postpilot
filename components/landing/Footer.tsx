@@ -32,7 +32,7 @@ export default function Footer() {
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Command className="w-5 h-5 text-white" />
-              <span className="text-lg font-medium text-white tracking-tight">Postpilot</span>
+              <span className="text-lg font-medium text-white tracking-tight">Puls</span>
             </div>
             <p className="text-sm text-white/40 leading-relaxed">
               AI-powered social media for solo founders
@@ -102,7 +102,7 @@ export default function Footer() {
         <div className="border-t border-white/[0.06] pt-8 flex items-center justify-center gap-2">
           <Command className="w-4 h-4 text-white/30" />
           <p className="text-center text-xs leading-5 text-white/40">
-            &copy; 2026 Postpilot, Inc. All rights reserved.
+            &copy; 2026 Puls, Inc. All rights reserved.
           </p>
         </div>
       </div>

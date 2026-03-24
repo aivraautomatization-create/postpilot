@@ -65,7 +65,7 @@ export default function TimelinePage() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <h2 className="text-2xl font-light text-white mb-1">Your Growth Story</h2>
         <p className="text-white/50 text-sm">
-          Watch how your strategy has evolved. Every month, PostPilot learns more about what works for your audience.
+          Watch how your strategy has evolved. Every month, Puls learns more about what works for your audience.
         </p>
       </motion.div>
 

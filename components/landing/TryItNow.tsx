@@ -58,7 +58,7 @@ export default function TryItNow() {
         <motion.div {...scrollReveal} className="text-center mb-12">
           <h2 className="text-base font-medium leading-7 text-white">See for yourself</h2>
           <p className="mt-2 text-3xl font-light tracking-tight text-white sm:text-4xl">
-            Try PostPilot right now. Free.
+            Try Puls right now. Free.
           </p>
           <p className="mt-6 text-lg leading-8 text-white/60">
             Enter your business below and watch our AI write a post for you in seconds. No signup required.

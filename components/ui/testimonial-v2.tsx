@@ -10,22 +10,22 @@ interface Testimonial {
   role: string;
 }
 
-// PostPilot testimonials — social proof with specificity (psychology: availability heuristic + social proof)
+// Puls testimonials — social proof with specificity (psychology: availability heuristic + social proof)
 const testimonials: Testimonial[] = [
   {
-    text: "PostPilot cut my content planning from 8 hours a week to under 40 minutes. I used to dread Mondays — now my entire week's posts are ready before breakfast.",
+    text: "Puls cut my content planning from 8 hours a week to under 40 minutes. I used to dread Mondays — now my entire week's posts are ready before breakfast.",
     image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150&h=150",
     name: "Maya Chen",
     role: "Lifestyle Creator · 180K followers",
   },
   {
-    text: "I was skeptical about AI writing 'sounding like me' but PostPilot nailed my tone after the first strategy session. My engagement went up 3.4x in 30 days.",
+    text: "I was skeptical about AI writing 'sounding like me' but Puls nailed my tone after the first strategy session. My engagement went up 3.4x in 30 days.",
     image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150&h=150",
     name: "Jordan Ellis",
     role: "Marketing Consultant",
   },
   {
-    text: "We run social for 14 clients. PostPilot replaced a part-time hire. ROI was positive in week two and we haven't looked back since.",
+    text: "We run social for 14 clients. Puls replaced a part-time hire. ROI was positive in week two and we haven't looked back since.",
     image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=150&h=150",
     name: "Priya Desai",
     role: "Founder, Spark Social Agency",
@@ -37,31 +37,31 @@ const testimonials: Testimonial[] = [
     role: "E-commerce Entrepreneur",
   },
   {
-    text: "I went from posting twice a week to every single day. My follower count doubled in 6 weeks. PostPilot is simply the highest-leverage tool in my stack.",
+    text: "I went from posting twice a week to every single day. My follower count doubled in 6 weeks. Puls is simply the highest-leverage tool in my stack.",
     image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150&h=150",
     name: "Sofia Laurent",
     role: "Personal Finance Creator",
   },
   {
-    text: "Our SaaS grew to 2,000 users through organic LinkedIn content. PostPilot handled every single post. It's the unfair advantage nobody talks about.",
+    text: "Our SaaS grew to 2,000 users through organic LinkedIn content. Puls handled every single post. It's the unfair advantage nobody talks about.",
     image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=150&h=150",
     name: "Tomás Vargas",
     role: "SaaS Founder",
   },
   {
-    text: "The templates alone are worth the price. I run a fitness brand and PostPilot knows the difference between motivation Monday and transformation Tuesday.",
+    text: "The templates alone are worth the price. I run a fitness brand and Puls knows the difference between motivation Monday and transformation Tuesday.",
     image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150&h=150",
     name: "Dani Brooks",
     role: "Fitness Coach · 95K Instagram",
   },
   {
-    text: "I used to spend my weekends batch-writing content. Now I use that time to actually serve my clients. PostPilot gave me my weekends back.",
+    text: "I used to spend my weekends batch-writing content. Now I use that time to actually serve my clients. Puls gave me my weekends back.",
     image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=150&h=150",
     name: "Keiko Tanaka",
     role: "Brand Strategist",
   },
   {
-    text: "I tried four AI writing tools. PostPilot is the only one that understood context — my industry, my past content, my audience's pain points. Night and day difference.",
+    text: "I tried four AI writing tools. Puls is the only one that understood context — my industry, my past content, my audience's pain points. Night and day difference.",
     image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=150&h=150",
     name: "Marcus Webb",
     role: "Real Estate Investor & Educator",

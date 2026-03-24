@@ -1,11 +1,11 @@
-# PostPilot: OAuth Bug Fixes, Admin Profile & Client UX
+# Puls: OAuth Bug Fixes, Admin Profile & Client UX
 
 **Date:** 2026-03-11
 **Status:** Approved
 
 ## Context
 
-PostPilot's social media OAuth connection flow has several bugs (XSS, false success, origin issues) and shows developer-facing setup instructions to all users. Additionally, need an admin test profile with business tier for full feature testing.
+Puls's social media OAuth connection flow has several bugs (XSS, false success, origin issues) and shows developer-facing setup instructions to all users. Additionally, need an admin test profile with business tier for full feature testing.
 
 ## Part 1: Admin Test Profile
 

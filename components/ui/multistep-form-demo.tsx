@@ -533,7 +533,7 @@ const OnboardingForm = () => {
                     <CardHeader>
                       <CardTitle>Launch Your AI Engine</CardTitle>
                       <CardDescription>
-                        Review your details and let PostPilot build your
+                        Review your details and let Puls build your
                         personalized content strategy.
                       </CardDescription>
                     </CardHeader>

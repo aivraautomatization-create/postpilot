@@ -74,7 +74,7 @@ export default function GettingStartedChecklist({ steps }: GettingStartedCheckli
             <h3 className="text-lg font-medium text-white mb-1">Getting Started</h3>
             <p className="text-sm text-white/40">
               {completedCount === 0
-                ? "Complete these steps to unlock PostPilot's full power."
+                ? "Complete these steps to unlock Puls's full power."
                 : completedCount === steps.length
                 ? "All done! You're ready to dominate social media."
                 : `${steps.length - completedCount} step${steps.length - completedCount > 1 ? "s" : ""} left. You're almost there!`}

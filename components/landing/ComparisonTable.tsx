@@ -7,7 +7,7 @@ import { scrollReveal } from "@/lib/motion";
 
 interface FeatureRow {
   feature: string;
-  postpilot: string | boolean | null;
+  puls: string | boolean | null;
   hootsuite: string | boolean | null;
   buffer: string | boolean | null;
   later: string | boolean | null;
@@ -16,63 +16,63 @@ interface FeatureRow {
 const rows: FeatureRow[] = [
   {
     feature: "AI content generation",
-    postpilot: "Full suite",
+    puls: "Full suite",
     hootsuite: false,
     buffer: false,
     later: false,
   },
   {
     feature: "Learns your brand voice",
-    postpilot: "Built-in",
+    puls: "Built-in",
     hootsuite: false,
     buffer: false,
     later: false,
   },
   {
     feature: "Viral strategy engine",
-    postpilot: "Built-in",
+    puls: "Built-in",
     hootsuite: false,
     buffer: false,
     later: false,
   },
   {
     feature: "Auto-publish",
-    postpilot: "6 platforms",
+    puls: "6 platforms",
     hootsuite: "5 platforms",
     buffer: "3 platforms",
     later: "2 platforms",
   },
   {
     feature: "Image & video AI",
-    postpilot: "Included",
+    puls: "Included",
     hootsuite: null,
     buffer: false,
     later: false,
   },
   {
     feature: "Niche playbooks",
-    postpilot: "100+ templates",
+    puls: "100+ templates",
     hootsuite: false,
     buffer: false,
     later: null,
   },
   {
     feature: "AI analytics & insights",
-    postpilot: "AI-powered",
+    puls: "AI-powered",
     hootsuite: null,
     buffer: null,
     later: null,
   },
   {
     feature: "Starting price / mo",
-    postpilot: "$19",
+    puls: "$19",
     hootsuite: "$99",
     buffer: "$60",
     later: "$80",
   },
   {
     feature: "Week of content in",
-    postpilot: "3 min",
+    puls: "3 min",
     hootsuite: "4+ hrs",
     buffer: "4+ hrs",
     later: "4+ hrs",
@@ -80,7 +80,7 @@ const rows: FeatureRow[] = [
 ];
 
 const cols = [
-  { key: "postpilot", label: "PostPilot", highlight: true },
+  { key: "puls", label: "Puls", highlight: true },
   { key: "hootsuite", label: "Hootsuite", highlight: false },
   { key: "buffer", label: "Buffer", highlight: false },
   { key: "later", label: "Later", highlight: false },

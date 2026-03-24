@@ -144,7 +144,7 @@ export default function InsightsPage() {
           <h2 className="text-2xl font-light tracking-tight text-white">Your AI Is Learning</h2>
         </div>
         <p className="text-white/40 text-sm">
-          The longer you use PostPilot, the smarter it gets about your brand.
+          The longer you use Puls, the smarter it gets about your brand.
         </p>
       </motion.div>
 
@@ -158,7 +158,7 @@ export default function InsightsPage() {
           <h3 className="text-base font-medium text-white mb-6 text-center">AI Confidence Score</h3>
           <CircularProgress score={data.confidenceScore} />
           <p className="text-sm text-white/40 text-center mt-6">
-            PostPilot has analyzed{" "}
+            Puls has analyzed{" "}
             <span className="text-white/70 font-medium">{data.postsAnalyzed} post{data.postsAnalyzed !== 1 ? "s" : ""}</span>{" "}
             and learned your writing style
           </p>
@@ -232,7 +232,7 @@ export default function InsightsPage() {
           </div>
         </div>
         <p className="text-xs text-white/30 mt-4">
-          PostPilot uses this to write content that sounds like you, not like AI.
+          Puls uses this to write content that sounds like you, not like AI.
         </p>
       </motion.div>
 
