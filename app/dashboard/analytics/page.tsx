@@ -13,7 +13,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import { Loader2, RefreshCw, BarChart2, TrendingUp, Heart, Share2, Eye } from "lucide-react";
+import { Loader2, RefreshCw, BarChart2, TrendingUp, Heart, Share2, Eye, Sparkles, CheckCircle2, Clock, ExternalLink } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { getSupabase } from "@/lib/supabase";
 
@@ -31,6 +31,13 @@ type PostMetric = {
     published_at: string;
     platforms: string[];
   };
+};
+
+type AIInsights = {
+  bestTimeToPost: { day: string; time: string; reason: string; platform: string }[];
+  topContentTypes: string[];
+  audienceInsights: string[];
+  quickWins: string[];
 };
 
 type AggregatedMetric = {
@@ -98,6 +105,9 @@ export default function AnalyticsPage() {
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<{ synced: number; errors: string[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [insights, setInsights] = useState<AIInsights | null>(null);
+  const [insightsEmpty, setInsightsEmpty] = useState(false);
+  const [insightsLoading, setInsightsLoading] = useState(false);
 
   const fetchMetrics = useCallback(async () => {
     if (!supabase || !user) return;
@@ -138,9 +148,34 @@ export default function AnalyticsPage() {
     }
   }, [supabase, user]);
 
+  const fetchInsights = useCallback(async () => {
+    setInsightsLoading(true);
+    try {
+      const res = await fetch("/api/analytics/insights");
+      const data = await res.json();
+      if (data.empty) {
+        setInsightsEmpty(true);
+        setInsights(null);
+      } else if (data.bestTimeToPost) {
+        setInsights(data as AIInsights);
+        setInsightsEmpty(false);
+      }
+    } catch (err) {
+      console.error("Failed to fetch insights:", err);
+    } finally {
+      setInsightsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchMetrics();
   }, [fetchMetrics]);
+
+  useEffect(() => {
+    if (!loading) {
+      fetchInsights();
+    }
+  }, [loading, fetchInsights]);
 
   const handleSync = async () => {
     setSyncing(true);
@@ -200,6 +235,30 @@ export default function AnalyticsPage() {
     platformMap[name].impressions += m.impressions || 0;
   }
   const barData: PlatformMetric[] = Object.values(platformMap);
+
+  // Top 5 posts by total engagement
+  const postEngagementMap: Record<string, { post_id: string; content: string; platform: string; likes: number; shares: number; reach: number; total: number }> = {};
+  for (const m of metrics) {
+    if (!m.post_id) continue;
+    if (!postEngagementMap[m.post_id]) {
+      postEngagementMap[m.post_id] = {
+        post_id: m.post_id,
+        content: m.posts?.content || "",
+        platform: m.platform,
+        likes: 0,
+        shares: 0,
+        reach: 0,
+        total: 0,
+      };
+    }
+    postEngagementMap[m.post_id].likes += m.likes || 0;
+    postEngagementMap[m.post_id].shares += m.shares || 0;
+    postEngagementMap[m.post_id].reach += m.reach || 0;
+    postEngagementMap[m.post_id].total += (m.likes || 0) + (m.shares || 0) + (m.reach || 0);
+  }
+  const topPosts = Object.values(postEngagementMap)
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 5);
 
   if (loading) {
     return (
@@ -446,6 +505,163 @@ export default function AnalyticsPage() {
               ))}
             </div>
           </div>
+
+          {/* Section A — AI Insights */}
+          <div className="bg-white/[0.02] backdrop-blur-xl border border-white/[0.08] rounded-2xl overflow-hidden">
+            <div className="p-6 border-b border-white/[0.06] flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-violet-500/10">
+                <Sparkles className="w-4 h-4 text-violet-400" />
+              </div>
+              <div>
+                <h3 className="text-base font-medium text-white">AI Insights</h3>
+                <p className="text-xs text-white/40 mt-0.5">Personalized recommendations based on your performance data</p>
+              </div>
+            </div>
+            <div className="p-6">
+              {insightsLoading ? (
+                <div className="flex items-center gap-3 text-white/40 text-sm py-4">
+                  <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+                  Analyzing your performance data...
+                </div>
+              ) : insightsEmpty || !insights ? (
+                <div className="border border-white/[0.06] rounded-xl p-6 text-center">
+                  <Sparkles className="w-6 h-6 text-white/20 mx-auto mb-2" />
+                  <p className="text-sm text-white/40">Post more content to unlock AI insights</p>
+                </div>
+              ) : (
+                <div className="space-y-7">
+                  {/* Best Times to Post */}
+                  {insights.bestTimeToPost?.length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <Clock className="w-3.5 h-3.5 text-white/30" />
+                        <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider">Best Times to Post</h4>
+                      </div>
+                      <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
+                        {insights.bestTimeToPost.map((slot, i) => (
+                          <div
+                            key={i}
+                            className="shrink-0 bg-white/[0.03] border border-white/[0.07] rounded-xl p-4 min-w-[160px]"
+                          >
+                            <p className="text-base font-semibold text-white">{slot.day}</p>
+                            <p className="text-sm text-white/60 mt-0.5">{slot.time}</p>
+                            <span
+                              className="inline-block mt-2 text-xs px-2 py-0.5 rounded-md font-medium capitalize"
+                              style={{
+                                backgroundColor: `${PLATFORM_COLORS[slot.platform?.toLowerCase()] || "#ffffff"}18`,
+                                color: PLATFORM_COLORS[slot.platform?.toLowerCase()] || "#ffffff60",
+                              }}
+                            >
+                              {slot.platform}
+                            </span>
+                            <p className="text-xs text-white/35 mt-2 leading-snug">{slot.reason}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Top Content Types */}
+                  {insights.topContentTypes?.length > 0 && (
+                    <div>
+                      <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-3">Top Content Types</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {insights.topContentTypes.map((type, i) => (
+                          <span
+                            key={i}
+                            className="px-3 py-1 bg-white/[0.05] border border-white/[0.08] rounded-full text-sm text-white/70"
+                          >
+                            {type}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Quick Wins */}
+                  {insights.quickWins?.length > 0 && (
+                    <div>
+                      <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-3">Quick Wins</h4>
+                      <div className="space-y-2">
+                        {insights.quickWins.map((win, i) => (
+                          <div key={i} className="flex items-start gap-3">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                            <p className="text-sm text-white/70">{win}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Section B — Top Performing Posts */}
+          {topPosts.length > 0 && (
+            <div className="bg-white/[0.02] backdrop-blur-xl border border-white/[0.08] rounded-2xl overflow-hidden">
+              <div className="p-6 border-b border-white/[0.06]">
+                <h3 className="text-base font-medium text-white">Top Performing Posts</h3>
+                <p className="text-xs text-white/40 mt-0.5">Ranked by total engagement (likes + shares + reach)</p>
+              </div>
+              <div className="divide-y divide-white/[0.04]">
+                {topPosts.map((post, index) => (
+                  <div key={post.post_id} className="px-6 py-5 flex items-start gap-5 hover:bg-white/[0.02] transition-colors">
+                    {/* Rank badge */}
+                    <div className="shrink-0 w-9 h-9 rounded-xl bg-white/[0.05] border border-white/[0.08] flex items-center justify-center">
+                      <span className="text-base font-bold text-white/70">{index + 1}</span>
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-white/75 leading-relaxed">
+                        {post.content.slice(0, 80)}{post.content.length > 80 ? "…" : ""}
+                      </p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <span
+                          className="text-xs px-2 py-0.5 rounded-md font-medium capitalize"
+                          style={{
+                            backgroundColor: `${PLATFORM_COLORS[post.platform] || "#ffffff"}18`,
+                            color: PLATFORM_COLORS[post.platform] || "#ffffff80",
+                          }}
+                        >
+                          {post.platform === "twitter" ? "X" : post.platform}
+                        </span>
+                      </div>
+                      {/* Breakdown */}
+                      <div className="flex items-center gap-4 mt-3 text-xs text-white/40">
+                        <span className="flex items-center gap-1">
+                          <Heart className="w-3 h-3 text-pink-400" />
+                          {post.likes.toLocaleString()} likes
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Share2 className="w-3 h-3 text-sky-400" />
+                          {post.shares.toLocaleString()} shares
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Eye className="w-3 h-3 text-purple-400" />
+                          {post.reach.toLocaleString()} reach
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Total engagement + link */}
+                    <div className="shrink-0 text-right">
+                      <p className="text-2xl font-light text-white">{post.total.toLocaleString()}</p>
+                      <p className="text-xs text-white/30 mt-0.5">total</p>
+                      <a
+                        href={`/dashboard/posts?id=${post.post_id}`}
+                        className="inline-flex items-center gap-1 mt-2 text-xs text-white/40 hover:text-white/70 transition-colors"
+                      >
+                        View post
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>

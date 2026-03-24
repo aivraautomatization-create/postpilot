@@ -41,6 +41,8 @@ export default function SettingsPage() {
   const [offerings, setOfferings] = useState("");
   const [targetAudience, setTargetAudience] = useState("");
   const [toneOfVoice, setToneOfVoice] = useState("");
+  const [goals, setGoals] = useState<string[]>([]);
+  const [industry, setIndustry] = useState("");
 
   useEffect(() => {
     async function fetchData() {
@@ -60,6 +62,8 @@ export default function SettingsPage() {
         setOfferings(profileData.offerings || "");
         setTargetAudience(profileData.target_audience || "");
         setToneOfVoice(profileData.tone_of_voice || "");
+        setGoals(profileData.goals || []);
+        setIndustry(profileData.industry || "");
       }
 
       // Fetch usage for current month (table may not exist yet)
@@ -95,6 +99,8 @@ export default function SettingsPage() {
         offerings,
         target_audience: targetAudience,
         tone_of_voice: toneOfVoice,
+        goals,
+        industry,
         updated_at: new Date().toISOString(),
       })
       .eq("id", user.id);
@@ -215,6 +221,66 @@ export default function SettingsPage() {
               onChange={(e) => setNiche(e.target.value)}
               className="w-full bg-white/[0.02] backdrop-blur-md border border-white/[0.08] hover:border-white/30 transition-colors duration-500 rounded-xl py-2.5 px-4 text-white placeholder:text-white/20 focus:outline-none focus:border-white/50 focus:ring-1 focus:ring-white/20 transition-all font-outfit"
             />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-white/70 mb-1">Industry</label>
+            <p className="text-xs text-white/30 mb-1.5">Your primary business sector</p>
+            <select
+              value={industry}
+              onChange={(e) => setIndustry(e.target.value)}
+              className="bg-transparent border border-white/[0.08] rounded-xl px-4 py-2.5 text-white text-sm w-full focus:outline-none focus:border-white/20"
+            >
+              <option value="" className="bg-[#0a0a0a]">Select industry…</option>
+              {[
+                "Hotels & Hospitality",
+                "Restaurants & Food",
+                "Coaching & Consulting",
+                "Real Estate",
+                "Fitness & Wellness",
+                "Retail & E-commerce",
+                "Beauty & Salon",
+                "Tours & Travel",
+                "Education",
+                "Other",
+              ].map((opt) => (
+                <option key={opt} value={opt} className="bg-[#0a0a0a]">
+                  {opt}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-white/70 mb-1">Business Goals</label>
+            <p className="text-xs text-white/30 mb-2">What you want to achieve with your content</p>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                "More Bookings",
+                "More Leads",
+                "More Followers",
+                "Brand Awareness",
+                "Customer Retention",
+                "Drive Sales",
+              ].map((goal) => {
+                const selected = goals.includes(goal);
+                return (
+                  <div
+                    key={goal}
+                    onClick={() =>
+                      setGoals((prev) =>
+                        prev.includes(goal) ? prev.filter((g) => g !== goal) : [...prev, goal]
+                      )
+                    }
+                    className={`cursor-pointer border rounded-xl px-4 py-2.5 text-sm transition-all select-none ${
+                      selected
+                        ? "bg-white/[0.06] border-white/20 text-white"
+                        : "border-white/[0.04] text-white/40"
+                    }`}
+                  >
+                    {goal}
+                  </div>
+                );
+              })}
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-white/70 mb-1.5">Offerings</label>
