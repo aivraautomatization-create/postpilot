@@ -13,6 +13,29 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  transpilePackages: [
+    'react-markdown',
+    'remark-parse',
+    'remark-rehype',
+    'unified',
+    'vfile',
+    'vfile-message',
+    'unist-util-visit',
+    'unist-util-visit-parents',
+    'unist-util-is',
+    'mdast-util-from-markdown',
+    'mdast-util-to-hast',
+    'mdast-util-to-string',
+    'hast-util-to-jsx-runtime',
+    'hast-util-whitespace',
+    'property-information',
+    'space-separated-tokens',
+    'comma-separated-tokens',
+    'micromark',
+    'decode-named-character-reference',
+    'character-entities',
+    'estree-util-is-identifier-name',
+  ],
   images: {
     remotePatterns: [
       {

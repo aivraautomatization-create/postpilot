@@ -13,6 +13,7 @@ import {
   CreditCard,
   Loader2,
   TrendingUp,
+  FileText,
   Link as LinkIcon,
   LogOut,
   Clock,
@@ -20,6 +21,8 @@ import {
   X,
   Zap,
   AlertTriangle,
+  Brain,
+  RefreshCw,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
@@ -30,8 +33,11 @@ import { isSubscriptionActive, getUsageLimit, getPlanName } from "@/lib/plan-lim
 
 const navigation = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
+  { name: "AI Brain", href: "/dashboard/brain", icon: Brain },
   { name: "Create Content", href: "/dashboard/create", icon: PenTool },
+  { name: "Repurpose", href: "/dashboard/repurpose", icon: RefreshCw },
   { name: "Viral Strategy", href: "/dashboard/strategy", icon: TrendingUp },
+  { name: "Templates", href: "/dashboard/templates", icon: FileText },
   { name: "Analyze Video", href: "/dashboard/analyze", icon: Video },
   { name: "AI Assistant", href: "/dashboard/chat", icon: MessageSquare },
   { name: "Post History", href: "/dashboard/history", icon: Clock },

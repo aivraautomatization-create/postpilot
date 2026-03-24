@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { clsx } from "clsx";
 import {
@@ -17,8 +17,13 @@ import {
   AlertCircle,
   RefreshCw
 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { validateFile, MAX_IMAGE_SIZE, ALLOWED_IMAGE_TYPES } from "@/lib/upload-validation";
+import { contentTemplates } from "@/lib/content-templates";
+import ContentScorePanel from "@/components/dashboard/ContentScorePanel";
+import ABVariantsPanel from "@/components/dashboard/ABVariantsPanel";
+import ReviewModal from "@/components/dashboard/ReviewModal";
 
 const tabs = [
   { id: "text", name: "Text Content", icon: Type },
@@ -27,8 +32,9 @@ const tabs = [
   { id: "animate", name: "Animate Image", icon: Wand2 },
 ];
 
-export default function CreateContent() {
+function CreateContentInner() {
   const { profile, loading: authLoading } = useAuth();
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState("text");
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -65,6 +71,10 @@ export default function CreateContent() {
   // Strategy state
   const [strategy, setStrategy] = useState<string | null>(null);
   const [strategyEnabled, setStrategyEnabled] = useState(true);
+
+  // A/B Variants + Review modal state
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [pendingPublishAction, setPendingPublishAction] = useState<(() => void) | null>(null);
 
   // Reset tab-specific state when switching tabs
   useEffect(() => {
@@ -104,6 +114,17 @@ export default function CreateContent() {
     }
   }, [profile]);
 
+  // Template pre-fill from search params
+  useEffect(() => {
+    const templateId = searchParams.get('template');
+    if (templateId) {
+      const template = contentTemplates.find(t => t.id === templateId);
+      if (template) {
+        setPrompt(template.content);
+      }
+    }
+  }, [searchParams]);
+
   useEffect(() => {
     if (selectedPlatform === "tiktok" || selectedPlatform === "reel") {
       setAspectRatio("9:16");
@@ -140,6 +161,13 @@ export default function CreateContent() {
   const safeJson = async (res: Response) => {
     const text = await res.text();
     try { return JSON.parse(text); } catch { return { error: text || "Server error" }; }
+  };
+
+  const handlePublishReviewed = async () => {
+    if (!result || selectedPlatforms.length === 0) return;
+    // Store the actual publish action, then open review modal
+    setPendingPublishAction(() => handlePublish);
+    setIsReviewModalOpen(true);
   };
 
   const handlePublish = async () => {
@@ -671,6 +699,22 @@ export default function CreateContent() {
                       </p>
                     </details>
                   )}
+
+                  {/* Content Score Panel */}
+                  {engagementScore !== null && (
+                    <ContentScorePanel score={engagementScore} suggestions={suggestions} />
+                  )}
+
+                  {/* A/B Variants Panel */}
+                  <ABVariantsPanel
+                    content={showEnhanced && enhancedResult ? enhancedResult : (result ?? "")}
+                    platform={selectedPlatforms.length > 0 ? selectedPlatforms[0] : "general"}
+                    niche={profile?.niche}
+                    onSelectVariant={(variantContent) => {
+                      setResult(variantContent);
+                      setShowEnhanced(false);
+                    }}
+                  />
                 </>
               )}
               {activeTab === "image" && (
@@ -817,7 +861,7 @@ export default function CreateContent() {
                 </div>
 
                 <button
-                  onClick={handlePublish}
+                  onClick={handlePublishReviewed}
                   disabled={isPublishing || selectedPlatforms.length === 0}
                   className="w-full flex items-center justify-center gap-2 bg-white/10 border border-white/10 text-white py-3 rounded-xl font-medium"
                 >
@@ -834,6 +878,33 @@ export default function CreateContent() {
           )}
         </div>
       </div>
+
+      {/* Review Modal — opens before publish */}
+      <ReviewModal
+        postId=""
+        content={result && activeTab === "text" ? (showEnhanced && enhancedResult ? enhancedResult : result) : ""}
+        platform={selectedPlatforms.length > 0 ? selectedPlatforms[0] : "general"}
+        isOpen={isReviewModalOpen}
+        onClose={() => {
+          setIsReviewModalOpen(false);
+          setPendingPublishAction(null);
+        }}
+        onApprove={() => {
+          setIsReviewModalOpen(false);
+          if (pendingPublishAction) {
+            pendingPublishAction();
+            setPendingPublishAction(null);
+          }
+        }}
+      />
     </div>
+  );
+}
+
+export default function CreateContent() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-[400px]"><Loader2 className="w-8 h-8 text-white animate-spin" /></div>}>
+      <CreateContentInner />
+    </Suspense>
   );
 }
