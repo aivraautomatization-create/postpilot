@@ -7,6 +7,7 @@ import { searchTrends } from "@/lib/perplexity";
 import { reviewContent } from "@/lib/claude";
 import { getGeminiKey } from "@/lib/env";
 import { generateSchema } from "@/lib/validations";
+import { buildBrainContext } from "@/lib/ai-brain";
 
 export async function POST(req: Request) {
   try {
@@ -67,7 +68,17 @@ export async function POST(req: Request) {
       trendData = await searchTrends(profile.niche, platform);
     }
 
-    // Step 2: Gemini content generation (enriched with trend data)
+    // Step 1.5: AI-Brain context (optional, non-blocking)
+    let brainContext: string | null = null;
+    if (userId) {
+      try {
+        brainContext = await buildBrainContext(userId);
+      } catch {
+        // Brain context is optional — continue without it
+      }
+    }
+
+    // Step 2: Gemini content generation (enriched with trend data + brain context)
     const ai = new GoogleGenAI({ apiKey });
 
     const systemInstruction = `
@@ -99,6 +110,8 @@ export async function POST(req: Request) {
     ${strategy ? `ALGORITHM MEMORY OVERLAY:\n${strategy}\nDeeply weave these strategic identifiers into the content.` : ''}
 
     ${trendData ? `REAL-TIME TREND DATA (from live research — USE THIS to make the content timely and relevant):\n${trendData}` : ''}
+
+    ${brainContext ? `AI-BRAIN MEMORY (patterns learned from this brand's past performance — USE THIS to replicate what works):\n${brainContext}` : ''}
 
     FINAL RULE: If the user reads this and thinks "An AI wrote this," you have failed. Write like a human master of the craft.
     `.trim();
