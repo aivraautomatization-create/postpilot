@@ -8,6 +8,7 @@ import Pricing from "@/components/landing/Pricing";
 import Testimonials from "@/components/landing/Testimonials";
 import Results from "@/components/landing/Results";
 import ComparisonTable from "@/components/landing/ComparisonTable";
+import DashboardPreview from "@/components/landing/DashboardPreview";
 import Footer from "@/components/landing/Footer";
 import BackgroundSystem from "@/components/landing/BackgroundSystem";
 import { getSupabaseServer } from "@/lib/supabase-server";
@@ -31,6 +32,7 @@ export default async function Home() {
         <Navbar />
         <Hero />
         <HowItWorks />
+        <DashboardPreview />
         <ProductPreview />
         <TryItNow />
         <Testimonials />

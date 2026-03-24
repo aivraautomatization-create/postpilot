@@ -53,7 +53,7 @@ export const contentTemplates: ContentTemplate[] = [
   {
     id: "saas-cta-1",
     title: "Free Trial Push",
-    content: "I spent {timeframe} building {product} so you don't have to spend {painful time} on {task}.\n\n✅ {Benefit 1}\n✅ {Benefit 2}\n✅ {Benefit 3}\n\nTry it free for 7 days. No credit card needed.\n\n→ {link}",
+    content: "I spent {timeframe} building {product} so you don't have to spend {painful time} on {task}.\n\n✅ {Benefit 1}\n✅ {Benefit 2}\n✅ {Benefit 3}\n\nTry it free for 14 days. No credit card needed.\n\n→ {link}",
     niche: "SaaS",
     platform: "Twitter",
     contentType: "CTA",

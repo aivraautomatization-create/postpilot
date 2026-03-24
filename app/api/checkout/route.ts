@@ -57,9 +57,9 @@ export async function POST(req: Request) {
     }
 
     const prices: Record<string, number> = {
-      'tier-entry': 6900,     // $69.00
-      'tier-pro': 9900,       // $99.00
-      'tier-business': 19900, // $199.00
+      'tier-entry': 1900,     // $19.00
+      'tier-pro': 4900,       // $49.00
+      'tier-business': 9700,  // $97.00
     };
 
     const productId = products[tierId] || products['tier-entry'];
@@ -86,8 +86,8 @@ export async function POST(req: Request) {
         .eq('id', user.id);
     }
 
-    // Free trial is only available for the Pro tier
-    const shouldOfferTrial = tierId === 'tier-pro' && !userProfile.trial_claimed;
+    // Free 14-day trial available on all tiers
+    const shouldOfferTrial = !userProfile.trial_claimed;
 
     // Create a Checkout Session for a subscription
     const session = await stripe.checkout.sessions.create({
@@ -108,7 +108,7 @@ export async function POST(req: Request) {
       ],
       mode: 'subscription',
       subscription_data: shouldOfferTrial ? {
-        trial_period_days: 7,
+        trial_period_days: 14,
         metadata: {
           supabase_user_id: user.id,
           tierId: tierId,

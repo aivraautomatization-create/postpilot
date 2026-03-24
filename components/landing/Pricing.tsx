@@ -12,72 +12,75 @@ const tiers = [
   {
     name: "Starter",
     id: "tier-entry",
-    priceMonthly: 27,
-    priceAnnual: 22,
-    dailyMonthly: "0.90",
-    dailyAnnual: "0.72",
+    priceMonthly: 19,
+    priceAnnual: 15,
+    dailyMonthly: "0.63",
+    dailyAnnual: "0.50",
     coffeeLabel: "Less than your morning coffee",
-    description: "Start building your audience consistently.",
+    description: "Perfect if you\u2019re starting out and want to test AI-driven social without commitment.",
     badge: null,
     BadgeIcon: Zap,
     features: [
-      "28 AI posts/month",
-      "5 platforms (Instagram, LinkedIn, Twitter, Facebook, TikTok)",
+      "14-day free trial included",
+      "1\u20132 social accounts",
+      "15 AI posts/month",
       "AI image generation",
-      "Basic analytics",
+      "Basic AI-brain & templates",
       "Email support",
     ],
-    hasTrial: false,
+    hasTrial: true,
     mostPopular: false,
-    cta: "Get started",
+    cta: "Start 14-day free trial",
     gradient: false,
   },
   {
-    name: "Pro",
+    name: "Creator",
     id: "tier-pro",
     priceMonthly: 49,
     priceAnnual: 39,
     dailyMonthly: "1.63",
     dailyAnnual: "1.28",
     coffeeLabel: "Cheaper than a latte",
-    description: "The growth engine serious founders choose.",
-    badge: "Most Popular · 73% choose this",
+    description: "Best for coaches, restaurants, tours, and small agencies who want AI-driven content at scale.",
+    badge: "Most Popular \u00b7 73% choose this",
     BadgeIcon: Crown,
     features: [
-      "7-day free trial included",
-      "50 posts + 5 Reels/TikToks/month",
-      "All 6 platforms",
-      "Viral strategy engine",
-      "Advanced AI Analyst",
+      "14-day free trial included",
+      "3\u20135 social accounts",
+      "60 posts + 10 Reels/TikToks/month",
+      "Full AI-brain + viral strategy engine",
+      "Video-first workflows",
+      "Niche templates & playbooks",
       "Priority support",
     ],
     hasTrial: true,
     mostPopular: true,
-    cta: "Start 7-day free trial",
+    cta: "Start 14-day free trial",
     gradient: true,
   },
   {
-    name: "Agency",
+    name: "Pro",
     id: "tier-business",
     priceMonthly: 97,
     priceAnnual: 78,
     dailyMonthly: "3.23",
     dailyAnnual: "2.56",
     coffeeLabel: "One fancy coffee per day",
-    description: "For founders who refuse to be second.",
+    description: "Built for hotels, real-estate, and growing SMEs that need multiple accounts and full automation.",
     badge: "Lock in founder pricing",
     BadgeIcon: Building2,
     features: [
-      "Everything in Pro +",
-      "100 posts + 50 Reels/TikToks/month",
-      "Priority AI generation",
-      "Client reporting dashboard",
-      "Early access to new features",
+      "14-day free trial included",
+      "5\u201310 social accounts",
+      "Unlimited posts + 50 Reels/TikToks/month",
+      "Multi-brand support",
+      "Bulk video repurposing",
+      "Detailed analytics & reporting",
       "Dedicated success manager",
     ],
-    hasTrial: false,
+    hasTrial: true,
     mostPopular: false,
-    cta: "Get started",
+    cta: "Start 14-day free trial",
     gradient: false,
   },
 ];
@@ -135,20 +138,20 @@ export default function Pricing() {
 
         {/* ROI anchor — loss aversion framing */}
         <motion.div {...scrollReveal} className="mx-auto max-w-3xl text-center mb-8">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-white/60 mb-6">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-white/60 mb-6 flex-wrap justify-center">
             <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-            Agencies charge <span className="font-semibold text-white">$3,000–$8,000/month</span> for what PostPilot does in 3 minutes
+            Most AI-social tools start at <span className="font-semibold text-white">~$99/mo</span>. Ours starts at <span className="font-semibold text-white">$19/mo</span> with AI-video, niche playbooks, and viral hooks included
           </div>
 
           <h2 className="text-4xl font-light tracking-tight text-white sm:text-5xl">
-            Choose your plan.
+            Flexible plans for every niche,
             <br />
-            <span className="text-white/50">Cancel anytime.</span>
+            <span className="text-white/50">starting at $19.</span>
           </h2>
 
           {/* The one-line loss aversion hook */}
           <p className="mt-5 text-base text-white/60 leading-relaxed max-w-xl mx-auto">
-            Most founders recoup the cost in the first week — in time saved.
+            Start your 14-day free trial — no credit card required. Connect your accounts, fill your brand info, and get your first 30-day AI-generated content calendar in minutes.
           </p>
         </motion.div>
 
@@ -305,11 +308,11 @@ export default function Pricing() {
 
         {/* Upgrade path hint */}
         <motion.div {...scrollReveal} className="mt-10 flex items-center justify-center gap-6 text-xs text-white/25">
-          <span>Starter <ArrowRight className="inline w-3 h-3 mx-1" /> Pro</span>
+          <span>Starter <ArrowRight className="inline w-3 h-3 mx-1" /> Creator</span>
           <span className="w-px h-4 bg-white/10" />
-          <span>Pro <ArrowRight className="inline w-3 h-3 mx-1" /> Agency</span>
+          <span>Creator <ArrowRight className="inline w-3 h-3 mx-1" /> Pro</span>
           <span className="w-px h-4 bg-white/10" />
-          <span>Agency <ArrowRight className="inline w-3 h-3 mx-1" /> Enterprise</span>
+          <span>Pro <ArrowRight className="inline w-3 h-3 mx-1" /> Enterprise</span>
         </motion.div>
 
         {/* Footer */}

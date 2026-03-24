@@ -36,7 +36,7 @@ export async function sendWelcomeEmail(email: string, name?: string) {
             <div style="margin: 32px 0;">
               <a href="${APP_URL}/dashboard" style="background: #ffffff; color: #000; padding: 14px 28px; border-radius: 10px; text-decoration: none; font-weight: 600; display: inline-block;">Go to Dashboard</a>
             </div>
-            <p style="color: #888; font-size: 14px;">Your 7-day free trial is now active. Enjoy!</p>
+            <p style="color: #888; font-size: 14px;">Your 14-day free trial is now active. Enjoy!</p>
             <p style="color: #444; margin-top: 24px;">Best,<br/>The PostPilot Team</p>
           </div>
         </div>
@@ -59,7 +59,7 @@ export async function sendTrialWarningEmail(email: string, daysLeft: number) {
           <div style="background: #fff; border-radius: 12px; padding: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
             <h1 style="color: #000; font-size: 24px; margin-bottom: 16px;">Your trial is almost over</h1>
             <p style="color: #444; line-height: 1.6;">Hi there,</p>
-            <p style="color: #444; line-height: 1.6;">We hope you're enjoying PostPilot! This is a friendly reminder that your 7-day free trial will end in <strong>${daysLeft} days</strong>.</p>
+            <p style="color: #444; line-height: 1.6;">We hope you're enjoying PostPilot! This is a friendly reminder that your 14-day free trial will end in <strong>${daysLeft} days</strong>.</p>
             <p style="color: #444; line-height: 1.6;">To keep using all our AI features and automated publishing, upgrade to a paid plan now.</p>
             <div style="margin: 32px 0;">
               <a href="${APP_URL}/#pricing" style="background: #ffffff; color: #000; padding: 14px 28px; border-radius: 10px; text-decoration: none; font-weight: 600; display: inline-block;">Upgrade Now</a>

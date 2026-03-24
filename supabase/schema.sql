@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   tone_of_voice TEXT,
   onboarding_completed BOOLEAN DEFAULT FALSE,
   trial_starts_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  trial_ends_at TIMESTAMP WITH TIME ZONE DEFAULT (NOW() + INTERVAL '7 days'),
+  trial_ends_at TIMESTAMP WITH TIME ZONE DEFAULT (NOW() + INTERVAL '14 days'),
   trial_claimed BOOLEAN DEFAULT FALSE,
   stripe_customer_id TEXT,
   subscription_status TEXT DEFAULT 'inactive', -- 'inactive', 'trialing', 'active', 'canceled', 'past_due'

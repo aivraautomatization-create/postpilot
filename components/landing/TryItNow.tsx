@@ -165,7 +165,7 @@ export default function TryItNow() {
                       href="/auth/signup"
                       className="inline-flex items-center justify-center gap-2 px-8 py-3 text-sm font-semibold bg-white text-black rounded-full hover:shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-all hover:scale-105 active:scale-95"
                     >
-                      Start 7-Day Free Trial
+                      Start 14-Day Free Trial
                       <ArrowRight className="w-4 h-4" />
                     </Link>
                   </div>

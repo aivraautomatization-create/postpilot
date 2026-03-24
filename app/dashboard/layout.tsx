@@ -21,6 +21,7 @@ import {
   X,
   Zap,
   AlertTriangle,
+  Brain,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
@@ -31,6 +32,7 @@ import { isSubscriptionActive, getUsageLimit, getPlanName } from "@/lib/plan-lim
 
 const navigation = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
+  { name: "AI Brain", href: "/dashboard/brain", icon: Brain },
   { name: "Create Content", href: "/dashboard/create", icon: PenTool },
   { name: "Viral Strategy", href: "/dashboard/strategy", icon: TrendingUp },
   { name: "Templates", href: "/dashboard/templates", icon: FileText },

@@ -6,6 +6,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { searchTrends } from "@/lib/perplexity";
 import { getGeminiKey } from "@/lib/env";
 import { isSubscriptionActive } from "@/lib/plan-limits";
+import { buildBrainContext } from "@/lib/ai-brain";
 
 export async function POST(req: Request) {
   try {
@@ -61,6 +62,14 @@ export async function POST(req: Request) {
     const niche = profile.niche || profile.companyName || 'General';
     const trendData = await searchTrends(niche, 'all platforms');
 
+    // Fetch AI-Brain context (optional)
+    let brainContext: string | null = null;
+    try {
+      brainContext = await buildBrainContext(user.id);
+    } catch {
+      // Brain context is optional
+    }
+
     const ai = new GoogleGenAI({ apiKey });
 
     const prompt = `
@@ -115,6 +124,7 @@ export async function POST(req: Request) {
     - 2-3 multiplier hacks
     - fullStrategy should be a comprehensive markdown version of the entire strategy
     ${trendData ? '- USE the real-time trend data to ground recommendations in what is actually trending RIGHT NOW.' : ''}
+    ${brainContext ? `\n\nAI-BRAIN MEMORY (patterns learned from past performance — factor these into your strategy):\n${brainContext}` : ''}
     `.trim();
 
     const response = await ai.models.generateContent({

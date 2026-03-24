@@ -25,26 +25,27 @@ export default function Hero() {
         >
           <Zap className="w-4 h-4 text-yellow-400" />
           <span className="text-sm text-white font-medium tracking-wide">
-            2M+ posts generated · 14 hrs/week saved per creator
+            2M+ posts generated · 14 hrs/week saved per business
           </span>
         </motion.div>
 
-        {/* Psychology: Loss Aversion in headline — "stop losing" framing */}
+        {/* Psychology: Niche-targeting headline — makes every niche feel seen */}
         <motion.h1
           variants={fadeInUp}
-          className="text-5xl md:text-7xl lg:text-[5.5rem] font-light tracking-tight mb-6 leading-[1.05] bg-clip-text text-transparent bg-gradient-to-r from-white via-white/90 to-white/60"
+          className="text-4xl md:text-6xl lg:text-[5rem] font-light tracking-tight mb-6 leading-[1.08] bg-clip-text text-transparent bg-gradient-to-r from-white via-white/90 to-white/60"
         >
-          Stop losing weeks<br />to content.
+          AI-powered social media<br />for your business.
         </motion.h1>
 
-        {/* Psychology: Present Bias (immediate benefit) + Specificity + Loss Aversion */}
+        {/* Psychology: Present Bias (immediate benefit) + Specificity + Niche appeal */}
         <motion.p
           variants={fadeInUp}
-          className="mt-6 max-w-2xl mx-auto text-xl text-white/60 mb-10 font-normal leading-relaxed"
+          className="mt-6 max-w-2xl mx-auto text-lg text-white/60 mb-10 font-normal leading-relaxed"
         >
-          In 3 minutes, PostPilot writes your entire week of platform-native content —
-          tailored to your voice, your niche, and your audience. Every day you wait
-          is reach you&apos;ll never recover.
+          An AI-powered social media manager for hotels, restaurants, coaches,
+          real-estate agents, and local businesses — self-service, no-hassle,
+          and AI-driven from day one. Connect your accounts, fill your brand info,
+          and get your first 30-day content calendar in minutes.
         </motion.p>
 
         {/* CTAs — Psychology: Commitment & Consistency (low-commitment entry) + Regret Aversion (risk reversal) */}
@@ -54,7 +55,7 @@ export default function Hero() {
         >
           <Link href="/auth/signup" className="w-full sm:w-auto relative z-20">
             <InteractiveHoverButton
-              text="Start Free — No Card Needed"
+              text="Start 14-Day Free Trial"
               className="w-full sm:w-72 py-4 rounded-full text-black hover:text-white dark:hover:text-black bg-white border-transparent"
             />
           </Link>
@@ -67,10 +68,27 @@ export default function Hero() {
           </Link>
         </motion.div>
 
+        {/* Niche examples — shows deep tailoring */}
+        <motion.div
+          variants={fadeInUp}
+          className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto"
+        >
+          {[
+            { niche: "For hotels", desc: "30-day booking-boost video calendar" },
+            { niche: "For coaches", desc: "30-day lead-generation post plan" },
+            { niche: "For restaurants", desc: "30-day mouth-watering short-video calendar" },
+          ].map((item) => (
+            <div key={item.niche} className="flex flex-col items-center p-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-sm">
+              <span className="text-sm font-semibold text-white">{item.niche}</span>
+              <span className="text-xs text-white/40 mt-1 text-center">{item.desc}</span>
+            </div>
+          ))}
+        </motion.div>
+
         {/* Psychology: Social Proof + Specificity — anchors trust via mimetic desire */}
         <motion.div
           variants={fadeInUp}
-          className="mt-12 flex flex-col items-center justify-center gap-3"
+          className="mt-10 flex flex-col items-center justify-center gap-3"
         >
           <div className="flex -space-x-3">
             {[1, 2, 3, 4, 5].map((i) => (
@@ -78,7 +96,7 @@ export default function Hero() {
                 key={i}
                 className="w-10 h-10 rounded-full border-2 border-black/50"
                 src={`https://i.pravatar.cc/100?img=${i + 10}`}
-                alt={`Creator ${i}`}
+                alt={`Business ${i}`}
               />
             ))}
           </div>
@@ -91,7 +109,7 @@ export default function Hero() {
               ))}
             </div>
             {/* Psychology: Specificity — odd numbers feel more authentic than round ones */}
-            <span className="text-sm font-medium">Trusted by 2,847 creators &amp; teams</span>
+            <span className="text-sm font-medium">Used by 800+ local businesses &amp; personal brands</span>
           </div>
         </motion.div>
 
@@ -102,7 +120,7 @@ export default function Hero() {
         >
           {[
             { value: "14 hrs", label: "saved per week" },
-            { value: "3.4×", label: "avg. engagement lift" },
+            { value: "3.4\u00d7", label: "avg. engagement lift" },
             { value: "$36K", label: "saved vs. agency/year" },
           ].map((stat) => (
             <div key={stat.label} className="flex flex-col items-center">

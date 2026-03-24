@@ -1,7 +1,7 @@
 export const PLAN_LIMITS: Record<string, { posts: number; videos: number; name: string }> = {
-  'tier-entry': { posts: 28, videos: 0, name: 'Entry' },
-  'tier-pro': { posts: 50, videos: 5, name: 'Pro' },
-  'tier-business': { posts: 100, videos: 50, name: 'Business' },
+  'tier-entry': { posts: 15, videos: 0, name: 'Starter' },
+  'tier-pro': { posts: 60, videos: 10, name: 'Creator' },
+  'tier-business': { posts: 999, videos: 50, name: 'Pro' },
 };
 
 export function getUsageLimit(tier: string | null | undefined): number {
@@ -10,7 +10,7 @@ export function getUsageLimit(tier: string | null | undefined): number {
 }
 
 export function getPlanName(tier: string | null | undefined): string {
-  if (!tier || !PLAN_LIMITS[tier]) return 'Entry';
+  if (!tier || !PLAN_LIMITS[tier]) return 'Starter';
   return PLAN_LIMITS[tier].name;
 }
 

@@ -149,7 +149,7 @@ export default function SignupPage() {
         )}
 
         <Button type="submit" disabled={loading} className="w-full h-11 rounded-xl bg-white text-black hover:bg-white/90 text-base font-semibold mt-4">
-          {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Start 7-Day Free Trial'}
+          {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Start 14-Day Free Trial'}
         </Button>
       </form>
 
