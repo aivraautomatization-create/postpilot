@@ -79,7 +79,7 @@ export default function HistoryPage() {
     const from = reset ? 0 : currentPosts.length;
     const to = from + PAGE_SIZE - 1;
 
-    let query = (supabase as any)
+    let query = supabase!
       .from("posts")
       .select("*")
       .eq("user_id", user.id)
@@ -104,7 +104,7 @@ export default function HistoryPage() {
 
     // Update counts on initial load
     if (reset) {
-      const allQuery = await (supabase as any)
+      const allQuery = await supabase!
         .from("posts")
         .select("status")
         .eq("user_id", user.id);
@@ -120,6 +120,7 @@ export default function HistoryPage() {
   }, [supabase, user, filter]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchPosts(true);
   }, [fetchPosts]);
 

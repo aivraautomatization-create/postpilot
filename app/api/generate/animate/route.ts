@@ -4,7 +4,7 @@ import { getSupabaseServer } from "@/lib/supabase-server";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { isSubscriptionActive } from "@/lib/plan-limits";
 import { getGeminiKey } from "@/lib/env";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimitAsync } from "@/lib/rate-limit-store";
 
 async function downloadVideoWithKey(videoUri: string, apiKey: string): Promise<Buffer | null> {
   try {
@@ -63,7 +63,7 @@ export async function POST(req: Request) {
     }
 
     // Rate limit: 3 per minute per user (expensive operation)
-    const { allowed, retryAfter } = checkRateLimit(`animate:${user.id}`, 3, 60000);
+    const { allowed, retryAfter } = await checkRateLimitAsync(`animate:${user.id}`, 3, 60000);
     if (!allowed) {
       return NextResponse.json({
         error: `Rate limit exceeded. Try again in ${retryAfter} seconds.`,

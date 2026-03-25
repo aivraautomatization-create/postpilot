@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     }
 
     // Fetch profile to get Stripe customer ID
-    const { data: profile } = await (supabaseAdmin as any)
+    const { data: profile } = await supabaseAdmin!
       .from('profiles')
       .select('stripe_customer_id')
       .eq('id', user.id)
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     }
 
     // Delete the Supabase auth user (cascade deletes profiles, social_accounts, posts, usage)
-    const { error: deleteError } = await (supabaseAdmin as any).auth.admin.deleteUser(user.id);
+    const { error: deleteError } = await supabaseAdmin!.auth.admin.deleteUser(user.id);
 
     if (deleteError) {
       console.error('Error deleting user:', deleteError);

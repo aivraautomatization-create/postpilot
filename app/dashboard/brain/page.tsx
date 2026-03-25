@@ -46,7 +46,7 @@ interface Post {
   platforms: string[];
   status: string;
   journey_stage: string | null;
-  scheduled_at: string | null;
+  scheduled_for: string | null;
 }
 
 interface PostVariant {
@@ -157,28 +157,28 @@ export default function BrandBrainPage() {
 
       try {
         // Fetch brand memory entries
-        const { data: memoryData, count } = await (supabase as any)
+        const { data: memoryData, count } = await supabase!
           .from("brand_memory")
           .select("*", { count: "exact" })
           .eq("user_id", user.id)
           .order("confidence_score", { ascending: false });
 
         if (memoryData) {
-          setBrandMemory(memoryData);
+          setBrandMemory(memoryData as any);
           setMemoryCount(count || memoryData.length);
-          setTopPatterns(memoryData.slice(0, 5));
+          setTopPatterns(memoryData.slice(0, 5) as any);
         }
 
         // Fetch posts analyzed count + all posts for funnel
-        const { data: postsData, count: postCount } = await (supabase as any)
+        const { data: postsData, count: postCount } = await supabase!
           .from("posts")
-          .select("id, content, platforms, status, journey_stage, scheduled_at", { count: "exact" })
+          .select("id, content, platforms, status, journey_stage, scheduled_for", { count: "exact" })
           .eq("user_id", user.id)
           .order("created_at", { ascending: false });
 
         setPostsAnalyzed(postCount || 0);
         if (postsData) {
-          setAllPosts(postsData);
+          setAllPosts(postsData as any);
         }
       } catch (err) {
         console.error("Error fetching brain data:", err);
@@ -199,14 +199,14 @@ export default function BrandBrainPage() {
       }
 
       try {
-        const { data } = await (supabase as any)
+        const { data } = await supabase!
           .from("post_variants")
           .select("*, posts!inner(content, platforms, status, user_id)")
           .eq("posts.user_id", user.id)
           .limit(10);
 
         if (data) {
-          setVariants(data);
+          setVariants(data as any);
         }
       } catch (err) {
         console.error("Error fetching variants:", err);
@@ -430,7 +430,7 @@ export default function BrandBrainPage() {
             <p className="text-white/60 text-sm mb-4 leading-relaxed">{vibeDescription}</p>
 
             <div className="flex flex-wrap gap-2">
-              {(profile?.content_pillars || ["Authentic", "Engaging", "Educational"]).map(
+              {((profile?.content_pillars as any) || ["Authentic", "Engaging", "Educational"]).map(
                 (tag: string, i: number) => (
                   <span
                     key={i}
@@ -744,9 +744,9 @@ export default function BrandBrainPage() {
                           </div>
 
                           {/* Scheduled date */}
-                          {post.scheduled_at && (
+                          {post.scheduled_for && (
                             <span className="text-white/30 text-xs flex-shrink-0 hidden sm:block">
-                              {new Date(post.scheduled_at).toLocaleDateString("en-US", {
+                              {new Date(post.scheduled_for).toLocaleDateString("en-US", {
                                 month: "short",
                                 day: "numeric",
                               })}

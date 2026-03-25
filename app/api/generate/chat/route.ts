@@ -4,7 +4,7 @@ import { getSupabaseServer } from "@/lib/supabase-server";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { getGeminiKey } from "@/lib/env";
 import { isSubscriptionActive } from "@/lib/plan-limits";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimitAsync } from "@/lib/rate-limit-store";
 
 export async function POST(req: Request) {
   try {
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     }
 
     // Rate limit: 10 per minute per user
-    const { allowed, retryAfter } = checkRateLimit(`chat:${user.id}`, 10, 60000);
+    const { allowed, retryAfter } = await checkRateLimitAsync(`chat:${user.id}`, 10, 60000);
     if (!allowed) {
       return NextResponse.json({
         error: `Rate limit exceeded. Try again in ${retryAfter} seconds.`,

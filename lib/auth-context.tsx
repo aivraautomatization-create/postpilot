@@ -4,10 +4,37 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { getSupabase } from './supabase';
 
+export interface Profile {
+  id: string;
+  full_name?: string | null;
+  company_name?: string | null;
+  industry?: string | null;
+  niche?: string | null;
+  target_audience?: string | null;
+  offerings?: string | null;
+  tone_of_voice?: string | null;
+  goals?: string[] | null;
+  onboarding_completed?: boolean | null;
+  subscription_status?: string | null;
+  subscription_tier?: string | null;
+  plan_status?: string | null;
+  trial_ends_at?: string | null;
+  trial_starts_at?: string | null;
+  trial_claimed?: boolean;
+  stripe_customer_id?: string | null;
+  latest_strategy?: Record<string, unknown> | null;
+  content_pillars?: Record<string, unknown> | null;
+  referral_code?: string | null;
+  referred_by?: string | null;
+  bonus_posts?: number | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
 type AuthContextType = {
   user: User | null;
   session: Session | null;
-  profile: any | null;
+  profile: Profile | null;
   loading: boolean;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -18,21 +45,21 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<any | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const supabase = getSupabase();
 
   const fetchProfile = async (userId: string) => {
     if (!supabase) return;
     try {
-      const { data, error } = await (supabase as any)
+      const { data } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
       
       if (data) {
-        setProfile(data);
+        setProfile(data as any);
         // Persist tier for quick access in non-hydrated states
         localStorage.setItem('subscriptionTier', data.subscription_tier || 'tier-entry');
       }

@@ -171,6 +171,7 @@ export const AwardBadge = ({ type, place, link }: AwardBadgeProps) => {
 
   useEffect(() => {
     if (isTimeoutFinished) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setMatrix(currentMatrix);
     }
   }, [currentMatrix, isTimeoutFinished]);

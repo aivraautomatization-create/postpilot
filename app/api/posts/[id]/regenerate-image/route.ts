@@ -4,7 +4,7 @@ import { getSupabaseServer } from "@/lib/supabase-server";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { getGeminiKey } from "@/lib/env";
 import { isSubscriptionActive } from "@/lib/plan-limits";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimitAsync } from "@/lib/rate-limit-store";
 
 export async function POST(
   request: Request,
@@ -24,7 +24,7 @@ export async function POST(
     }
 
     // Rate limit: 5 per minute per user
-    const { allowed, retryAfter } = checkRateLimit(`regenerate:${user.id}`, 5, 60000);
+    const { allowed, retryAfter } = await checkRateLimitAsync(`regenerate:${user.id}`, 5, 60000);
     if (!allowed) {
       return NextResponse.json({
         error: `Rate limit exceeded. Try again in ${retryAfter} seconds.`,
@@ -38,7 +38,7 @@ export async function POST(
     }
 
     // Check subscription
-    const { data: userProfile } = await (admin as any)
+    const { data: userProfile } = await admin
       .from('profiles')
       .select('subscription_status, trial_ends_at, stripe_customer_id')
       .eq('id', user.id)
@@ -51,7 +51,7 @@ export async function POST(
     }
 
     // Verify post belongs to user and get current data
-    const { data: post } = await (admin as any)
+    const { data: post } = await admin
       .from("posts")
       .select("id, content, image_url")
       .eq("id", id)
@@ -124,7 +124,7 @@ export async function POST(
     const ext = imageData.mimeType.includes('png') ? 'png' : 'jpg';
     const fileName = `${user.id}/${crypto.randomUUID()}.${ext}`;
 
-    const { error: uploadError } = await (admin as any).storage
+    const { error: uploadError } = await admin.storage
       .from('media')
       .upload(fileName, buffer, {
         contentType: imageData.mimeType,
@@ -137,14 +137,14 @@ export async function POST(
       // Fall back to base64 data URL if storage upload fails
       imageUrl = `data:${imageData.mimeType};base64,${imageData.base64}`;
     } else {
-      const { data: { publicUrl } } = (admin as any).storage
+      const { data: { publicUrl } } = admin.storage
         .from('media')
         .getPublicUrl(fileName);
       imageUrl = publicUrl;
     }
 
     // Update the post's image_url
-    await (admin as any)
+    await admin
       .from("posts")
       .update({ image_url: imageUrl })
       .eq("id", id);

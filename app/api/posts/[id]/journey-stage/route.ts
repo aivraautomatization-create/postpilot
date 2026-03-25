@@ -38,7 +38,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Database connection failed" }, { status: 500 });
     }
 
-    const { error } = await (admin as any)
+    const { error } = await admin
       .from("posts")
       .update({ journey_stage: journeyStage })
       .eq("id", postId)

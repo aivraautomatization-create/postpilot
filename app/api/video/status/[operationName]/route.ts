@@ -40,7 +40,7 @@ export async function GET(
 
       const admin = getSupabaseAdmin();
       if (admin) {
-        await (admin as any)
+        await admin
           .from('video_operations')
           .update({
             status: 'completed',

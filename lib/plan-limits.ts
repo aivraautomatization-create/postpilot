@@ -4,9 +4,9 @@ export const PLAN_LIMITS: Record<string, { posts: number; videos: number; name: 
   'tier-business': { posts: 999, videos: 50, name: 'Pro' },
 };
 
-export function getUsageLimit(tier: string | null | undefined): number {
-  if (!tier || !PLAN_LIMITS[tier]) return PLAN_LIMITS['tier-entry'].posts;
-  return PLAN_LIMITS[tier].posts;
+export function getUsageLimit(tier: string | null | undefined, bonusPosts: number = 0): number {
+  const base = (!tier || !PLAN_LIMITS[tier]) ? PLAN_LIMITS['tier-entry'].posts : PLAN_LIMITS[tier].posts;
+  return base + bonusPosts;
 }
 
 export function getPlanName(tier: string | null | undefined): string {

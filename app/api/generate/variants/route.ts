@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     // Check subscription
     const admin = getSupabaseAdmin();
     if (admin) {
-      const { data: userProfile } = await (admin as any)
+      const { data: userProfile } = await admin
         .from('profiles')
         .select('subscription_status, trial_ends_at, stripe_customer_id')
         .eq('id', user.id)
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const { content, platform, niche } = await req.json();
+    const { content, platform, niche, postId } = await req.json();
 
     if (!content || !platform || !niche) {
       return NextResponse.json({ error: "content, platform, and niche are required" }, { status: 400 });
@@ -82,6 +82,28 @@ ${content}`,
     const text = message.content[0].type === 'text' ? message.content[0].text : '';
     const cleaned = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
     const variants = JSON.parse(cleaned);
+
+    // Persist variants to post_variants table if a postId was provided.
+    // This enables the A/B learning loop: when the user selects a variant,
+    // the select route can fetch all variants and record preference signals.
+    if (postId && admin) {
+      try {
+        const rows = variants.map((v: { label: string; content: string; hook: string; cta: string }) => ({
+          post_id: postId,
+          variant_label: v.label,
+          content: v.content,
+          hook: v.hook,
+          cta: v.cta,
+          selected: false,
+        }));
+        // Delete any old variants for this post first, then insert fresh ones
+        await admin.from("post_variants").delete().eq("post_id", postId);
+        await admin.from("post_variants").insert(rows);
+      } catch (dbErr) {
+        // Non-critical — return variants even if persistence fails
+        console.error("[variants] Failed to persist variants:", dbErr);
+      }
+    }
 
     return NextResponse.json({ variants });
   } catch (error) {

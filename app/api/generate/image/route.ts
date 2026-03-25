@@ -4,7 +4,7 @@ import { getSupabaseServer } from "@/lib/supabase-server";
 import { isSubscriptionActive } from "@/lib/plan-limits";
 import { searchTrends } from "@/lib/perplexity";
 import { getGeminiKey } from "@/lib/env";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimitAsync } from "@/lib/rate-limit-store";
 
 export async function POST(req: Request) {
   try {
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     }
 
     // Rate limit: 5 per minute per user
-    const { allowed, retryAfter } = checkRateLimit(`image:${user.id}`, 5, 60000);
+    const { allowed, retryAfter } = await checkRateLimitAsync(`image:${user.id}`, 5, 60000);
     if (!allowed) {
       return NextResponse.json({
         error: `Rate limit exceeded. Try again in ${retryAfter} seconds.`,

@@ -96,7 +96,7 @@ export default function Pricing() {
 
   const handleCheckout = async (tierId: string) => {
     if (!user) {
-      window.location.href = `/auth/signup?plan=${tierId}`;
+      window.location.href = `/auth/signup?plan=${tierId}&billing=${billing}`;
       return;
     }
     try {
@@ -104,7 +104,7 @@ export default function Pricing() {
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tierId }),
+        body: JSON.stringify({ tierId, billingCycle: billing }),
       });
       const data = await response.json();
       if (data.customerId) {

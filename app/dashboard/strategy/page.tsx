@@ -208,7 +208,7 @@ export default function ViralStrategyPage() {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) return;
-      const { data } = await (supabase as any)
+      const { data } = await supabase!
         .from("profiles")
         .select("niche")
         .eq("id", user.id)
@@ -461,7 +461,7 @@ export default function ViralStrategyPage() {
               <div className="text-center py-8">
                 <TrendingUp className="w-8 h-8 text-white/10 mx-auto mb-2" />
                 <p className="text-white/30 text-sm">
-                  Enter your niche and click "Find Trends" to snipe viral
+                  Enter your niche and click &quot;Find Trends&quot; to snipe viral
                   opportunities
                 </p>
               </div>

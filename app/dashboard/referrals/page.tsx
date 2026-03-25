@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Gift, Copy, Check, Users, UserPlus, ArrowRight, Loader2 } from "lucide-react";
+import { Gift, Copy, Check, Users, UserPlus, Loader2, Share2 } from "lucide-react";
 
 interface ReferralData {
   referralCode: string;
@@ -41,6 +41,14 @@ export default function ReferralsPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const shareText = "I've been using Puls to automate my social media with AI — you get 14 days free + 10 bonus posts when you sign up with my link:";
+
+  const shareLinks = data ? {
+    twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(data.referralLink)}`,
+    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(data.referralLink)}`,
+    whatsapp: `https://wa.me/?text=${encodeURIComponent(`${shareText} ${data.referralLink}`)}`,
+  } : null;
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -65,7 +73,7 @@ export default function ReferralsPage() {
       >
         <h2 className="text-2xl font-light text-white mb-1">Refer a Friend</h2>
         <p className="text-white/50 text-sm">
-          Give a friend 14 days of Pro free. Get 10 extra posts when they sign up.
+          You both win — your friend gets <span className="text-white/70 font-medium">14 days of Pro free + 10 bonus posts</span>. You earn <span className="text-white/70 font-medium">10 bonus posts</span> too.
         </p>
       </motion.div>
 
@@ -98,7 +106,66 @@ export default function ReferralsPage() {
             {copied ? "Copied" : "Copy"}
           </button>
         </div>
+
+        {/* Share buttons */}
+        {shareLinks && (
+          <div className="flex items-center gap-2 pt-1">
+            <span className="text-xs text-white/30 flex items-center gap-1.5">
+              <Share2 className="w-3 h-3" /> Share on
+            </span>
+            <a
+              href={shareLinks.twitter}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1.5 rounded-lg bg-white/[0.05] border border-white/[0.08] text-xs text-white/60 hover:text-white hover:bg-white/[0.08] transition-all"
+            >
+              X / Twitter
+            </a>
+            <a
+              href={shareLinks.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1.5 rounded-lg bg-white/[0.05] border border-white/[0.08] text-xs text-white/60 hover:text-white hover:bg-white/[0.08] transition-all"
+            >
+              LinkedIn
+            </a>
+            <a
+              href={shareLinks.whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1.5 rounded-lg bg-white/[0.05] border border-white/[0.08] text-xs text-white/60 hover:text-white hover:bg-white/[0.08] transition-all"
+            >
+              WhatsApp
+            </a>
+          </div>
+        )}
       </motion.div>
+
+      {/* Milestone progress */}
+      {data.stats.totalReferrals < 5 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs text-white/50">Next milestone</span>
+            <span className="text-xs text-white/50">{data.stats.totalReferrals}/5 referrals</span>
+          </div>
+          <div className="w-full h-1.5 rounded-full bg-white/[0.06] overflow-hidden mb-3">
+            <motion.div
+              className="h-full bg-white rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${(data.stats.totalReferrals / 5) * 100}%` }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            />
+          </div>
+          <p className="text-xs text-white/40">
+            {5 - data.stats.totalReferrals} more {5 - data.stats.totalReferrals === 1 ? "referral" : "referrals"} to unlock a free month of Creator plan
+          </p>
+        </motion.div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -134,8 +201,8 @@ export default function ReferralsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {[
             { step: "1", title: "Share your link", desc: "Send your unique referral link to friends and colleagues" },
-            { step: "2", title: "They sign up", desc: "Your friend gets 14 days of Pro free — no credit card needed" },
-            { step: "3", title: "You get rewarded", desc: "Earn 10 extra posts added to your monthly limit" },
+            { step: "2", title: "They sign up", desc: "Your friend gets 14 days of Pro free + 10 bonus posts — no credit card needed" },
+            { step: "3", title: "You both win", desc: "You earn 10 bonus posts added to your monthly limit. Stacks with every referral." },
           ].map((item) => (
             <div key={item.step} className="flex gap-3">
               <div className="w-8 h-8 rounded-full bg-white/[0.05] border border-white/[0.08] flex items-center justify-center shrink-0">

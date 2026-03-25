@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import { sendWelcomeEmail } from '@/lib/emails';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { checkRateLimitAsync } from "@/lib/rate-limit-store";
 
 export async function POST(req: Request) {
   try {
     // Rate limit by IP to prevent email spam
     const forwarded = req.headers.get('x-forwarded-for');
     const ip = forwarded?.split(',')[0]?.trim() || 'unknown';
-    const { allowed, retryAfter } = checkRateLimit(`welcome:${ip}`, 3, 300000);
+    const { allowed, retryAfter } = await checkRateLimitAsync(`welcome:${ip}`, 3, 300000);
     if (!allowed) {
       return NextResponse.json({
         error: `Rate limit exceeded. Try again in ${retryAfter} seconds.`,

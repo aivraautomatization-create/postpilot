@@ -5,7 +5,7 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 import { MAX_VIDEO_SIZE, ALLOWED_VIDEO_TYPES } from "@/lib/upload-validation";
 import { getGeminiKey } from "@/lib/env";
 import { isSubscriptionActive } from "@/lib/plan-limits";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimitAsync } from "@/lib/rate-limit-store";
 
 export async function POST(req: Request) {
   try {
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     }
 
     // Rate limit: 5 per minute per user
-    const { allowed, retryAfter } = checkRateLimit(`analyze:${user.id}`, 5, 60000);
+    const { allowed, retryAfter } = await checkRateLimitAsync(`analyze:${user.id}`, 5, 60000);
     if (!allowed) {
       return NextResponse.json({
         error: `Rate limit exceeded. Try again in ${retryAfter} seconds.`,

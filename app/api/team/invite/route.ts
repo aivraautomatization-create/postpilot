@@ -42,7 +42,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'You cannot invite yourself.' }, { status: 400 });
     }
 
-    const supabase = getSupabaseAdmin() as any;
+    const supabase = getSupabaseAdmin();
     if (!supabase) {
       return NextResponse.json({ error: 'Database configuration missing' }, { status: 500 });
     }

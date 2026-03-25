@@ -56,15 +56,21 @@ export function Waves({
         noiseRef.current = createNoise2D()
 
         // Initialize size and lines
+        // eslint-disable-next-line react-hooks/immutability
         setSize()
+        // eslint-disable-next-line react-hooks/immutability
         setLines()
 
         // Bind events
+        // eslint-disable-next-line react-hooks/immutability
         window.addEventListener('resize', onResize)
+        // eslint-disable-next-line react-hooks/immutability
         window.addEventListener('mousemove', onMouseMove)
+        // eslint-disable-next-line react-hooks/immutability
         containerRef.current.addEventListener('touchmove', onTouchMove, { passive: false })
 
         // Start animation
+        // eslint-disable-next-line react-hooks/immutability
         rafRef.current = requestAnimationFrame(tick)
 
         return () => {

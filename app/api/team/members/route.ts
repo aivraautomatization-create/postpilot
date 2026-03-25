@@ -14,7 +14,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const supabase = getSupabaseAdmin() as any;
+    const supabase = getSupabaseAdmin();
     if (!supabase) {
       return NextResponse.json({ error: 'Database configuration missing' }, { status: 500 });
     }
@@ -56,7 +56,7 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'Member id is required.' }, { status: 400 });
     }
 
-    const supabase = getSupabaseAdmin() as any;
+    const supabase = getSupabaseAdmin();
     if (!supabase) {
       return NextResponse.json({ error: 'Database configuration missing' }, { status: 500 });
     }

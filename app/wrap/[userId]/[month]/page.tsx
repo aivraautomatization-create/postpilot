@@ -17,7 +17,7 @@ async function getWrapData(userId: string, month: string) {
   const startDate = new Date(year, mo - 1, 1).toISOString();
   const endDate = new Date(year, mo, 1).toISOString();
 
-  const { data: profile } = await (admin as any)
+  const { data: profile } = await admin!
     .from("profiles")
     .select("full_name, company_name")
     .eq("id", userId)
@@ -25,7 +25,7 @@ async function getWrapData(userId: string, month: string) {
 
   if (!profile) return null;
 
-  const { data: posts } = await (admin as any)
+  const { data: posts } = await admin!
     .from("posts")
     .select("id, platforms")
     .eq("user_id", userId)
@@ -45,7 +45,7 @@ async function getWrapData(userId: string, month: string) {
 
   let totalEngagement = 0;
   if (postIds.length > 0) {
-    const { data: metrics } = await (admin as any)
+    const { data: metrics } = await admin!
       .from("post_metrics")
       .select("likes, shares")
       .in("post_id", postIds);
@@ -62,7 +62,7 @@ async function getWrapData(userId: string, month: string) {
       : `${timeSavedMinutes}m`;
 
   return {
-    name: profile.full_name || profile.company_name || "A Puls User",
+    name: (profile as any).full_name || (profile as any).company_name || "A Puls User",
     totalPosts: publishedPosts.length,
     totalPlatforms: platformSet.size,
     platforms: Array.from(platformSet),
@@ -114,7 +114,7 @@ export default async function PublicWrapPage({ params }: Props) {
         <div className="bg-white/[0.02] border border-white/[0.08] rounded-3xl p-12 text-center max-w-md">
           <h1 className="text-xl font-medium text-white mb-2">Wrap not available</h1>
           <p className="text-white/40 text-sm mb-6">
-            This content wrap doesn't exist or has no published posts for the selected month.
+            This content wrap doesn&apos;t exist or has no published posts for the selected month.
           </p>
           <Link
             href="/auth/signup"

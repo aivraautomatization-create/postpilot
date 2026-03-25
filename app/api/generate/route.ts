@@ -2,7 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import { NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabase-server";
 import { isSubscriptionActive } from "@/lib/plan-limits";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimitAsync } from "@/lib/rate-limit-store";
 import { searchTrends } from "@/lib/perplexity";
 import { reviewContent } from "@/lib/claude";
 import { getGeminiKey } from "@/lib/env";
@@ -44,9 +44,11 @@ export async function POST(req: Request) {
       }
     }
 
-    // Rate limiting
+    // Rate limiting (serverless-safe — backed by Supabase with in-memory fallback)
     if (userId) {
-      const { allowed, retryAfter } = checkRateLimit(`generate:${userId}`, 20, 60000);
+      const { getSupabaseAdmin: getAdmin } = await import("@/lib/supabase");
+      const admin = getAdmin();
+      const { allowed, retryAfter } = await checkRateLimitAsync(`generate:${userId}`, 20, 60000, admin);
       if (!allowed) {
         return NextResponse.json({
           error: `Rate limit exceeded. Try again in ${retryAfter} seconds.`,
@@ -62,21 +64,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Gemini API key not configured" }, { status: 500 });
     }
 
-    // Step 1: Perplexity trend research (optional, non-blocking)
-    let trendData: string | null = null;
-    if (profile?.niche) {
-      trendData = await searchTrends(profile.niche, platform);
-    }
+    // Step 1: Perplexity trend research + AI-Brain context (PARALLEL — both are independent)
+    const [trendResult, brainResult] = await Promise.allSettled([
+      profile?.niche ? searchTrends(profile.niche, platform) : Promise.resolve(null),
+      userId ? buildBrainContext(userId) : Promise.resolve(null),
+    ]);
 
-    // Step 1.5: AI-Brain context (optional, non-blocking)
-    let brainContext: string | null = null;
-    if (userId) {
-      try {
-        brainContext = await buildBrainContext(userId);
-      } catch {
-        // Brain context is optional — continue without it
-      }
-    }
+    const trendData = trendResult.status === 'fulfilled' ? trendResult.value : null;
+    const brainContext = brainResult.status === 'fulfilled' ? brainResult.value : null;
 
     // Step 2: Gemini content generation (enriched with trend data + brain context)
     const ai = new GoogleGenAI({ apiKey });

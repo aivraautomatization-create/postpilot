@@ -9,6 +9,9 @@ import {
   Check,
   Loader2,
   Rocket,
+  Brain,
+  Sparkles,
+  SkipForward,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,6 +42,7 @@ const steps = [
   { id: "business", title: "Your Business" },
   { id: "audience", title: "Your Audience" },
   { id: "goals", title: "Your Goals" },
+  { id: "brand-voice", title: "Brand Voice" },
   { id: "launch", title: "Launch" },
 ];
 
@@ -111,6 +115,16 @@ const OnboardingForm = () => {
 
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [fingerprint, setFingerprint] = useState<{
+    voiceSummary: string;
+    topHooks: string[];
+    writingTraits: string[];
+    ctaStyle: string;
+    emojiUsage: string;
+    avgPostLength: string;
+  } | null>(null);
+  const [fingerprintError, setFingerprintError] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
     fullName: "",
     companyName: "",
@@ -160,7 +174,7 @@ const OnboardingForm = () => {
 
     try {
       // Save profile data to Supabase
-      const { error: profileError } = await supabase
+      const { error: profileError } = await supabase!
         .from("profiles")
         .update({
           full_name: formData.fullName,
@@ -211,6 +225,8 @@ const OnboardingForm = () => {
         return formData.targetAudience.trim() !== "";
       case 2:
         return formData.goals.length > 0 && formData.platforms.length > 0;
+      case 3:
+        return true; // Brand voice step is optional
       default:
         return true;
     }
@@ -527,8 +543,178 @@ const OnboardingForm = () => {
                   </>
                 )}
 
-                {/* Step 4: Launch Your AI Engine */}
+                {/* Step 4: Brand Voice Fingerprint */}
                 {currentStep === 3 && (
+                  <>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Brain className="h-5 w-5" />
+                        Brand Voice Fingerprint
+                      </CardTitle>
+                      <CardDescription>
+                        Connect a social account so our AI can analyze your
+                        existing posts and learn your authentic voice.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {isAnalyzing ? (
+                        <motion.div
+                          className="flex flex-col items-center justify-center py-10 space-y-3"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                        >
+                          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                          <p className="text-sm text-muted-foreground">
+                            Analyzing your posts and extracting voice
+                            patterns...
+                          </p>
+                        </motion.div>
+                      ) : fingerprint ? (
+                        <motion.div
+                          variants={fadeInUp}
+                          initial="hidden"
+                          animate="visible"
+                          className="space-y-4"
+                        >
+                          <div className="rounded-lg border border-green-500/20 bg-green-500/5 p-4 space-y-3">
+                            <div className="flex items-center gap-2 text-green-600">
+                              <Sparkles className="h-4 w-4" />
+                              <span className="text-sm font-medium">
+                                Voice fingerprint captured
+                              </span>
+                            </div>
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                              {fingerprint.voiceSummary}
+                            </p>
+                          </div>
+                          <div className="rounded-lg border p-4 space-y-2">
+                            <span className="text-xs text-muted-foreground uppercase tracking-wider">
+                              Your writing traits
+                            </span>
+                            <div className="flex flex-wrap gap-2">
+                              {fingerprint.writingTraits.map((trait) => (
+                                <span
+                                  key={trait}
+                                  className="px-2.5 py-1 bg-primary/10 text-primary text-xs rounded-full"
+                                >
+                                  {trait}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          {fingerprint.topHooks.length > 0 && (
+                            <div className="rounded-lg border p-4 space-y-2">
+                              <span className="text-xs text-muted-foreground uppercase tracking-wider">
+                                Your best hooks
+                              </span>
+                              <ul className="space-y-1">
+                                {fingerprint.topHooks.map((hook) => (
+                                  <li
+                                    key={hook}
+                                    className="text-sm text-muted-foreground"
+                                  >
+                                    &ldquo;{hook}&rdquo;
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          <p className="text-xs text-muted-foreground text-center">
+                            This data is now stored in your AI Brain and will
+                            personalize every post you generate.
+                          </p>
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          variants={fadeInUp}
+                          initial="hidden"
+                          animate="visible"
+                          className="space-y-4"
+                        >
+                          <p className="text-sm text-muted-foreground">
+                            Select a platform to analyze. We&apos;ll read your
+                            recent posts (up to 20) and extract your unique
+                            voice patterns, best hooks, and style.
+                          </p>
+                          {fingerprintError && (
+                            <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-3 text-sm text-red-600">
+                              {fingerprintError}
+                            </div>
+                          )}
+                          <div className="grid grid-cols-2 gap-2">
+                            {(
+                              [
+                                { id: "twitter", label: "X / Twitter" },
+                                { id: "linkedin", label: "LinkedIn" },
+                                { id: "instagram", label: "Instagram" },
+                                { id: "facebook", label: "Facebook" },
+                              ] as const
+                            ).map((platform) => (
+                              <motion.button
+                                key={platform.id}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                className="rounded-lg border p-3 text-sm font-medium hover:border-primary hover:bg-primary/5 transition-colors text-left"
+                                onClick={async () => {
+                                  setIsAnalyzing(true);
+                                  setFingerprintError(null);
+                                  try {
+                                    const res = await fetch(
+                                      "/api/brain/fingerprint",
+                                      {
+                                        method: "POST",
+                                        headers: {
+                                          "Content-Type": "application/json",
+                                        },
+                                        body: JSON.stringify({
+                                          provider: platform.id,
+                                        }),
+                                      }
+                                    );
+                                    const data = await res.json();
+                                    if (!res.ok) {
+                                      setFingerprintError(
+                                        data.error || "Analysis failed"
+                                      );
+                                    } else if (data.fingerprint) {
+                                      setFingerprint(data.fingerprint);
+                                      toast.success(
+                                        `Analyzed ${data.postsAnalyzed} posts — ${data.patternsStored} patterns stored!`
+                                      );
+                                    } else {
+                                      setFingerprintError(
+                                        data.message ||
+                                          "No posts found to analyze."
+                                      );
+                                    }
+                                  } catch {
+                                    setFingerprintError(
+                                      "Network error. Try again."
+                                    );
+                                  } finally {
+                                    setIsAnalyzing(false);
+                                  }
+                                }}
+                              >
+                                {platform.label}
+                              </motion.button>
+                            ))}
+                          </div>
+                          <button
+                            onClick={nextStep}
+                            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mx-auto pt-2"
+                          >
+                            <SkipForward className="h-3 w-3" />
+                            Skip — I&apos;ll let it learn as I go
+                          </button>
+                        </motion.div>
+                      )}
+                    </CardContent>
+                  </>
+                )}
+
+                {/* Step 5: Launch Your AI Engine */}
+                {currentStep === 4 && (
                   <>
                     <CardHeader>
                       <CardTitle>Launch Your AI Engine</CardTitle>

@@ -49,7 +49,7 @@ type Post = {
   content: string;
   platforms: string[];
   status: string;
-  scheduled_date: string | null;
+  scheduled_for: string | null;
   created_at: string;
 };
 
@@ -72,7 +72,7 @@ function parseDateKey(key: string): Date {
 }
 
 function getPostDateKey(post: Post): string | null {
-  const raw = post.scheduled_date;
+  const raw = post.scheduled_for;
   if (!raw) return null;
   // Handles both "YYYY-MM-DD" and full ISO strings
   return raw.slice(0, 10);
@@ -166,16 +166,17 @@ export default function CalendarPage() {
   const fetchPosts = useCallback(async () => {
     if (!supabase || !user) return;
     setLoading(true);
-    const { data } = await (supabase as any)
+    const { data } = await supabase!
       .from("posts")
-      .select("id, content, platforms, status, scheduled_date, created_at")
+      .select("id, content, platforms, status, scheduled_for, created_at")
       .eq("user_id", user.id)
-      .order("scheduled_date", { ascending: true });
-    setPosts(data || []);
+      .order("scheduled_for", { ascending: true });
+    setPosts((data as any) || []);
     setLoading(false);
   }, [supabase, user]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchPosts();
   }, [fetchPosts]);
 

@@ -5,7 +5,7 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 import { isSubscriptionActive } from "@/lib/plan-limits";
 import { searchTrends } from "@/lib/perplexity";
 import { getGeminiKey } from "@/lib/env";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimitAsync } from "@/lib/rate-limit-store";
 
 async function downloadVideoWithKey(videoUri: string, apiKey: string): Promise<Buffer | null> {
   try {
@@ -29,7 +29,7 @@ async function uploadToSupabaseStorage(videoBuffer: Buffer, userId: string): Pro
 
     const fileName = `${userId}/${crypto.randomUUID()}.mp4`;
 
-    const { error } = await (admin as any).storage
+    const { error } = await admin!.storage
       .from('media')
       .upload(fileName, videoBuffer, {
         contentType: 'video/mp4',
@@ -41,7 +41,7 @@ async function uploadToSupabaseStorage(videoBuffer: Buffer, userId: string): Pro
       return null;
     }
 
-    const { data: { publicUrl } } = (admin as any).storage
+    const { data: { publicUrl } } = admin!.storage
       .from('media')
       .getPublicUrl(fileName);
 
@@ -64,7 +64,7 @@ export async function POST(req: Request) {
     }
 
     // Rate limit: 3 per minute per user (expensive operation)
-    const { allowed, retryAfter } = checkRateLimit(`video:${user.id}`, 3, 60000);
+    const { allowed, retryAfter } = await checkRateLimitAsync(`video:${user.id}`, 3, 60000);
     if (!allowed) {
       return NextResponse.json({
         error: `Rate limit exceeded. Try again in ${retryAfter} seconds.`,
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
     // Check subscription
     const admin = getSupabaseAdmin();
     if (admin) {
-      const { data: profile } = await (admin as any)
+      const { data: profile } = await admin
         .from('profiles')
         .select('subscription_status, trial_ends_at, stripe_customer_id, subscription_tier')
         .eq('id', user.id)

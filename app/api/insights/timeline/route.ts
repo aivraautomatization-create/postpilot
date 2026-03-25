@@ -13,7 +13,7 @@ export async function GET() {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const admin = getSupabaseAdmin() as any;
+    const admin = getSupabaseAdmin();
     if (!admin) {
       return NextResponse.json({ error: "Database unavailable" }, { status: 500 });
     }
@@ -47,8 +47,8 @@ export async function GET() {
     // Build metrics lookup
     const metricsMap = new Map<string, { likes: number; shares: number; reach: number }>();
     for (const m of (metrics || [])) {
-      const existing = metricsMap.get(m.post_id) || { likes: 0, shares: 0, reach: 0 };
-      metricsMap.set(m.post_id, {
+      const existing = metricsMap.get(m.post_id!) || { likes: 0, shares: 0, reach: 0 };
+      metricsMap.set(m.post_id!, {
         likes: existing.likes + (m.likes || 0),
         shares: existing.shares + (m.shares || 0),
         reach: existing.reach + (m.reach || 0),

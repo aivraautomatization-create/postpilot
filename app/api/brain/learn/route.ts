@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     // Check subscription
     const admin = getSupabaseAdmin();
     if (admin) {
-      const { data: userProfile } = await (admin as any)
+      const { data: userProfile } = await admin
         .from('profiles')
         .select('subscription_status, trial_ends_at, stripe_customer_id')
         .eq('id', user.id)

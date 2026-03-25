@@ -22,7 +22,7 @@ export async function GET() {
       return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
     }
 
-    const { data: userProfile } = await (admin as any)
+    const { data: userProfile } = await admin
       .from('profiles')
       .select('subscription_status, trial_ends_at, stripe_customer_id')
       .eq('id', user.id)
@@ -38,7 +38,7 @@ export async function GET() {
     const context = await buildBrainContext(user.id);
 
     // Fetch top 5 brand_memory entries by performance_score
-    const { data: topPatterns } = await (admin as any)
+    const { data: topPatterns } = await admin
       .from('brand_memory')
       .select('*')
       .eq('user_id', user.id)

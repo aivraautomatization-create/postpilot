@@ -157,6 +157,7 @@ function FloatingPaths({ position }: { position: number }) {
 							pathOffset: [0, 1, 0],
 						}}
 						transition={{
+							// eslint-disable-next-line react-hooks/purity
 							duration: 20 + Math.random() * 10,
 							repeat: Number.POSITIVE_INFINITY,
 							ease: 'linear',

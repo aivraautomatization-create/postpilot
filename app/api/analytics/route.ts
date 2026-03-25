@@ -25,13 +25,13 @@ export async function GET() {
     // Fetch all data in parallel
     const [usageResult, postsResult, accountsResult, weeklyResult] = await Promise.all([
       // Current month usage
-      (admin as any).from('usage').select('*').eq('user_id', user.id).eq('period', period).single(),
+      admin!.from('usage').select('*').eq('user_id', user.id).eq('period', period).single(),
       // All posts
-      (admin as any).from('posts').select('id, status, platforms, published_at, created_at').eq('user_id', user.id),
+      admin!.from('posts').select('id, status, platforms, published_at, created_at').eq('user_id', user.id),
       // Connected accounts
-      (admin as any).from('social_accounts').select('provider').eq('user_id', user.id),
+      admin!.from('social_accounts').select('provider').eq('user_id', user.id),
       // Posts from last 7 days
-      (admin as any)
+      admin!
         .from('posts')
         .select('published_at, platforms, status')
         .eq('user_id', user.id)

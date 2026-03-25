@@ -115,7 +115,7 @@ function CreateContentInner() {
 
   useEffect(() => {
     if (profile?.latest_strategy) {
-      setStrategy(profile.latest_strategy);
+      setStrategy(profile.latest_strategy as any);
     }
   }, [profile]);
 
@@ -225,18 +225,19 @@ function CreateContentInner() {
 
     try {
       if (activeTab === "text") {
-        const response = await fetch('/api/generate', {
+        // Stream text generation for instant perceived speed
+        const response = await fetch('/api/generate/stream', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             topic: prompt,
             platform: selectedPlatforms.length > 0 ? selectedPlatforms[0] : 'General',
             profile: {
-              company_name: profile?.company_name || profile?.companyName,
+              company_name: profile?.company_name,
               niche: profile?.niche,
               offerings: profile?.offerings,
-              target_audience: profile?.target_audience || profile?.targetAudience,
-              tone_of_voice: profile?.tone_of_voice || profile?.toneOfVoice
+              target_audience: profile?.target_audience,
+              tone_of_voice: profile?.tone_of_voice
             },
             strategy: strategyEnabled && strategy ? strategy : null,
             journeyStage: journeyStage || undefined,
@@ -244,17 +245,60 @@ function CreateContentInner() {
           })
         });
 
-        const data = await safeJson(response);
-
-        if (response.ok) {
-          setResult(data.content);
-          // Enhanced pipeline results
-          if (data.enhanced) setEnhancedResult(data.enhanced);
-          if (data.engagementScore) setEngagementScore(data.engagementScore);
-          if (data.suggestions) setSuggestions(data.suggestions);
-          if (data.trends) setTrendData(data.trends);
-        } else {
+        if (!response.ok) {
+          const data = await response.json();
           setError(data.error || "Failed to generate text.");
+        } else {
+          // Parse SSE stream
+          const reader = response.body?.getReader();
+          if (!reader) {
+            setError("No stream available");
+          } else {
+            const decoder = new TextDecoder();
+            let accumulated = "";
+            let streamTrends: string | null = null;
+
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              const chunk = decoder.decode(value, { stream: true });
+              const lines = chunk.split("\n");
+              for (const line of lines) {
+                if (!line.startsWith("data: ")) continue;
+                try {
+                  const data = JSON.parse(line.slice(6));
+                  if (data.error) { setError(data.error); break; }
+                  if (data.done) { streamTrends = data.trends || null; continue; }
+                  if (data.text) {
+                    accumulated += data.text;
+                    setResult(accumulated);
+                  }
+                } catch { /* skip malformed SSE */ }
+              }
+            }
+
+            if (streamTrends) setTrendData(streamTrends);
+
+            // Fetch Claude review after stream completes (non-blocking enhancement)
+            if (accumulated) {
+              try {
+                const reviewRes = await fetch('/api/generate/review', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    content: accumulated,
+                    platform: selectedPlatforms.length > 0 ? selectedPlatforms[0] : 'General',
+                    niche: profile?.niche || 'General'
+                  })
+                });
+                if (reviewRes.ok) {
+                  const review = await reviewRes.json();
+                  if (review.score) setEngagementScore(review.score);
+                  if (review.improvements) setSuggestions(review.improvements);
+                }
+              } catch { /* Review is optional — don't block on failure */ }
+            }
+          }
         }
       } else if (activeTab === "image") {
         const response = await fetch('/api/generate/image', {
@@ -618,7 +662,7 @@ function CreateContentInner() {
                   </div>
                   {journeyStage && (
                     <div className="mt-2 flex gap-2 flex-wrap">
-                      {getSuggestedCTAs(journeyStage, profile?.goals).map(cta => (
+                      {getSuggestedCTAs(journeyStage, profile?.goals ?? undefined).map(cta => (
                         <button
                           key={cta}
                           onClick={() => setSelectedCTA(selectedCTA === cta ? null : cta)}
@@ -755,7 +799,7 @@ function CreateContentInner() {
                   <ABVariantsPanel
                     content={showEnhanced && enhancedResult ? enhancedResult : (result ?? "")}
                     platform={selectedPlatforms.length > 0 ? selectedPlatforms[0] : "general"}
-                    niche={profile?.niche}
+                    niche={profile?.niche ?? undefined}
                     onSelectVariant={(variantContent) => {
                       setResult(variantContent);
                       setShowEnhanced(false);

@@ -5,6 +5,7 @@ import { ArrowRight, Command, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 import { fadeInUp, staggerContainer } from "@/lib/motion";
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
+import { GooeyText } from "@/components/ui/gooey-text-morphing";
 
 // Psychology: Loss Aversion + Specificity + Social Proof + Authority Bias
 // "The average creator wastes 14 hrs/week on content. Puls users don't."
@@ -34,7 +35,13 @@ export default function Hero() {
           variants={fadeInUp}
           className="text-4xl md:text-6xl lg:text-[5rem] font-light tracking-tight mb-6 leading-[1.08] bg-clip-text text-transparent bg-gradient-to-r from-white via-white/90 to-white/60"
         >
-          AI-powered social media<br />for your business.
+          AI-powered{" "}
+          <GooeyText
+            texts={["social media", "content growth", "brand magic", "engagement"]}
+            className="inline-block h-[1em] translate-y-[0.15em] min-w-[4.5em] text-white"
+            textClassName="bg-clip-text text-transparent bg-gradient-to-r from-white via-white/90 to-white/60 font-light"
+          />
+          <br />for your business.
         </motion.h1>
 
         {/* Psychology: Present Bias (immediate benefit) + Specificity + Niche appeal */}

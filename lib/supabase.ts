@@ -1,9 +1,10 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { createBrowserClient } from '@supabase/ssr';
+import type { Database } from './database.types';
 
 // Lazy initialization of Supabase client
-let supabaseClient: ReturnType<typeof createBrowserClient> | null = null;
-let supabaseAdminClient: ReturnType<typeof createClient> | null = null;
+let supabaseClient: ReturnType<typeof createBrowserClient<Database>> | null = null;
+let supabaseAdminClient: SupabaseClient<Database> | null = null;
 
 export function getSupabase() {
   if (!supabaseClient) {
@@ -15,7 +16,7 @@ export function getSupabase() {
       return null;
     }
 
-    supabaseClient = createBrowserClient(supabaseUrl, supabaseAnonKey);
+    supabaseClient = createBrowserClient<Database>(supabaseUrl, supabaseAnonKey);
   }
   return supabaseClient;
 }
@@ -34,7 +35,7 @@ export function getSupabaseAdmin() {
     supabaseUrl = supabaseUrl.replace(/^.*(https:\/\/)/i, '$1').trim();
     supabaseServiceKey = supabaseServiceKey.replace(/^.*(eyJhbG)/i, '$1').trim();
     
-    supabaseAdminClient = createClient(supabaseUrl, supabaseServiceKey);
+    supabaseAdminClient = createClient<Database>(supabaseUrl, supabaseServiceKey);
   }
   return supabaseAdminClient;
 }

@@ -130,13 +130,13 @@ export async function buildBrainContext(userId: string): Promise<string> {
     if (hooks.length > 0) {
       const avgScore =
         hooks.reduce(
-          (s: number, h: { performance_score: number }) =>
+          (s: number, h: any) =>
             s + h.performance_score,
           0
         ) / hooks.length;
       const hookDescriptions = hooks
         .map(
-          (h: { content: Record<string, unknown> }) =>
+          (h: any) =>
             (h.content as { description?: string }).description ??
             JSON.stringify(h.content)
         )
@@ -149,7 +149,7 @@ export async function buildBrainContext(userId: string): Promise<string> {
     if (formats.length > 0) {
       const formatDescriptions = formats
         .map(
-          (f: { content: Record<string, unknown>; performance_score: number }) =>
+          (f: any) =>
             `${(f.content as { format?: string }).format ?? 'unknown'} (${f.performance_score.toFixed(2)})`
         )
         .join(', ');
@@ -159,7 +159,7 @@ export async function buildBrainContext(userId: string): Promise<string> {
     if (times.length > 0) {
       const timeDescriptions = times
         .map(
-          (t: { content: Record<string, unknown> }) =>
+          (t: any) =>
             (t.content as { time?: string }).time ?? JSON.stringify(t.content)
         )
         .join(', ');
@@ -169,7 +169,7 @@ export async function buildBrainContext(userId: string): Promise<string> {
     if (ctas.length > 0) {
       const ctaDescriptions = ctas
         .map(
-          (c: { content: Record<string, unknown>; performance_score: number }) =>
+          (c: any) =>
             `'${(c.content as { text?: string }).text ?? 'unknown'}' (${c.performance_score.toFixed(2)})`
         )
         .join(', ');
@@ -179,7 +179,7 @@ export async function buildBrainContext(userId: string): Promise<string> {
     if (reactions.length > 0) {
       const reactionDescriptions = reactions
         .map(
-          (r: { content: Record<string, unknown> }) =>
+          (r: any) =>
             (r.content as { insight?: string }).insight ??
             JSON.stringify(r.content)
         )
@@ -259,11 +259,11 @@ overallScore is 1-100 representing overall content strategy health.`,
     const periodStart = since.toISOString().split('T')[0];
     const periodEnd = new Date().toISOString().split('T')[0];
 
-    await (supabase as any).from('strategy_reports').insert({
+    await supabase.from('strategy_reports').insert({
       user_id: userId,
       period_start: periodStart,
       period_end: periodEnd,
-      report_data: report,
+      report_data: report as any,
     });
 
     return report;
@@ -285,7 +285,7 @@ export async function learnFromPost(
   if (!supabase) return;
 
   try {
-    const { data: post, error: postError } = await (supabase as any)
+    const { data: post, error: postError } = await supabase
       .from('posts')
       .select('*')
       .eq('id', postId)
@@ -297,7 +297,7 @@ export async function learnFromPost(
       return;
     }
 
-    const { data: metrics } = await (supabase as any)
+    const { data: metrics } = await supabase
       .from('post_metrics')
       .select('*')
       .eq('post_id', postId)
@@ -305,15 +305,15 @@ export async function learnFromPost(
 
     const patterns = await extractPatterns(
       {
-        content: post.content,
+        content: post.content ?? '',
         platforms: post.platforms ?? [],
         status: post.status,
       },
       {
-        likes: metrics?.likes,
-        shares: metrics?.shares,
-        reach: metrics?.reach,
-        impressions: metrics?.impressions,
+        likes: metrics?.likes ?? undefined,
+        shares: metrics?.shares ?? undefined,
+        reach: metrics?.reach ?? undefined,
+        impressions: metrics?.impressions ?? undefined,
       }
     );
 
@@ -327,9 +327,9 @@ export async function learnFromPost(
       source_post_id: postId,
     }));
 
-    const { error: insertError } = await (supabase as any)
+    const { error: insertError } = await supabase
       .from('brand_memory')
-      .insert(rows);
+      .insert(rows as any);
 
     if (insertError) {
       console.error(

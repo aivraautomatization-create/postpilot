@@ -13,6 +13,8 @@ import {
   Globe,
   Clock,
   TrendingUp,
+  Share2,
+  Users,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/lib/auth-context";
@@ -288,7 +290,7 @@ export default function WrapPage() {
               )}
 
               <motion.div
-                className="flex justify-center pt-4"
+                className="flex flex-col items-center gap-3 pt-4"
                 custom={7}
                 initial="hidden"
                 animate="visible"
@@ -305,11 +307,35 @@ export default function WrapPage() {
                     </>
                   ) : (
                     <>
-                      <Copy className="w-4 h-4" />
+                      <Share2 className="w-4 h-4" />
                       Share Your Wrap
                     </>
                   )}
                 </button>
+                <p className="text-[11px] text-white/20">Made with Puls</p>
+              </motion.div>
+
+              {/* Referral CTA — viral loop */}
+              <motion.div
+                className="bg-gradient-to-br from-purple-500/[0.06] to-pink-500/[0.06] border border-white/[0.08] rounded-2xl p-6 text-center"
+                custom={8}
+                initial="hidden"
+                animate="visible"
+                variants={fadeUp}
+              >
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Users className="w-4 h-4 text-purple-400" />
+                  <span className="text-sm font-medium text-white">Know someone who&apos;d love this?</span>
+                </div>
+                <p className="text-xs text-white/40 mb-4">
+                  Invite a friend — you both get 10 bonus posts. They get 14 days of Pro free.
+                </p>
+                <a
+                  href="/dashboard/referrals"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/[0.08] hover:bg-white/[0.12] border border-white/[0.1] text-white text-sm font-medium rounded-xl transition-all active:scale-95"
+                >
+                  Get Your Referral Link
+                </a>
               </motion.div>
             </div>
           )}

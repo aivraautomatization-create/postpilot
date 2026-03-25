@@ -6,12 +6,15 @@ import { checkoutSchema } from '@/lib/validations';
 
 export async function POST(req: Request) {
   try {
-    const { tierId } = await req.json();
+    const body = await req.json();
+    const { tierId, billingCycle = 'monthly' } = body;
 
-    const parsed = checkoutSchema.safeParse({ tierId });
+    const parsed = checkoutSchema.safeParse({ tierId, billingCycle });
     if (!parsed.success) {
       return NextResponse.json({ error: 'Invalid plan selected.' }, { status: 400 });
     }
+
+    const isAnnual = billingCycle === 'annual';
     const stripe = getStripe();
     const supabase = await getSupabaseServer();
     const supabaseAdmin = getSupabaseAdmin();
@@ -31,7 +34,7 @@ export async function POST(req: Request) {
     }
 
     // Check if user already has a Stripe customer ID or has claimed a trial
-    const { data: profile, error: profileError } = await (supabaseAdmin as any)
+    const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('*')
       .eq('id', user.id)
@@ -56,14 +59,24 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Payment configuration incomplete' }, { status: 500 });
     }
 
-    const prices: Record<string, number> = {
+    // Monthly prices
+    const monthlyPrices: Record<string, number> = {
       'tier-entry': 1900,     // $19.00
       'tier-pro': 4900,       // $49.00
       'tier-business': 9700,  // $97.00
     };
 
+    // Annual prices (20% discount — psychology: anchoring + commitment bias)
+    const annualPrices: Record<string, number> = {
+      'tier-entry': 15 * 12 * 100,    // $15/mo × 12 = $180/year
+      'tier-pro': 39 * 12 * 100,      // $39/mo × 12 = $468/year
+      'tier-business': 78 * 12 * 100,  // $78/mo × 12 = $936/year
+    };
+
     const productId = products[tierId] || products['tier-entry'];
-    const amount = prices[tierId] || 6900;
+    const amount = isAnnual
+      ? (annualPrices[tierId] || annualPrices['tier-entry'])
+      : (monthlyPrices[tierId] || monthlyPrices['tier-entry']);
     const origin = req.headers.get('origin') || 'http://localhost:3000';
 
     let customerId = userProfile.stripe_customer_id;
@@ -80,7 +93,7 @@ export async function POST(req: Request) {
       customerId = customer.id;
 
       // Update profile with customer ID
-      await (supabaseAdmin as any)
+      await supabaseAdmin
         .from('profiles')
         .update({ stripe_customer_id: customerId })
         .eq('id', user.id);
@@ -99,7 +112,7 @@ export async function POST(req: Request) {
             currency: 'usd',
             product: productId,
             recurring: {
-              interval: 'month',
+              interval: isAnnual ? 'year' : 'month',
             },
             unit_amount: amount,
           },
@@ -112,11 +125,13 @@ export async function POST(req: Request) {
         metadata: {
           supabase_user_id: user.id,
           tierId: tierId,
+          billingCycle: billingCycle,
         }
       } : {
         metadata: {
           supabase_user_id: user.id,
           tierId: tierId,
+          billingCycle: billingCycle,
         }
       },
       success_url: `${origin}/dashboard?success=true&session_id={CHECKOUT_SESSION_ID}`,

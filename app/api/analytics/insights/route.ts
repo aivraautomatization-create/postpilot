@@ -23,7 +23,7 @@ export async function GET() {
   }
 
   const [metricsResult, brandMemoryResult] = await Promise.all([
-    (admin as any)
+    admin!
       .from("post_metrics")
       .select(
         `
@@ -45,7 +45,7 @@ export async function GET() {
       .eq("posts.user_id", user.id)
       .order("fetched_at", { ascending: false })
       .limit(200),
-    (admin as any)
+    admin!
       .from("brand_memory")
       .select("*")
       .eq("user_id", user.id)

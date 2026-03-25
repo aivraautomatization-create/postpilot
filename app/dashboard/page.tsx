@@ -34,7 +34,7 @@ export default function DashboardOverview() {
       if (!supabase) return;
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data } = await (supabase as any)
+        const { data } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', user.id)
@@ -75,7 +75,7 @@ export default function DashboardOverview() {
   const isTrialing = status === 'trialing' || (!profile?.stripe_customer_id && daysLeft > 0);
 
   const postsThisMonth = analytics?.stats?.postsThisMonth || 0;
-  const limit = getUsageLimit(profile?.subscription_tier);
+  const limit = getUsageLimit(profile?.subscription_tier, profile?.bonus_posts || 0);
   const totalPublished = analytics?.stats?.totalPublished || 0;
   const activePlatforms = analytics?.stats?.activePlatforms || 0;
   const isNewUser = totalPublished === 0 || postsThisMonth === 0;

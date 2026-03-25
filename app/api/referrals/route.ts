@@ -14,7 +14,7 @@ export async function GET() {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const admin = getSupabaseAdmin() as any;
+    const admin = getSupabaseAdmin();
     if (!admin) {
       return NextResponse.json({ error: "Database unavailable" }, { status: 500 });
     }
@@ -36,7 +36,7 @@ export async function GET() {
     }
 
     // Get referral stats
-    const { data: referrals } = await admin
+    const { data: referrals } = await (admin as any)
       .from("referrals")
       .select("id, status, referred_email, created_at, converted_at")
       .eq("referrer_id", user.id)

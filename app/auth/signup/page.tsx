@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getSupabase } from '@/lib/supabase';
-import { Loader2, Mail, Lock, User as UserIcon, AlertCircle } from 'lucide-react';
+import { Loader2, Mail, Lock, User as UserIcon, AlertCircle, Gift } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -27,6 +27,7 @@ export default function SignupPage() {
 
     const searchParams = new URLSearchParams(window.location.search);
     const plan = searchParams.get('plan');
+    const ref = searchParams.get('ref');
 
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -35,6 +36,7 @@ export default function SignupPage() {
         options: {
           data: {
             full_name: fullName,
+            ...(ref ? { referral_code: ref } : {}),
           },
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
@@ -42,11 +44,20 @@ export default function SignupPage() {
 
       if (error) throw error;
 
+      // Fire welcome email + referral processing in parallel (non-blocking)
       fetch('/api/auth/welcome', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, name: fullName }),
       }).catch(() => {});
+
+      if (ref && data.user) {
+        fetch('/api/referrals/process', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ referralCode: ref, newUserId: data.user.id, email }),
+        }).catch(() => {});
+      }
 
       if (data.session) {
         const redirectPath = plan ? `/dashboard?initiate_checkout=${plan}` : '/dashboard';
@@ -81,8 +92,16 @@ export default function SignupPage() {
     );
   }
 
+  const referralCode = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('ref') : null;
+
   return (
     <div className="space-y-6">
+      {referralCode && (
+        <div className="flex items-center gap-2 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 text-sm">
+          <Gift className="w-4 h-4 shrink-0" />
+          <p>You&apos;ve been invited! You&apos;ll get <strong>14 days of Pro free</strong> + your friend earns bonus posts.</p>
+        </div>
+      )}
       <div className="space-y-2 text-center lg:text-left mb-8">
         <h1 className="text-3xl font-bold tracking-tight">Create your account</h1>
         <p className="text-white/60">Join to automate your content pipeline.</p>

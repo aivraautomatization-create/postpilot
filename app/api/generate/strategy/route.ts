@@ -2,7 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import { NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabase-server";
 import { getSupabaseAdmin } from "@/lib/supabase";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimitAsync } from "@/lib/rate-limit-store";
 import { searchTrends } from "@/lib/perplexity";
 import { getGeminiKey } from "@/lib/env";
 import { isSubscriptionActive } from "@/lib/plan-limits";
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     }
 
     // Rate limit: 5 per minute
-    const { allowed, retryAfter } = checkRateLimit(`strategy:${user.id}`, 5, 60000);
+    const { allowed, retryAfter } = await checkRateLimitAsync(`strategy:${user.id}`, 5, 60000);
     if (!allowed) {
       return NextResponse.json({
         error: `Rate limit exceeded. Try again in ${retryAfter} seconds.`,
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     // Check subscription
     const admin = getSupabaseAdmin();
     if (admin) {
-      const { data: userProfile } = await (admin as any)
+      const { data: userProfile } = await admin
         .from('profiles')
         .select('subscription_status, trial_ends_at, stripe_customer_id')
         .eq('id', user.id)

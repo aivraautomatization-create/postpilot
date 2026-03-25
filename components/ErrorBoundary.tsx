@@ -24,6 +24,11 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error("ErrorBoundary caught:", error, errorInfo);
+    if (typeof window !== 'undefined') {
+      import('@sentry/nextjs').then((Sentry) => {
+        Sentry.captureException(error, { extra: { componentStack: errorInfo.componentStack } });
+      }).catch(() => { /* Sentry not configured */ });
+    }
   }
 
   render() {

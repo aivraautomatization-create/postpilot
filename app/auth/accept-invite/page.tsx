@@ -48,7 +48,7 @@ function AcceptInviteContent() {
 
     try {
       // Look up the invite by token
-      const { data: invite, error: lookupError } = await (supabase as any)
+      const { data: invite, error: lookupError } = await supabase!
         .from('team_members')
         .select('id, invited_email, accepted_at, owner_id')
         .eq('invite_token', token)
@@ -67,7 +67,7 @@ function AcceptInviteContent() {
       }
 
       // Update the row: set member_id and accepted_at
-      const { error: updateError } = await (supabase as any)
+      const { error: updateError } = await supabase!
         .from('team_members')
         .update({
           member_id: user.id,

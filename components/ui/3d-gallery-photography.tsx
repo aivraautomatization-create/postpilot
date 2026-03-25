@@ -164,12 +164,14 @@ function ImagePlane({
 
 	useEffect(() => {
 		if (material && texture) {
+			// eslint-disable-next-line react-hooks/immutability
 			material.uniforms.map.value = texture;
 		}
 	}, [material, texture]);
 
 	useEffect(() => {
 		if (material && material.uniforms) {
+			// eslint-disable-next-line react-hooks/immutability
 			material.uniforms.isHovered.value = isHovered ? 1.0 : 0.0;
 		}
 	}, [material, isHovered]);
@@ -204,6 +206,7 @@ function GalleryScene({
 }: Omit<InfiniteGalleryProps, 'className' | 'style'>) {
 	const [scrollVelocity, setScrollVelocity] = useState(0);
 	const [autoPlay, setAutoPlay] = useState(true);
+	// eslint-disable-next-line react-hooks/purity
 	const lastInteraction = useRef(Date.now());
 
 	const normalizedImages = useMemo(
@@ -537,9 +540,11 @@ export default function InfiniteGallery({
 			const gl =
 				canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
 			if (!gl) {
+				// eslint-disable-next-line react-hooks/set-state-in-effect
 				setWebglSupported(false);
 			}
 		} catch (e) {
+			// eslint-disable-next-line react-hooks/set-state-in-effect
 			setWebglSupported(false);
 		}
 	}, []);

@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getSupabaseAdmin } from '@/lib/supabase';
-import { sendSubscriptionConfirmationEmail, sendPaymentFailedEmail } from '@/lib/emails';
+import { sendSubscriptionConfirmationEmail, sendPaymentFailedEmail, sendReferralSuccessEmail } from '@/lib/emails';
 import { getPlanName } from '@/lib/plan-limits';
+
+const CONVERSION_BONUS_POSTS = 15; // Extra posts when referred user converts to paid
 
 let stripeClient: Stripe | null = null;
 
@@ -52,7 +54,7 @@ export async function POST(req: Request) {
 
         if (userId) {
           const tierId = subscription.metadata.tierId || 'tier-entry';
-          await (supabaseAdmin as any)
+          await supabaseAdmin
             .from('profiles')
             .update({
               stripe_customer_id: customerId,
@@ -67,12 +69,64 @@ export async function POST(req: Request) {
 
           // Send subscription confirmation email
           try {
-            const { data: authUser } = await (supabaseAdmin as any).auth.admin.getUserById(userId);
+            const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId);
             if (authUser?.user?.email) {
               await sendSubscriptionConfirmationEmail(authUser.user.email, getPlanName(tierId));
             }
           } catch (emailErr) {
             console.error('Failed to send subscription confirmation email:', emailErr);
+          }
+
+          // Referral conversion: if this user was referred, upgrade their referral
+          // record to "converted" and award the referrer a conversion bonus.
+          try {
+            const { data: newUserProfile } = await supabaseAdmin
+              .from('profiles')
+              .select('referred_by')
+              .eq('id', userId)
+              .single();
+
+            const referrerId = (newUserProfile as any)?.referred_by;
+            if (referrerId) {
+              // Mark referral as converted
+              await (supabaseAdmin as any)
+                .from('referrals')
+                .update({
+                  status: 'converted',
+                  converted_at: new Date().toISOString(),
+                })
+                .eq('referrer_id', referrerId)
+                .eq('referred_id', userId);
+
+              // Award conversion bonus to referrer (on top of signup bonus)
+              const { data: referrerProfile } = await (supabaseAdmin as any)
+                .from('profiles')
+                .select('bonus_posts, full_name')
+                .eq('id', referrerId)
+                .single();
+
+              if (referrerProfile) {
+                await (supabaseAdmin as any)
+                  .from('profiles')
+                  .update({
+                    bonus_posts: (referrerProfile.bonus_posts || 0) + CONVERSION_BONUS_POSTS,
+                  })
+                  .eq('id', referrerId);
+
+                // Notify referrer of conversion bonus
+                const { data: referrerAuth } = await supabaseAdmin.auth.admin.getUserById(referrerId);
+                if (referrerAuth?.user?.email) {
+                  await sendReferralSuccessEmail(
+                    referrerAuth.user.email,
+                    referrerProfile.full_name || undefined,
+                    undefined,
+                    CONVERSION_BONUS_POSTS,
+                  );
+                }
+              }
+            }
+          } catch (refErr) {
+            console.error('Referral conversion processing failed:', refErr);
           }
         }
         break;
@@ -93,7 +147,7 @@ export async function POST(req: Request) {
           };
           if (tierId) updateData.subscription_tier = tierId;
 
-          await (supabaseAdmin as any)
+          await supabaseAdmin
             .from('profiles')
             .update(updateData)
             .eq('id', userId);
@@ -106,7 +160,7 @@ export async function POST(req: Request) {
         const customerId = invoice.customer as string;
 
         if (customerId) {
-          const { data: failedProfile } = await (supabaseAdmin as any)
+          const { data: failedProfile } = await supabaseAdmin
             .from('profiles')
             .update({ subscription_status: 'past_due' })
             .eq('stripe_customer_id', customerId)
@@ -116,7 +170,7 @@ export async function POST(req: Request) {
           // Send payment failed email
           if (failedProfile?.id) {
             try {
-              const { data: authUser } = await (supabaseAdmin as any).auth.admin.getUserById(failedProfile.id);
+              const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(failedProfile.id);
               if (authUser?.user?.email) {
                 await sendPaymentFailedEmail(authUser.user.email);
               }

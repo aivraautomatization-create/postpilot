@@ -7,3 +7,15 @@ coverage/
 !.env.example
 .claude/
 .vercel
+
+# Editor backup files
+*.swp
+*.swo
+*~
+
+# macOS Finder duplicates
+*\ 2.*
+*\ 2.tsx
+*\ 2.ts
+*\ 2.mjs
+*\ 2.sql

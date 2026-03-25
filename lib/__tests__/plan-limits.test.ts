@@ -2,27 +2,36 @@ import { describe, it, expect } from 'vitest';
 import { isSubscriptionActive, getUsageLimit, getPlanName, PLAN_LIMITS } from '../plan-limits';
 
 describe('getUsageLimit', () => {
-  it('returns entry limit for null tier', () => {
-    expect(getUsageLimit(null)).toBe(28);
+  it('returns starter limit for null tier', () => {
+    expect(getUsageLimit(null)).toBe(15);
   });
 
   it('returns correct limit for known tier', () => {
-    expect(getUsageLimit('tier-pro')).toBe(50);
-    expect(getUsageLimit('tier-business')).toBe(100);
+    expect(getUsageLimit('tier-pro')).toBe(60);
+    expect(getUsageLimit('tier-business')).toBe(999);
   });
 
-  it('falls back to entry for unknown tier', () => {
-    expect(getUsageLimit('tier-unknown')).toBe(28);
+  it('falls back to starter for unknown tier', () => {
+    expect(getUsageLimit('tier-unknown')).toBe(15);
+  });
+
+  it('adds bonus posts to base limit', () => {
+    expect(getUsageLimit('tier-entry', 10)).toBe(25);
+    expect(getUsageLimit('tier-pro', 20)).toBe(80);
+  });
+
+  it('handles zero bonus posts', () => {
+    expect(getUsageLimit('tier-entry', 0)).toBe(15);
   });
 });
 
 describe('getPlanName', () => {
-  it('returns Entry for null tier', () => {
-    expect(getPlanName(null)).toBe('Entry');
+  it('returns Starter for null tier', () => {
+    expect(getPlanName(null)).toBe('Starter');
   });
 
   it('returns correct name for known tier', () => {
-    expect(getPlanName('tier-pro')).toBe('Pro');
+    expect(getPlanName('tier-pro')).toBe('Creator');
   });
 });
 

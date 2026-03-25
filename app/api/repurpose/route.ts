@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     // ── Subscription check ───────────────────────────────────────────────────
     const admin = getSupabaseAdmin();
     if (admin) {
-      const { data: profile } = await (admin as any)
+      const { data: profile } = await admin
         .from("profiles")
         .select("subscription_status, trial_ends_at, stripe_customer_id")
         .eq("id", user.id)
@@ -159,7 +159,7 @@ ${content}`;
         },
       }));
 
-      const { data: saved, error: saveError } = await (admin as any)
+      const { data: saved, error: saveError } = await admin
         .from("posts")
         .insert(inserts)
         .select();

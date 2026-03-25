@@ -57,7 +57,7 @@ export async function POST(req: Request) {
     // Save operation to Supabase
     const admin = getSupabaseAdmin();
     if (admin) {
-      await (admin as any).from('video_operations').insert({
+      await admin.from('video_operations').insert({
         user_id: user.id,
         operation_name: operation.name,
         platform,

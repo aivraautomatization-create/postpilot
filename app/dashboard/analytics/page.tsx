@@ -116,7 +116,7 @@ export default function AnalyticsPage() {
     setError(null);
 
     try {
-      const { data, error: fetchError } = await (supabase as any)
+      const { data, error: fetchError } = await supabase!
         .from("post_metrics")
         .select(
           `
@@ -140,10 +140,10 @@ export default function AnalyticsPage() {
         .limit(200);
 
       if (fetchError) throw fetchError;
-      setMetrics(data || []);
+      setMetrics((data as any) || []);
 
       // Fetch posts for journey stage breakdown
-      const { data: postsData } = await (supabase as any)
+      const { data: postsData } = await supabase!
         .from("posts")
         .select("id, journey_stage")
         .eq("user_id", user.id);
@@ -347,7 +347,7 @@ export default function AnalyticsPage() {
           </div>
           <h3 className="text-lg font-medium text-white mb-2">No metrics yet</h3>
           <p className="text-white/40 text-sm max-w-sm mx-auto mb-6">
-            Click "Refresh Metrics" to fetch engagement data from your connected social platforms.
+            Click &quot;Refresh Metrics&quot; to fetch engagement data from your connected social platforms.
             Metrics are available for posts published after platform post IDs are stored.
           </p>
           <button

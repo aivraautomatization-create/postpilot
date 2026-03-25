@@ -80,7 +80,7 @@ Scoring guide:
     if (postId) {
       const admin = getSupabaseAdmin();
       if (admin) {
-        await (admin as any)
+        await admin
           .from("posts")
           .update({
             ai_feedback: feedback,

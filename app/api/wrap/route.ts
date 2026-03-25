@@ -29,7 +29,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Server error" }, { status: 500 });
     }
 
-    const { data: posts } = await (admin as any)
+    const { data: posts } = await admin
       .from("posts")
       .select("id, content, platforms, image_url, published_at")
       .eq("user_id", user.id)
@@ -51,7 +51,7 @@ export async function GET(req: Request) {
 
     let metrics: any[] = [];
     if (postIds.length > 0) {
-      const { data: metricsData } = await (admin as any)
+      const { data: metricsData } = await admin
         .from("post_metrics")
         .select("post_id, platform, likes, shares, reach, impressions")
         .in("post_id", postIds);

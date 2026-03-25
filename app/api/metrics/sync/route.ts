@@ -26,7 +26,7 @@ export async function POST() {
     }
     const userId = user.id;
 
-    const supabase = getSupabaseAdmin() as any;
+    const supabase = getSupabaseAdmin();
     if (!supabase) {
       return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
     }
@@ -63,7 +63,7 @@ export async function POST() {
 
     for (const post of posts) {
       const platforms: string[] = post.platforms || [];
-      const publishResults: Record<string, any> = post.publish_results || {};
+      const publishResults: Record<string, any> = (post.publish_results as Record<string, any>) || {};
 
       for (const platform of platforms) {
         const account = accounts.find((a: any) => a.provider === platform);

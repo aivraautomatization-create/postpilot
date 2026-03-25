@@ -1,6 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import { NextResponse } from "next/server";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimitAsync } from "@/lib/rate-limit-store";
 import { getGeminiKey } from "@/lib/env";
 
 export async function POST(req: Request) {
@@ -16,7 +16,7 @@ export async function POST(req: Request) {
 
     // Rate limit by IP — 1 demo per IP per hour
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-    const { allowed, retryAfter } = checkRateLimit(`demo:${ip}`, 3, 3600000);
+    const { allowed, retryAfter } = await checkRateLimitAsync(`demo:${ip}`, 3, 3600000);
     if (!allowed) {
       return NextResponse.json({
         error: `Demo limit reached. Sign up for unlimited generations! Try again in ${retryAfter} seconds.`,

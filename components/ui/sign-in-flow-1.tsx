@@ -245,6 +245,7 @@ const ShaderMaterial = ({
   useFrame(({ clock }) => {
     if (!ref.current) return;
     const timestamp = clock.getElapsedTime();
+    // eslint-disable-next-line react-hooks/immutability
     lastFrameTime = timestamp;
 
     const material: any = ref.current.material;
@@ -374,6 +375,7 @@ function MiniNavbar() {
     }
 
     if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setHeaderShapeClass('rounded-xl');
     } else {
       shapeTimeoutRef.current = setTimeout(() => {
@@ -749,7 +751,7 @@ export const SignInPage = ({ className }: SignInPageProps) => {
                     className="space-y-6 text-center"
                   >
                     <div className="space-y-1">
-                      <h1 className="text-[2.5rem] font-bold leading-[1.1] tracking-tight text-white">You're in!</h1>
+                      <h1 className="text-[2.5rem] font-bold leading-[1.1] tracking-tight text-white">You&apos;re in!</h1>
                       <p className="text-[1.25rem] text-white/50 font-light">Welcome</p>
                     </div>
                     

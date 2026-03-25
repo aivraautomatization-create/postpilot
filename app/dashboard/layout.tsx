@@ -30,6 +30,7 @@ import { useAuth } from "@/lib/auth-context";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { getSupabase } from "@/lib/supabase";
 import { isSubscriptionActive, getUsageLimit, getPlanName } from "@/lib/plan-limits";
+import StreakNudgeModal from "@/components/dashboard/StreakNudgeModal";
 
 const navigation = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
@@ -59,6 +60,7 @@ export default function DashboardLayout({
   const [isManagingSub, setIsManagingSub] = useState(false);
   const [isCheckingProfile, setIsCheckingProfile] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [streakData, setStreakData] = useState<{ current_streak: number; last_post_date: string | null } | null>(null);
   const checkoutInitiatedRef = useRef(false);
   const supabase = getSupabase();
 
@@ -109,6 +111,19 @@ export default function DashboardLayout({
     }
   }, [user, authLoading, profile, pathname, router]);
 
+  // Fetch streak data for nudge modal
+  useEffect(() => {
+    if (!user || !supabase) return;
+    supabase
+      .from('user_streaks')
+      .select('current_streak, last_post_date')
+      .eq('user_id', user.id)
+      .single()
+      .then(({ data }) => {
+        if (data) setStreakData(data as any);
+      });
+  }, [user, supabase]);
+
   // Close sidebar on navigation (mobile)
   useEffect(() => {
     setSidebarOpen(false);
@@ -157,7 +172,7 @@ export default function DashboardLayout({
     return <>{children}</>;
   }
 
-  const subscriptionActive = isSubscriptionActive(profile);
+  const subscriptionActive = isSubscriptionActive(profile as any);
   const isRestrictedPage = !UNRESTRICTED_PAGES.includes(pathname);
   const showExpiredOverlay = !subscriptionActive && isRestrictedPage;
 
@@ -323,6 +338,14 @@ export default function DashboardLayout({
           </div>
         </main>
       </div>
+
+      {/* Psych: Loss Aversion streak nudge — fires when streak is at risk */}
+      {streakData && streakData.current_streak >= 3 && (
+        <StreakNudgeModal
+          currentStreak={streakData.current_streak}
+          lastPostDate={streakData.last_post_date}
+        />
+      )}
     </div>
   );
 }

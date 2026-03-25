@@ -48,15 +48,15 @@ export default function SettingsPage() {
     async function fetchData() {
       if (!supabase || !user) return;
 
-      const { data: profileData } = await (supabase as any)
+      const { data: profileData } = await supabase!
         .from("profiles")
         .select("*")
         .eq("id", user.id)
         .single();
 
       if (profileData) {
-        setProfile(profileData);
-        setFullName(profileData.full_name || user?.user_metadata?.full_name || "");
+        setProfile(profileData as any);
+        setFullName((profileData as any).full_name || user?.user_metadata?.full_name || "");
         setCompanyName(profileData.company_name || "");
         setNiche(profileData.niche || "");
         setOfferings(profileData.offerings || "");
@@ -70,7 +70,7 @@ export default function SettingsPage() {
       try {
         const now = new Date();
         const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-        const { data: usageData } = await (supabase as any)
+        const { data: usageData } = await supabase!
           .from("usage")
           .select("*")
           .eq("user_id", user.id)
@@ -91,7 +91,7 @@ export default function SettingsPage() {
     setSaving(true);
     setSaved(false);
 
-    await (supabase as any)
+    await supabase!
       .from("profiles")
       .update({
         company_name: companyName,
@@ -175,7 +175,7 @@ export default function SettingsPage() {
   }
 
   const currentUsage = usage?.posts_count || 0;
-  const limit = getUsageLimit(profile?.subscription_tier);
+  const limit = getUsageLimit(profile?.subscription_tier, profile?.bonus_posts || 0);
   const usagePercent = Math.min((currentUsage / limit) * 100, 100);
 
   return (

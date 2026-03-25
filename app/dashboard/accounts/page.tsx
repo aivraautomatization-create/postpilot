@@ -107,7 +107,7 @@ export default function AccountsPage() {
 
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data } = await (supabase as any)
+        const { data } = await supabase
           .from('social_accounts')
           .select('provider, provider_account_name')
           .eq('user_id', user.id);
@@ -132,7 +132,7 @@ export default function AccountsPage() {
         if (supabase && tokens?.accessToken) {
           const { data: { user } } = await supabase.auth.getUser();
           if (user) {
-            await (supabase as any)
+            await supabase
               .from('social_accounts')
               .upsert({
                 user_id: user.id,
@@ -231,7 +231,7 @@ export default function AccountsPage() {
       if (supabase) {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          await (supabase as any)
+          await supabase
             .from('social_accounts')
             .delete()
             .eq('user_id', user.id)

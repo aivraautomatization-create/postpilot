@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseServer } from '@/lib/supabase-server';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { checkRateLimitAsync } from "@/lib/rate-limit-store";
 
 const ALLOWED_DOMAINS = [
   'generativelanguage.googleapis.com',
@@ -32,7 +32,7 @@ export async function GET(req: Request) {
   }
 
   // Rate limit: 20 per minute per user
-  const { allowed, retryAfter } = checkRateLimit(`video-proxy:${user.id}`, 20, 60000);
+  const { allowed, retryAfter } = await checkRateLimitAsync(`video-proxy:${user.id}`, 20, 60000);
   if (!allowed) {
     return NextResponse.json({
       error: `Rate limit exceeded. Try again in ${retryAfter} seconds.`,
