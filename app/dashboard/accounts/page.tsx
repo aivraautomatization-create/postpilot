@@ -312,8 +312,8 @@ export default function AccountsPage() {
               <CheckCircle2 className="w-5 h-5 text-white" />
               <span className="text-sm text-white">{successMessage}</span>
             </div>
-            <button onClick={() => setSuccessMessage(null)} className="text-white/50 hover:text-white/80">
-              <X className="w-4 h-4" />
+            <button onClick={() => setSuccessMessage(null)} aria-label="Dismiss message" className="text-white/50 hover:text-white/80">
+              <X className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
         )}

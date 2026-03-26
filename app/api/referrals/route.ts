@@ -36,14 +36,14 @@ export async function GET() {
     }
 
     // Get referral stats
-    const { data: referrals } = await (admin as any)
+    const { data: referrals } = await admin
       .from("referrals")
       .select("id, status, referred_email, created_at, converted_at")
       .eq("referrer_id", user.id)
       .order("created_at", { ascending: false });
 
-    const signedUp = (referrals || []).filter((r: any) => r.status === "signed_up" || r.status === "converted").length;
-    const converted = (referrals || []).filter((r: any) => r.status === "converted").length;
+    const signedUp = (referrals || []).filter((r) => r.status === "signed_up" || r.status === "converted").length;
+    const converted = (referrals || []).filter((r) => r.status === "converted").length;
 
     return NextResponse.json({
       referralCode,

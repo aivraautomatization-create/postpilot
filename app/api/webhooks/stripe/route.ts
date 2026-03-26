@@ -86,10 +86,10 @@ export async function POST(req: Request) {
               .eq('id', userId)
               .single();
 
-            const referrerId = (newUserProfile as any)?.referred_by;
+            const referrerId = newUserProfile?.referred_by ?? null;
             if (referrerId) {
               // Mark referral as converted
-              await (supabaseAdmin as any)
+              await supabaseAdmin
                 .from('referrals')
                 .update({
                   status: 'converted',
@@ -99,14 +99,14 @@ export async function POST(req: Request) {
                 .eq('referred_id', userId);
 
               // Award conversion bonus to referrer (on top of signup bonus)
-              const { data: referrerProfile } = await (supabaseAdmin as any)
+              const { data: referrerProfile } = await supabaseAdmin
                 .from('profiles')
                 .select('bonus_posts, full_name')
                 .eq('id', referrerId)
                 .single();
 
               if (referrerProfile) {
-                await (supabaseAdmin as any)
+                await supabaseAdmin
                   .from('profiles')
                   .update({
                     bonus_posts: (referrerProfile.bonus_posts || 0) + CONVERSION_BONUS_POSTS,

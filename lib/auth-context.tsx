@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
       
       if (data) {
-        setProfile(data as any);
+        setProfile(data as unknown as Profile);
         // Persist tier for quick access in non-hydrated states
         localStorage.setItem('subscriptionTier', data.subscription_tier || 'tier-entry');
       }

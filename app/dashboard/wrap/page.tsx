@@ -130,9 +130,10 @@ export default function WrapPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setMonth(getMonthOffset(month, -1))}
+            aria-label="Previous month"
             className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-colors"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-5 h-5" aria-hidden="true" />
           </button>
           <span className="text-sm text-white/70 min-w-[140px] text-center font-medium">
             {formatMonthLabel(month)}
@@ -140,9 +141,10 @@ export default function WrapPage() {
           <button
             onClick={() => canGoForward && setMonth(getMonthOffset(month, 1))}
             disabled={!canGoForward}
+            aria-label="Next month"
             className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
       </div>

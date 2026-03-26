@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     }
 
     // Find the referrer by their referral code
-    const { data: referrer } = await (admin as any)
+    const { data: referrer } = await admin
       .from("profiles")
       .select("id, bonus_posts, full_name")
       .eq("referral_code", referralCode)
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
     }
 
     // Check if this user was already referred (prevent double-processing)
-    const { data: existingRef } = await (admin as any)
+    const { data: existingRef } = await admin
       .from("referrals")
       .select("id")
       .eq("referred_id", newUserId)
@@ -56,7 +56,7 @@ export async function POST(req: Request) {
     }
 
     // Record the referral
-    await (admin as any).from("referrals").insert({
+    await admin.from("referrals").insert({
       referrer_id: referrer.id,
       referral_code: referralCode,
       referred_email: email || null,
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
     });
 
     // Award bonus posts to referrer (bilateral)
-    await (admin as any)
+    await admin
       .from("profiles")
       .update({
         bonus_posts: (referrer.bonus_posts || 0) + BONUS_POSTS_PER_REFERRAL,
@@ -74,7 +74,7 @@ export async function POST(req: Request) {
       .eq("id", referrer.id);
 
     // Award bonus posts to invitee (bilateral) + set referred_by
-    await (admin as any)
+    await admin
       .from("profiles")
       .update({
         referred_by: referrer.id,
@@ -84,7 +84,7 @@ export async function POST(req: Request) {
 
     // Notify referrer via email (non-blocking)
     try {
-      const { data: referrerAuth } = await (admin as any).auth.admin.getUserById(referrer.id);
+      const { data: referrerAuth } = await admin.auth.admin.getUserById(referrer.id);
       if (referrerAuth?.user?.email) {
         await sendReferralSuccessEmail(
           referrerAuth.user.email,

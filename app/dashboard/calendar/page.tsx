@@ -284,15 +284,17 @@ export default function CalendarPage() {
           <div className="flex items-center gap-1">
             <button
               onClick={() => navigate(-1)}
+              aria-label="Previous period"
               className="p-2 rounded-xl border border-white/[0.08] text-white/60 hover:text-white hover:bg-white/[0.04] transition-all"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-4 h-4" aria-hidden="true" />
             </button>
             <button
               onClick={() => navigate(1)}
+              aria-label="Next period"
               className="p-2 rounded-xl border border-white/[0.08] text-white/60 hover:text-white hover:bg-white/[0.04] transition-all"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
 

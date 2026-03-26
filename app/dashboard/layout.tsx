@@ -185,13 +185,15 @@ export default function DashboardLayout({
         </Link>
       </div>
 
-      <nav className="flex-1 px-4 py-6 space-y-2">
+      <nav role="navigation" aria-label="Dashboard navigation" className="flex-1 px-4 py-6 space-y-2">
         {navigation.map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link
               key={item.name}
               href={item.href}
+              aria-label={item.name}
+              aria-current={isActive ? "page" : undefined}
               className={clsx(
                 "group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-300",
                 isActive
@@ -219,6 +221,7 @@ export default function DashboardLayout({
         <button
           onClick={handleManageSubscription}
           disabled={isManagingSub}
+          aria-label="Manage subscription"
           className="flex items-center gap-3 px-3 py-2 w-full rounded-lg text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition-colors disabled:opacity-50"
         >
           {isManagingSub ? <Loader2 className="w-5 h-5 animate-spin" /> : <CreditCard className="w-5 h-5" />}
@@ -238,6 +241,7 @@ export default function DashboardLayout({
         </Link>
         <button
           onClick={() => signOut()}
+          aria-label="Log out"
           className="flex items-center gap-3 px-3 py-2 w-full rounded-lg text-sm font-medium text-red-400/60 hover:text-red-400 hover:bg-red-400/5 transition-colors"
         >
           <LogOut className="w-5 h-5" />
@@ -269,6 +273,7 @@ export default function DashboardLayout({
 
       {/* Sidebar — desktop: always visible, mobile: slide-in */}
       <div
+        id="dashboard-sidebar"
         className={clsx(
           "w-64 border-r border-white-[0.08] flex flex-col bg-white/[0.02] backdrop-blur-2xl z-50",
           "fixed inset-y-0 left-0 transform transition-transform duration-200 ease-in-out md:relative md:translate-x-0",
@@ -284,9 +289,12 @@ export default function DashboardLayout({
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
+              aria-label="Open navigation menu"
+              aria-expanded={sidebarOpen}
+              aria-controls="dashboard-sidebar"
               className="md:hidden p-1 text-white/60 hover:text-white"
             >
-              <Menu className="w-6 h-6" />
+              <Menu className="w-6 h-6" aria-hidden="true" />
             </button>
             <h1 className="text-lg font-medium">
               {navigation.find(n => n.href === pathname)?.name || (pathname === '/dashboard/settings' ? 'Settings' : 'Dashboard')}

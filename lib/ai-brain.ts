@@ -195,6 +195,49 @@ export async function buildBrainContext(userId: string): Promise<string> {
 }
 
 // ---------------------------------------------------------------------------
+// 2b. getLatestStrategyContext — returns most recent strategy recommendations
+//     as a plain string for injection into generation prompts.
+// ---------------------------------------------------------------------------
+
+export async function getLatestStrategyContext(
+  userId: string
+): Promise<string | null> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return null;
+
+  try {
+    const { data } = await supabase
+      .from('strategy_reports')
+      .select('report_data, generated_at')
+      .eq('user_id', userId)
+      .order('generated_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (!data?.report_data) return null;
+
+    const report = data.report_data as unknown as StrategyReport;
+    if (!report.recommendations?.length) return null;
+
+    const lines = [
+      `Strategy recommendations (from ${new Date(data.generated_at).toLocaleDateString()}):`,
+      ...report.recommendations.map((r) => `- ${r}`),
+    ];
+
+    if (report.bestHooks?.length) {
+      lines.push(`Best hook styles: ${report.bestHooks.slice(0, 3).join(', ')}.`);
+    }
+    if (report.bestPostingTimes?.length) {
+      lines.push(`Best times to post: ${report.bestPostingTimes.slice(0, 2).join(', ')}.`);
+    }
+
+    return lines.join('\n');
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // 3. generateStrategyReport
 // ---------------------------------------------------------------------------
 
@@ -263,7 +306,7 @@ overallScore is 1-100 representing overall content strategy health.`,
       user_id: userId,
       period_start: periodStart,
       period_end: periodEnd,
-      report_data: report as any,
+      report_data: report as unknown as import('./database.types').Json,
     });
 
     return report;
@@ -329,7 +372,7 @@ export async function learnFromPost(
 
     const { error: insertError } = await supabase
       .from('brand_memory')
-      .insert(rows as any);
+      .insert(rows);
 
     if (insertError) {
       console.error(

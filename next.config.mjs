@@ -49,7 +49,7 @@ const nextConfig = {
   },
   serverExternalPackages: ['@google/genai', 'gcp-metadata'],
   experimental: {
-    optimizePackageImports: ['lucide-react', 'recharts', 'framer-motion', 'date-fns'],
+    optimizePackageImports: ['lucide-react', 'recharts', 'framer-motion', 'date-fns', 'three', '@react-three/fiber', '@react-three/drei'],
   },
 };
 

@@ -7,7 +7,7 @@ import { searchTrends } from "@/lib/perplexity";
 import { reviewContent } from "@/lib/claude";
 import { getGeminiKey } from "@/lib/env";
 import { generateSchema } from "@/lib/validations";
-import { buildBrainContext } from "@/lib/ai-brain";
+import { buildBrainContext, getLatestStrategyContext } from "@/lib/ai-brain";
 
 export async function POST(req: Request) {
   try {
@@ -64,14 +64,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Gemini API key not configured" }, { status: 500 });
     }
 
-    // Step 1: Perplexity trend research + AI-Brain context (PARALLEL — both are independent)
-    const [trendResult, brainResult] = await Promise.allSettled([
+    // Step 1: Perplexity trend research + AI-Brain context + strategy context (all parallel)
+    const [trendResult, brainResult, strategyResult] = await Promise.allSettled([
       profile?.niche ? searchTrends(profile.niche, platform) : Promise.resolve(null),
       userId ? buildBrainContext(userId) : Promise.resolve(null),
+      userId ? getLatestStrategyContext(userId) : Promise.resolve(null),
     ]);
 
     const trendData = trendResult.status === 'fulfilled' ? trendResult.value : null;
     const brainContext = brainResult.status === 'fulfilled' ? brainResult.value : null;
+    const strategyContext = strategyResult.status === 'fulfilled' ? strategyResult.value : null;
 
     // Step 2: Gemini content generation (enriched with trend data + brain context)
     const ai = new GoogleGenAI({ apiKey });
@@ -107,6 +109,8 @@ export async function POST(req: Request) {
     ${trendData ? `REAL-TIME TREND DATA (from live research — USE THIS to make the content timely and relevant):\n${trendData}` : ''}
 
     ${brainContext ? `AI-BRAIN MEMORY (patterns learned from this brand's past performance — USE THIS to replicate what works):\n${brainContext}` : ''}
+
+    ${strategyContext ? `RECENT STRATEGY INSIGHTS (AI-generated recommendations from post performance analysis — APPLY THESE):\n${strategyContext}` : ''}
 
     ${journeyStage ? `\nContent Journey Stage: ${journeyStage}. ${(suggestedCTAs as string[] | undefined)?.length ? `Suggested CTAs to consider: ${(suggestedCTAs as string[]).join(', ')}` : ''}` : ''}
 

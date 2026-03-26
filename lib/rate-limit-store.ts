@@ -28,7 +28,7 @@ export async function checkRateLimitAsync(
   // Try Supabase-backed rate limiting first
   if (supabaseAdmin) {
     try {
-      const { data, error } = await (supabaseAdmin as any).rpc('check_rate_limit', {
+      const { data, error } = await supabaseAdmin.rpc('check_rate_limit', {
         p_key: key,
         p_limit: limit,
         p_window_ms: windowMs,
@@ -76,8 +76,9 @@ if (typeof globalThis !== 'undefined') {
 
   // Use globalThis to avoid duplicate intervals in dev hot-reload
   const globalKey = '__puls_rate_limit_cleanup';
-  if (!(globalThis as any)[globalKey]) {
-    (globalThis as any)[globalKey] = setInterval(cleanup, 60 * 1000);
+  const g = globalThis as typeof globalThis & Record<string, unknown>;
+  if (!g[globalKey]) {
+    g[globalKey] = setInterval(cleanup, 60 * 1000);
   }
 }
 

@@ -197,9 +197,10 @@ export default function ReviewModal({
                 </div>
                 <button
                   onClick={onClose}
+                  aria-label="Close modal"
                   className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/[0.06] transition-colors"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-4 h-4" aria-hidden="true" />
                 </button>
               </div>
 

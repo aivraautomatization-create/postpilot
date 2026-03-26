@@ -284,6 +284,42 @@ export type Database = {
         }
         Relationships: []
       }
+      referrals: {
+        Row: {
+          id: string
+          referrer_id: string
+          referral_code: string
+          referred_email: string | null
+          referred_id: string | null
+          status: 'pending' | 'signed_up' | 'converted'
+          bonus_posts_awarded: boolean | null
+          created_at: string | null
+          converted_at: string | null
+        }
+        Insert: {
+          id?: string
+          referrer_id: string
+          referral_code: string
+          referred_email?: string | null
+          referred_id?: string | null
+          status?: 'pending' | 'signed_up' | 'converted'
+          bonus_posts_awarded?: boolean | null
+          created_at?: string | null
+          converted_at?: string | null
+        }
+        Update: {
+          id?: string
+          referrer_id?: string
+          referral_code?: string
+          referred_email?: string | null
+          referred_id?: string | null
+          status?: 'pending' | 'signed_up' | 'converted'
+          bonus_posts_awarded?: boolean | null
+          created_at?: string | null
+          converted_at?: string | null
+        }
+        Relationships: []
+      }
       rate_limits: {
         Row: {
           count: number

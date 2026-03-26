@@ -5,7 +5,7 @@ import { checkRateLimitAsync } from "@/lib/rate-limit-store";
 import { searchTrends } from "@/lib/perplexity";
 import { getGeminiKey } from "@/lib/env";
 import { generateSchema } from "@/lib/validations";
-import { buildBrainContext } from "@/lib/ai-brain";
+import { buildBrainContext, getLatestStrategyContext } from "@/lib/ai-brain";
 
 export const runtime = "nodejs";
 
@@ -81,14 +81,16 @@ export async function POST(req: Request) {
       });
     }
 
-    // Parallel: trends + brain context
-    const [trendResult, brainResult] = await Promise.allSettled([
+    // Parallel: trends + brain context + strategy context
+    const [trendResult, brainResult, strategyResult] = await Promise.allSettled([
       profile?.niche ? searchTrends(profile.niche, platform) : Promise.resolve(null),
       userId ? buildBrainContext(userId) : Promise.resolve(null),
+      userId ? getLatestStrategyContext(userId) : Promise.resolve(null),
     ]);
 
     const trendData = trendResult.status === "fulfilled" ? trendResult.value : null;
     const brainContext = brainResult.status === "fulfilled" ? brainResult.value : null;
+    const strategyContext = strategyResult.status === "fulfilled" ? strategyResult.value : null;
 
     // Build system instruction (same as non-streaming route)
     const systemInstruction = `
@@ -122,6 +124,8 @@ export async function POST(req: Request) {
     ${trendData ? `REAL-TIME TREND DATA (from live research — USE THIS to make the content timely and relevant):\n${trendData}` : ""}
 
     ${brainContext ? `AI-BRAIN MEMORY (patterns learned from this brand's past performance — USE THIS to replicate what works):\n${brainContext}` : ""}
+
+    ${strategyContext ? `RECENT STRATEGY INSIGHTS (AI-generated recommendations from post performance analysis — APPLY THESE):\n${strategyContext}` : ""}
 
     ${journeyStage ? `\nContent Journey Stage: ${journeyStage}. ${(suggestedCTAs as string[] | undefined)?.length ? `Suggested CTAs to consider: ${(suggestedCTAs as string[]).join(", ")}` : ""}` : ""}
 

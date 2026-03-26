@@ -15,6 +15,8 @@ env:
   # Stub env vars so the build doesn't crash on missing config
   NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
   NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
+  # Set commit SHA as app version so Sentry release tracking works
+  NEXT_PUBLIC_APP_VERSION: ${{ github.sha }}
 
 jobs:
   # ──────────────────────────────────────────────
@@ -81,10 +83,9 @@ jobs:
 
       - run: npm ci
 
-      # Block on high/critical CVEs; moderate is allowed
+      # Block on high/critical CVEs; moderate is informational only
       - name: npm audit
         run: npm audit --audit-level=high
-        continue-on-error: true
 
       # Scan for accidentally committed secrets
       - name: Secret scan (Gitleaks)
