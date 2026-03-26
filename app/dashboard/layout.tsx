@@ -120,7 +120,7 @@ export default function DashboardLayout({
       .eq('user_id', user.id)
       .single()
       .then(({ data }) => {
-        if (data) setStreakData(data as any);
+        if (data) setStreakData(data);
       });
   }, [user, supabase]);
 
@@ -172,7 +172,7 @@ export default function DashboardLayout({
     return <>{children}</>;
   }
 
-  const subscriptionActive = isSubscriptionActive(profile as any);
+  const subscriptionActive = isSubscriptionActive(profile);
   const isRestrictedPage = !UNRESTRICTED_PAGES.includes(pathname);
   const showExpiredOverlay = !subscriptionActive && isRestrictedPage;
 

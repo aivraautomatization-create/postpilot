@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     if (!admin) {
       return NextResponse.json({ error: "Database configuration missing" }, { status: 500 });
     }
-    const { data: profile } = await (admin as any)
+    const { data: profile } = await admin
       .from('profiles')
       .select('subscription_status, trial_ends_at, stripe_customer_id')
       .eq('id', user.id)
@@ -61,7 +61,7 @@ export async function POST(req: Request) {
 
     // If reset, delete old messages for this user's current session
     if (reset && sessionId) {
-      await (admin as any)
+      await admin
         .from('chat_messages')
         .delete()
         .eq('user_id', user.id)
@@ -69,7 +69,7 @@ export async function POST(req: Request) {
     }
 
     // Load chat history from Supabase
-    const { data: history } = await (admin as any)
+    const { data: history } = await admin
       .from('chat_messages')
       .select('role, content')
       .eq('user_id', user.id)
@@ -102,7 +102,7 @@ export async function POST(req: Request) {
     const responseText = response.text || "";
 
     // Save both messages to Supabase
-    await (admin as any)
+    await admin
       .from('chat_messages')
       .insert([
         {

@@ -164,9 +164,9 @@ export default function BrandBrainPage() {
           .order("confidence_score", { ascending: false });
 
         if (memoryData) {
-          setBrandMemory(memoryData as any);
+          setBrandMemory(memoryData as unknown as BrandMemoryEntry[]);
           setMemoryCount(count || memoryData.length);
-          setTopPatterns(memoryData.slice(0, 5) as any);
+          setTopPatterns(memoryData.slice(0, 5) as unknown as BrandMemoryEntry[]);
         }
 
         // Fetch posts analyzed count + all posts for funnel
@@ -178,7 +178,7 @@ export default function BrandBrainPage() {
 
         setPostsAnalyzed(postCount || 0);
         if (postsData) {
-          setAllPosts(postsData as any);
+          setAllPosts(postsData as unknown as Post[]);
         }
       } catch (err) {
         console.error("Error fetching brain data:", err);
@@ -206,7 +206,7 @@ export default function BrandBrainPage() {
           .limit(10);
 
         if (data) {
-          setVariants(data as any);
+          setVariants(data as unknown as PostVariant[]);
         }
       } catch (err) {
         console.error("Error fetching variants:", err);
@@ -430,7 +430,7 @@ export default function BrandBrainPage() {
             <p className="text-white/60 text-sm mb-4 leading-relaxed">{vibeDescription}</p>
 
             <div className="flex flex-wrap gap-2">
-              {((profile?.content_pillars as any) || ["Authentic", "Engaging", "Educational"]).map(
+              {((profile?.content_pillars as string[] | null | undefined) || ["Authentic", "Engaging", "Educational"]).map(
                 (tag: string, i: number) => (
                   <span
                     key={i}

@@ -171,7 +171,7 @@ export default function CalendarPage() {
       .select("id, content, platforms, status, scheduled_for, created_at")
       .eq("user_id", user.id)
       .order("scheduled_for", { ascending: true });
-    setPosts((data as any) || []);
+    setPosts((data as unknown as Post[]) || []);
     setLoading(false);
   }, [supabase, user]);
 

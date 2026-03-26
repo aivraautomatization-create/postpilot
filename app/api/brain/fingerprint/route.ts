@@ -48,7 +48,7 @@ export async function POST(req: Request) {
     }
 
     // Fetch connected account
-    const { data: account } = await (admin as any)
+    const { data: account } = await admin
       .from("social_accounts")
       .select("*")
       .eq("user_id", user.id)
@@ -211,11 +211,11 @@ Be specific to THIS person's actual voice. Don't generic-ify it.`,
         performance_score: p.performance_score || 0.5,
       }));
 
-      await (admin as any).from("brand_memory").insert(rows);
+      await admin.from("brand_memory").insert(rows);
     }
 
     // Mark fingerprint as analyzed
-    await (admin as any)
+    await admin
       .from("profiles")
       .update({ brand_fingerprint_analyzed_at: new Date().toISOString() })
       .eq("id", user.id);

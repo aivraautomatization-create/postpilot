@@ -55,8 +55,8 @@ export default function SettingsPage() {
         .single();
 
       if (profileData) {
-        setProfile(profileData as any);
-        setFullName((profileData as any).full_name || user?.user_metadata?.full_name || "");
+        setProfile(profileData);
+        setFullName(profileData.full_name || user?.user_metadata?.full_name || "");
         setCompanyName(profileData.company_name || "");
         setNiche(profileData.niche || "");
         setOfferings(profileData.offerings || "");

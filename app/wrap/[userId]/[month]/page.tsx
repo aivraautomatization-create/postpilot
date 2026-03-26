@@ -34,7 +34,7 @@ async function getWrapData(userId: string, month: string) {
     .lt("published_at", endDate);
 
   const publishedPosts = posts || [];
-  const postIds = publishedPosts.map((p: any) => p.id);
+  const postIds = publishedPosts.map((p) => p.id);
 
   const platformSet = new Set<string>();
   for (const post of publishedPosts) {
@@ -50,7 +50,7 @@ async function getWrapData(userId: string, month: string) {
       .select("likes, shares")
       .in("post_id", postIds);
     totalEngagement = (metrics || []).reduce(
-      (sum: number, m: any) => sum + (m.likes || 0) + (m.shares || 0),
+      (sum, m) => sum + (m.likes || 0) + (m.shares || 0),
       0
     );
   }
@@ -62,7 +62,7 @@ async function getWrapData(userId: string, month: string) {
       : `${timeSavedMinutes}m`;
 
   return {
-    name: (profile as any).full_name || (profile as any).company_name || "A Puls User",
+    name: profile.full_name || profile.company_name || "A Puls User",
     totalPosts: publishedPosts.length,
     totalPlatforms: platformSet.size,
     platforms: Array.from(platformSet),

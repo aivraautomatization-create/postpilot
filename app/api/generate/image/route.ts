@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     const { getSupabaseAdmin } = await import("@/lib/supabase");
     const admin = getSupabaseAdmin();
     if (admin) {
-      const { data: profile } = await (admin as any)
+      const { data: profile } = await admin
         .from('profiles')
         .select('subscription_status, trial_ends_at, stripe_customer_id')
         .eq('id', user.id)

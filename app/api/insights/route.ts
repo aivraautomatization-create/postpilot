@@ -4,6 +4,16 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
+type MetricWithPost = {
+  post_id: string | null
+  platform: string
+  likes: number | null
+  shares: number | null
+  reach: number | null
+  fetched_at: string | null
+  posts: { user_id: string; published_at: string | null } | null
+}
+
 export async function GET() {
   const supabase = await getSupabaseServer();
   if (!supabase) {
@@ -42,7 +52,7 @@ export async function GET() {
 
   const posts = postsResult.data || [];
   const profile = profileResult.data;
-  const metrics: any[] = (metricsResult.data || []) as any[];
+  const metrics = (metricsResult.data || []) as unknown as MetricWithPost[];
 
   const postsAnalyzed = posts.length;
   const confidenceScore = Math.min(100, postsAnalyzed * 2);
@@ -50,7 +60,7 @@ export async function GET() {
   // Best performing day
   const dayEngagement: Record<number, { total: number; count: number }> = {};
   for (const m of metrics) {
-    const publishedAt = (m as any).posts?.published_at;
+    const publishedAt = m.posts?.published_at;
     if (!publishedAt) continue;
     const day = new Date(publishedAt).getDay();
     if (!dayEngagement[day]) dayEngagement[day] = { total: 0, count: 0 };
@@ -98,7 +108,7 @@ export async function GET() {
   }
 
   for (const m of metrics) {
-    const publishedAt = (m as any).posts?.published_at;
+    const publishedAt = m.posts?.published_at;
     if (!publishedAt) continue;
     const d = new Date(publishedAt);
     if (d < sixMonthsAgo) continue;
@@ -123,8 +133,8 @@ export async function GET() {
     bestPlatform,
     engagementTrend,
     voiceProfile: {
-      toneOfVoice: (profile as any)?.tone_of_voice || null,
-      niche: (profile as any)?.niche || null,
+      toneOfVoice: profile?.tone_of_voice || null,
+      niche: profile?.niche || null,
     },
   });
 }

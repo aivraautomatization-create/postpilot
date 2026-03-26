@@ -40,7 +40,7 @@ export async function POST(req: Request) {
       };
     });
 
-    const { error } = await (admin as any).from('posts').insert(posts);
+    const { error } = await admin.from('posts').insert(posts);
     if (error) throw error;
 
     return NextResponse.json({ success: true, count: posts.length });

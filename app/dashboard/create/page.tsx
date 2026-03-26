@@ -115,7 +115,7 @@ function CreateContentInner() {
 
   useEffect(() => {
     if (profile?.latest_strategy) {
-      setStrategy(profile.latest_strategy as any);
+      setStrategy(profile.latest_strategy as string | null);
     }
   }, [profile]);
 

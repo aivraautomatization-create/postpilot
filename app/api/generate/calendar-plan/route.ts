@@ -24,7 +24,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
     }
 
-    const { data: userProfile } = await (admin as any)
+    const { data: userProfile } = await admin
       .from('profiles')
       .select('subscription_status, trial_ends_at, stripe_customer_id')
       .eq('id', user.id)
@@ -150,7 +150,7 @@ ${trendData ? '- USE the real-time trend data to ground topics in what is actual
       };
     });
 
-    const { error: insertError } = await (admin as any)
+    const { error: insertError } = await admin
       .from('posts')
       .insert(postsToInsert);
 

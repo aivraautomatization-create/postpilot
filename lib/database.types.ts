@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      chat_messages: {
+        Row: {
+          id: string
+          user_id: string
+          session_id: string
+          role: string
+          content: string
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          session_id: string
+          role: string
+          content: string
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          session_id?: string
+          role?: string
+          content?: string
+          created_at?: string | null
+        }
+        Relationships: []
+      }
       brand_memory: {
         Row: {
           content: Json
@@ -206,6 +233,7 @@ export type Database = {
       profiles: {
         Row: {
           bonus_posts: number | null
+          brand_fingerprint_analyzed_at: string | null
           company_name: string | null
           content_pillars: Json | null
           created_at: string
@@ -232,6 +260,7 @@ export type Database = {
         }
         Insert: {
           bonus_posts?: number | null
+          brand_fingerprint_analyzed_at?: string | null
           company_name?: string | null
           content_pillars?: Json | null
           created_at?: string
@@ -258,6 +287,7 @@ export type Database = {
         }
         Update: {
           bonus_posts?: number | null
+          brand_fingerprint_analyzed_at?: string | null
           company_name?: string | null
           content_pillars?: Json | null
           created_at?: string

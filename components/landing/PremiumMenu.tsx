@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
 import Link from "next/link";
 import { X, Menu as MenuIcon, ArrowRight, TrendingUp, Zap, ShieldCheck } from "lucide-react";
 
@@ -20,7 +20,7 @@ export default function PremiumMenu() {
     };
   }, [isOpen]);
 
-  const menuVariants = {
+  const menuVariants: Variants = {
     closed: {
       opacity: 0,
       clipPath: "circle(0% at 100% 0%)",
@@ -33,7 +33,7 @@ export default function PremiumMenu() {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     closed: { opacity: 0, y: 20 },
     open: (i: number) => ({
       opacity: 1,
@@ -83,7 +83,7 @@ export default function PremiumMenu() {
             initial="closed"
             animate="open"
             exit="closed"
-            variants={menuVariants as any}
+            variants={menuVariants}
             className="fixed inset-0 z-[100] bg-[#050505]/95 backdrop-blur-2xl flex flex-col md:flex-row h-screen w-screen overflow-hidden text-white"
           >
             {/* Ambient background glows */}
@@ -108,7 +108,7 @@ export default function PremiumMenu() {
                 {links.map((link, i) => (
                   <motion.div
                     custom={i}
-                    variants={itemVariants as any}
+                    variants={itemVariants}
                     key={link.name}
                   >
                     <Link 
@@ -122,7 +122,7 @@ export default function PremiumMenu() {
                   </motion.div>
                 ))}
                 
-                <motion.div custom={links.length} variants={itemVariants as any} className="mt-12 space-y-4 ml-1">
+                <motion.div custom={links.length} variants={itemVariants} className="mt-12 space-y-4 ml-1">
                   <div className="text-sm text-white/40">
                     <p>hello@puls.work</p>
                     <p>Privacy Policy & Terms</p>
@@ -142,7 +142,7 @@ export default function PremiumMenu() {
                 {advantages.map((adv, i) => (
                   <motion.div 
                     custom={i + 3} 
-                    variants={itemVariants as any}
+                    variants={itemVariants}
                     key={adv.title}
                     className="relative group cursor-default"
                   >
@@ -165,7 +165,7 @@ export default function PremiumMenu() {
                 
                 <motion.div 
                   custom={7} 
-                  variants={itemVariants as any}
+                  variants={itemVariants}
                   className="pt-8 border-t border-white/10"
                 >
                   <Link 

@@ -140,7 +140,7 @@ export default function AnalyticsPage() {
         .limit(200);
 
       if (fetchError) throw fetchError;
-      setMetrics((data as any) || []);
+      setMetrics((data as unknown as PostMetric[]) || []);
 
       // Fetch posts for journey stage breakdown
       const { data: postsData } = await supabase!

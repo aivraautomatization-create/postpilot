@@ -45,8 +45,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Failed to fetch user profile' }, { status: 500 });
     }
 
-    const userProfile = profile as any;
-
     // Mapping tier IDs to Stripe Product IDs from environment variables
     const products: Record<string, string> = {
       'tier-entry': process.env.STRIPE_PRODUCT_ENTRY || '',
@@ -79,7 +77,7 @@ export async function POST(req: Request) {
       : (monthlyPrices[tierId] || monthlyPrices['tier-entry']);
     const origin = req.headers.get('origin') || 'http://localhost:3000';
 
-    let customerId = userProfile.stripe_customer_id;
+    let customerId = profile.stripe_customer_id;
 
     if (!customerId) {
       // Create a new customer
@@ -100,7 +98,7 @@ export async function POST(req: Request) {
     }
 
     // Free 14-day trial available on all tiers
-    const shouldOfferTrial = !userProfile.trial_claimed;
+    const shouldOfferTrial = !profile.trial_claimed;
 
     // Create a Checkout Session for a subscription
     const session = await stripe.checkout.sessions.create({
