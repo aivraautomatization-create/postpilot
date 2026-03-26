@@ -19,75 +19,74 @@ export default function Hero() {
         animate="visible"
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 mt-10"
       >
-        {/* Psychology: Authority Bias + Specificity — concrete numbers build credibility */}
+        {/* Badge */}
         <motion.div
           variants={fadeInUp}
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/[0.12] bg-white/[0.04] backdrop-blur-md mb-8 shadow-[0_0_20px_rgba(168,85,247,0.15)]"
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#00BFFF]/20 bg-[#00BFFF]/[0.06] backdrop-blur-md mb-8"
         >
-          <Zap className="w-4 h-4 text-yellow-400" />
-          <span className="text-sm text-white font-medium tracking-wide">
-            2M+ posts generated · 14 hrs/week saved per business
+          <Zap className="w-4 h-4 text-[#00BFFF]" />
+          <span className="text-sm text-[#F8F9FA] font-medium tracking-wide">
+            800+ businesses · 14 hrs/week saved on average
           </span>
         </motion.div>
 
-        {/* Psychology: Niche-targeting headline — makes every niche feel seen */}
+        {/* Headline */}
         <motion.h1
           variants={fadeInUp}
-          className="text-4xl md:text-6xl lg:text-[5rem] font-light tracking-tight mb-6 leading-[1.08] bg-clip-text text-transparent bg-gradient-to-r from-white via-white/90 to-white/60"
+          className="text-4xl md:text-6xl lg:text-[5rem] font-light tracking-tight mb-6 leading-[1.08] text-[#F8F9FA]"
         >
           AI-powered{" "}
           <GooeyText
-            texts={["social media", "content growth", "brand magic", "engagement"]}
-            className="inline-block h-[1em] translate-y-[0.15em] min-w-[4.5em] text-white"
-            textClassName="bg-clip-text text-transparent bg-gradient-to-r from-white via-white/90 to-white/60 font-light"
+            texts={["brand manager", "content engine", "social strategy", "growth tool"]}
+            className="inline-block h-[1em] translate-y-[0.15em] min-w-[4.5em]"
+            textClassName="bg-clip-text text-transparent bg-gradient-to-r from-[#00BFFF] to-[#6DD5FF] font-light"
           />
-          <br />for your business.
+          <br />for serious creators.
         </motion.h1>
 
-        {/* Psychology: Present Bias (immediate benefit) + Specificity + Niche appeal */}
+        {/* Tagline — universal, brand-voice aligned */}
         <motion.p
           variants={fadeInUp}
-          className="mt-6 max-w-2xl mx-auto text-lg text-white/60 mb-10 font-normal leading-relaxed"
+          className="mt-4 max-w-xl mx-auto text-lg text-[#F8F9FA]/55 mb-10 font-normal leading-relaxed"
         >
-          An AI-powered social media manager for hotels, restaurants, coaches,
-          real-estate agents, and local businesses — self-service, no-hassle,
-          and AI-driven from day one. Connect your accounts, fill your brand info,
-          and get your first 30-day content calendar in minutes.
+          AI-generated posts, videos, and strategy — tailored to your brand.
+          <br />
+          <span className="text-[#F8F9FA]/40 text-base">Reliable, simple, and built for performance.</span>
         </motion.p>
 
-        {/* CTAs — Psychology: Commitment & Consistency (low-commitment entry) + Regret Aversion (risk reversal) */}
+        {/* CTAs */}
         <motion.div
           variants={fadeInUp}
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
           <Link href="/auth/signup" className="w-full sm:w-auto relative z-20">
             <InteractiveHoverButton
-              text="Start 14-Day Free Trial"
-              className="w-full sm:w-72 py-4 rounded-full text-black hover:text-white dark:hover:text-black bg-white border-transparent"
+              text="Start free — no card needed"
+              className="w-full sm:w-72 py-4 rounded-full text-[#0F1115] hover:text-[#F8F9FA] bg-[#00BFFF] border-transparent font-medium"
             />
           </Link>
           <Link
             href="#features"
-            className="inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-medium text-white bg-white/[0.04] border border-white/[0.08] hover:border-white/40 transition-colors duration-500 hover:bg-white/[0.08] rounded-full backdrop-blur-md w-full sm:w-auto"
+            className="inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-medium text-[#F8F9FA]/70 bg-white/[0.03] border border-white/[0.08] hover:border-[#00BFFF]/30 transition-colors duration-500 hover:bg-[#00BFFF]/[0.05] rounded-full backdrop-blur-md w-full sm:w-auto"
           >
-            See How It Works
+            See how it works
             <ArrowRight className="w-4 h-4" />
           </Link>
         </motion.div>
 
-        {/* Niche examples — shows deep tailoring */}
+        {/* Universal value props */}
         <motion.div
           variants={fadeInUp}
           className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto"
         >
           {[
-            { niche: "For hotels", desc: "30-day booking-boost video calendar" },
-            { niche: "For coaches", desc: "30-day lead-generation post plan" },
-            { niche: "For restaurants", desc: "30-day mouth-watering short-video calendar" },
+            { label: "From idea to calendar", desc: "AI builds your 30-day plan in one click" },
+            { label: "Your brand voice", desc: "Learns how you talk. Writes like you." },
+            { label: "Zero noise", desc: "Schedule, publish, and move on." },
           ].map((item) => (
-            <div key={item.niche} className="flex flex-col items-center p-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-sm">
-              <span className="text-sm font-semibold text-white">{item.niche}</span>
-              <span className="text-xs text-white/40 mt-1 text-center">{item.desc}</span>
+            <div key={item.label} className="flex flex-col items-center p-4 rounded-2xl border border-[#00BFFF]/[0.08] bg-[#00BFFF]/[0.02] backdrop-blur-sm">
+              <span className="text-sm font-semibold text-[#F8F9FA]">{item.label}</span>
+              <span className="text-xs text-[#F8F9FA]/40 mt-1 text-center">{item.desc}</span>
             </div>
           ))}
         </motion.div>
@@ -107,8 +106,8 @@ export default function Hero() {
               />
             ))}
           </div>
-          <div className="flex items-center gap-1.5 text-white/80">
-            <div className="flex gap-1 text-yellow-400">
+          <div className="flex items-center gap-1.5 text-[#F8F9FA]/80">
+            <div className="flex gap-1 text-[#C08A46]">
               {[1, 2, 3, 4, 5].map((i) => (
                 <svg key={i} className="w-4 h-4 fill-current" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -116,7 +115,7 @@ export default function Hero() {
               ))}
             </div>
             {/* Psychology: Specificity — odd numbers feel more authentic than round ones */}
-            <span className="text-sm font-medium">Used by 800+ local businesses &amp; personal brands</span>
+            <span className="text-sm font-medium text-[#F8F9FA]/70">Trusted by 800+ creators and businesses</span>
           </div>
         </motion.div>
 
@@ -131,8 +130,8 @@ export default function Hero() {
             { value: "$36K", label: "saved vs. agency/year" },
           ].map((stat) => (
             <div key={stat.label} className="flex flex-col items-center">
-              <span className="text-2xl font-bold text-white">{stat.value}</span>
-              <span className="text-xs text-white/40 mt-0.5 uppercase tracking-widest">{stat.label}</span>
+              <span className="text-2xl font-semibold text-[#00BFFF]">{stat.value}</span>
+              <span className="text-xs text-[#F8F9FA]/40 mt-0.5 uppercase tracking-widest">{stat.label}</span>
             </div>
           ))}
         </motion.div>

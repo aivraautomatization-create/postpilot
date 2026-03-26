@@ -78,7 +78,7 @@ export default async function Home() {
   };
 
   return (
-    <div className="relative min-h-screen bg-canvas-base overflow-hidden">
+    <div className="relative min-h-screen bg-[#0F1115] overflow-hidden">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

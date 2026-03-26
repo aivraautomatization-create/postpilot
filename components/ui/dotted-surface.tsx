@@ -40,7 +40,7 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
 
 		// Scene setup
 		const scene = new THREE.Scene();
-		scene.fog = new THREE.Fog(0x000000, 2000, 10000);
+		scene.fog = new THREE.Fog(0x0F1115, 2000, 10000);
 
 		const camera = new THREE.PerspectiveCamera(
 			60,
@@ -75,9 +75,10 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
 
 				positions.push(x, y, z);
 				if (theme === 'dark' || !theme) {
-					colors.push(0.8, 0.8, 0.8);
+					// Brand cyan dots: #00BFFF → R:0, G:0.75, B:1
+					colors.push(0.05, 0.55, 0.72);
 				} else {
-					colors.push(0.2, 0.2, 0.2);
+					colors.push(0.06, 0.27, 0.4);
 				}
 			}
 		}

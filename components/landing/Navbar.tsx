@@ -22,7 +22,7 @@ export default function Navbar() {
             
             {user ? (
               <div className="flex items-center gap-4">
-                <Link href="/dashboard" className="hidden sm:block text-sm font-semibold bg-white text-black backdrop-blur-md px-5 py-2.5 rounded-full hover:shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-all hover:scale-105 active:scale-95">
+                <Link href="/dashboard" className="hidden sm:block text-sm font-semibold bg-[#00BFFF] text-[#0F1115] backdrop-blur-md px-5 py-2.5 rounded-full hover:shadow-[0_0_20px_rgba(0,191,255,0.3)] transition-all hover:scale-105 active:scale-95">
                   Dashboard
                 </Link>
                 <PremiumMenu />
@@ -39,7 +39,7 @@ export default function Navbar() {
                 <Link href="/auth/login" className="hidden sm:block text-sm font-medium text-white/70 hover:text-white transition-colors">
                   Log in
                 </Link>
-                <Link href="/auth/signup" className="hidden sm:block text-sm font-semibold bg-white text-black backdrop-blur-md px-5 py-2.5 rounded-full hover:shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-all hover:scale-105 active:scale-95">
+                <Link href="/auth/signup" className="hidden sm:block text-sm font-semibold bg-[#00BFFF] text-[#0F1115] backdrop-blur-md px-5 py-2.5 rounded-full hover:shadow-[0_0_20px_rgba(0,191,255,0.3)] transition-all hover:scale-105 active:scale-95">
                   Start Free Trial
                 </Link>
                 <PremiumMenu />

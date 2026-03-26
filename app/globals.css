@@ -6,43 +6,59 @@
 @source "../lib/**/*.tsx";
 
 @theme {
-  /* Colors - Base and Canvas */
-  --color-canvas-base: #030303;
+  /* ── Brand Colors ── */
+  /* Primary: deep blue-gray — calm, premium, trustworthy */
+  --color-brand-primary: #101828;
+  /* Accent: bright cyan — smart, fast, AI-energy */
+  --color-brand-accent: #00BFFF;
+  /* Gold: warm amber — human touch, AI-insight hints */
+  --color-brand-gold: #C08A46;
+  /* Light surface: soft off-white — clean, airy, premium */
+  --color-brand-surface-light: #FDFEFF;
+  /* Dark surface: deep charcoal — modern, serious */
+  --color-brand-surface-dark: #0F1115;
+  /* Text on dark backgrounds */
+  --color-brand-text-light: #F8F9FA;
+  /* Text on light backgrounds */
+  --color-brand-text-dark: #0F0F10;
+
+  /* ── Canvas & Surfaces ── */
+  --color-canvas-base: #0F1115;
   --color-surface-glass-sm: rgba(255, 255, 255, 0.02);
   --color-surface-glass-md: rgba(255, 255, 255, 0.04);
   --color-surface-glass-lg: rgba(255, 255, 255, 0.08);
 
-  /* Colors - Iridescent Accents */
-  --color-accent-violet: hsl(260, 80%, 65%);
-  --color-accent-rose: hsl(340, 75%, 60%);
-  --color-accent-cyan: hsl(210, 50%, 95%);
-  --color-accent-diamond: #f0faff;
+  /* ── Accent Aliases (for existing component compatibility) ── */
+  --color-accent-violet: #00BFFF;
+  --color-accent-rose: #C08A46;
+  --color-accent-cyan: #00BFFF;
+  --color-accent-diamond: #e0f7ff;
 
-  /* Typography */
-  --color-text-primary: #ffffff;
-  --color-text-secondary: rgba(255, 255, 255, 0.7);
-  --color-text-muted: rgba(255, 255, 255, 0.4);
+  /* ── Typography ── */
+  --color-text-primary: #F8F9FA;
+  --color-text-secondary: rgba(248, 249, 250, 0.7);
+  --color-text-muted: rgba(248, 249, 250, 0.4);
 
-  /* Borders & Glows */
-  --color-border-glass: rgba(255, 255, 255, 0.08);
-  --color-border-glass-hover: rgba(255, 255, 255, 0.15);
-  
-  /* Blurs for Glassmorphism */
+  /* ── Borders & Glows ── */
+  --color-border-glass: rgba(0, 191, 255, 0.08);
+  --color-border-glass-hover: rgba(0, 191, 255, 0.2);
+
+  /* ── Blurs ── */
   --blur-glass-sm: 8px;
   --blur-glass-md: 16px;
   --blur-glass-lg: 24px;
 
-  /* Depth & Shadows */
-  --shadow-glass-card: inset 0 1px 0 0 rgba(255,255,255,0.06), 0 4px 24px -4px rgba(0,0,0,0.5);
-  --shadow-glass-elevated: inset 0 1px 0 0 rgba(255,255,255,0.1), 0 12px 32px -8px rgba(0,0,0,0.6);
-  --shadow-glow-accent: 0 0 20px -5px var(--color-accent-violet);
+  /* ── Shadows ── */
+  --shadow-glass-card: inset 0 1px 0 0 rgba(0,191,255,0.06), 0 4px 24px -4px rgba(0,0,0,0.5);
+  --shadow-glass-elevated: inset 0 1px 0 0 rgba(0,191,255,0.1), 0 12px 32px -8px rgba(0,0,0,0.6);
+  --shadow-glow-accent: 0 0 24px -6px rgba(0, 191, 255, 0.4);
 
-  /* Border Radii */
+  /* ── Border Radii ── */
   --radius-card: 1.25rem;
   --radius-button: 0.75rem;
   --radius-badge: 9999px;
-  
-  /* Motion Constants */
+
+  /* ── Motion ── */
   --transition-glass: 300ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
